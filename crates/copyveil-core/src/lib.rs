@@ -19,11 +19,16 @@
 
 mod classify;
 mod content;
+mod crypto;
 mod history;
 mod item;
+mod record;
 mod sensitivity;
+mod store;
 
 pub use content::Content;
+pub use crypto::{CryptoError, KEY_LEN, Key};
 pub use history::{History, HistoryError, Settings};
 pub use item::{Capture, Item, ItemId, Kind, Reason};
 pub use sensitivity::Sensitivity;
+pub use store::{Loaded, MAX_PERSISTED_BYTES, Opened, Store, StoreError};

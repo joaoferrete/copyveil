@@ -32,6 +32,7 @@ flowchart LR
 | Path | What it is |
 |---|---|
 | `crates/copyveil-core` | Library + `copyveil-daemon` binary. History, Sensitivity rules, Expiry, encryption at rest, D-Bus service. |
+| `crates/copyveil-keyring` | Reads and creates the History key in the Secret Service keyring with `oo7`. Thin on purpose: it can only be tested against a running keyring. |
 | `crates/copyveil-detect` | Pure library. Detectors that flag content as Suspected. No I/O, so it's easy to test, fuzz and reuse. |
 | `crates/copyveil-app` | `copyveil` binary. GTK4/libadwaita UI: popup, settings, onboarding. Talks to the core over D-Bus only. |
 | `crates/copyveil-capture-datacontrol` | Capture source for KDE, COSMIC and wlroots compositors (v0.2). |
@@ -44,7 +45,7 @@ flowchart LR
 
 1. The user copies something. The capture source reads the content and the MIME types on offer, and sends both to the core.
 2. The core classifies the Item. If the source flagged it with `x-kde-passwordManagerHint: secret`, it's a Secret. Otherwise `copyveil-detect` decides between Suspected and Plain. The user can change this later with an Override.
-3. Secret and Suspected Items go to the memory store with an Expiry timer. Plain Items are encrypted and written to the store on disk.
+3. Secret and Suspected Items go to the memory store with an Expiry timer. Plain Items are sealed one by one and written to the store on disk ([ADR 0005](adr/0005-plain-store-is-sqlite-with-per-item-xchacha20-poly1305.md)).
 4. The app asks the core for the History over D-Bus. Masked Items arrive without their content; content reaches the app only for a Reveal or a paste, and only for that one Item.
 5. On paste, the core puts the content on the clipboard and asks the capture source to paste. On GNOME, the extension injects <kbd>Ctrl</kbd>+<kbd>V</kbd>. After a Secret is pasted, the core clears it from the clipboard when its timer runs out.
 

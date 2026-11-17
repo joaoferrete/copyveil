@@ -50,7 +50,7 @@ mod settings {
     fn defaults() {
         let settings = Settings::default();
         assert_eq!(settings.secret_expiry, Duration::from_secs(30));
-        assert_eq!(settings.suspected_expiry, Duration::from_secs(900));
+        assert_eq!(settings.suspected_expiry, Duration::from_mins(15));
         assert_eq!(settings.max_plain_items, 500);
         assert_eq!(settings.detectors, DetectorSet::all());
         assert_eq!(history().settings(), &settings);
@@ -118,7 +118,7 @@ mod capture {
         assert_eq!(history.get(plain).unwrap().expires_at(), None);
         assert_eq!(
             history.get(suspected).unwrap().expires_at(),
-            Some(now + Duration::from_secs(900))
+            Some(now + Duration::from_mins(15))
         );
         assert_eq!(
             history.get(secret).unwrap().expires_at(),
@@ -224,13 +224,17 @@ mod expiry {
         let secret = history.capture(Capture::secret_text("hunter2"), now);
         let plain = history.capture(Capture::text("ls"), now);
 
-        assert!(history.expire(now + (30 * SECOND - NANO)).is_empty());
+        assert!(
+            history
+                .expire(now + (30 * SECOND).checked_sub(NANO).unwrap())
+                .is_empty()
+        );
         assert!(history.get(secret).is_some());
 
         assert_eq!(history.expire(now + 30 * SECOND), [secret]);
         assert!(history.get(secret).is_none());
         assert!(history.get(plain).is_some());
-        assert!(history.expire(now + Duration::from_secs(86_400)).is_empty());
+        assert!(history.expire(now + Duration::from_hours(24)).is_empty());
     }
 
     #[test]
@@ -385,7 +389,7 @@ mod overrides {
             .unwrap();
         assert_eq!(history.get(id).unwrap().expires_at(), None);
         assert_eq!(history.pin(id), Ok(()));
-        assert!(history.expire(now + Duration::from_secs(86_400)).is_empty());
+        assert!(history.expire(now + Duration::from_hours(24)).is_empty());
     }
 
     #[test]

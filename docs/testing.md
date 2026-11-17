@@ -17,8 +17,8 @@ When a mutant survives, the test suite has a hole: add the test that kills it. A
 ### Required test suites
 
 - **Sensitivity rules**: one test per rule in `docs/adr/0002-*`. Secret and Suspected never persist, only Plain can be pinned, and Override changes storage as described.
-- **Crypto round-trip** (property test, `proptest`): any content encrypts and decrypts to itself, and two encryptions of the same content differ.
-- **Leak test** (lands with the encrypted store): run the core against a temporary directory, feed it Secret and Suspected Items with known marker values, let them expire, and assert that no byte sequence of any marker appears in any file under that directory, including the database, its journal and temporary files.
+- **Crypto round-trip** (property test, `proptest`): any content encrypts and decrypts to itself, two encryptions of the same content differ, and stored records decode to what was encoded.
+- **Leak test** (`crates/copyveil-core/tests/leak.rs`): run the core against a temporary directory, feed it Secret and Suspected Items with known marker values, let them expire, and assert that no byte sequence of any marker appears in any file under that directory, including the database, its journal and temporary files.
 - **No-leak formatting**: content types implement neither `Debug` nor `Display`, checked by compile-fail tests (`trybuild`).
 
 ### Detector corpus
