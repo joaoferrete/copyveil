@@ -13,6 +13,11 @@ name = "copyveil-daemon"
 path = "src/bin/copyveil-daemon.rs"
 
 [dependencies]
+copyveil-detect.workspace = true
+zeroize = { version = "1.8", features = ["std"] }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+static_assertions = "1.1"
