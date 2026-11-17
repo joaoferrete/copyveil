@@ -10,6 +10,10 @@ Copyveil is a clipboard history manager for Linux whose defining trait is handli
 A piece of content copied to the clipboard and captured by the app.
 _Avoid_: Clip, entry, copy
 
+**Capture**:
+One clipboard change as reported by a capture source, before it becomes an Item. Copying content that is already in the History refreshes that Item instead of creating a new one.
+_Avoid_: Event, copy, clip
+
 **History**:
 The ordered collection of Items the user can browse and paste again.
 _Avoid_: List, log
