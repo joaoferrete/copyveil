@@ -39,5 +39,8 @@ jobs:
             deps
             repo
           requireScope: false
+          # Dependabot capitalises its subjects ("Bump …"); its PRs are labelled `dependencies`.
+          ignoreLabels: |
+            dependencies
           subjectPattern: ^[a-z].+[^.]$
           subjectPatternError: Start the subject in lowercase and leave out the final period.
