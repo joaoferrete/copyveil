@@ -1,0 +1,2 @@
+a JWT has three parts: header.payload.signature
+eyJ is what base64 JSON starts with

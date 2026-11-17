@@ -1,0 +1,6 @@
+# Synthetic GitHub tokens. Made up; never real credentials.
+ghp_GDuJSN7WM2qW0jG6gIUzNkxTczZ3jLNsAUQf
+gho_sFsgukgoedcoOKYSq428J69rixatKDm1Antr
+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
+GITHUB_TOKEN=ghp_GDuJSN7WM2qW0jG6gIUzNkxTczZ3jLNsAUQf
+git clone https://ghp_GDuJSN7WM2qW0jG6gIUzNkxTczZ3jLNsAUQf@github.com/example/repo.git

@@ -28,6 +28,8 @@ Each detector in `copyveil-detect` has two corpus files under `crates/copyveil-d
 - `<detector>.positive.txt`: synthetic values in every format the detector claims to recognise. These are made up, never real secrets.
 - `<detector>.negative.txt`: known false positives (UUIDs, commit hashes, base64 images, file paths…).
 
+One sample per line; blank lines and lines starting with `#` are ignored. `tests/corpus.rs` checks that every positive is reported as its own detector and that no negative is flagged by any detector.
+
 Every "Detector got it wrong" issue becomes a corpus line in the PR that fixes it. A detector change without a corpus change won't be merged.
 
 ### Fuzzing
