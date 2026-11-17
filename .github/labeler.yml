@@ -1,0 +1,26 @@
+# Paths here must match the security-sensitive section of .github/CODEOWNERS.
+security-sensitive:
+  - changed-files:
+      - any-glob-to-any-file:
+          - crates/copyveil-core/**
+          - crates/copyveil-detect/**
+          - crates/copyveil-capture-*/**
+          - gnome-extension/**
+          - deny.toml
+          - clippy.toml
+          - Cargo.toml
+          - .github/workflows/**
+
+design:
+  - changed-files:
+      - any-glob-to-any-file:
+          - design/**
+          - data/ui/**
+          - data/icons/**
+          - docs/design/**
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - docs/**

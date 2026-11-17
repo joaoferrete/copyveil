@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>@APP_ID@</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Copyveil</name>
+  <summary>Clipboard history that forgets your secrets</summary>
+  <description>
+    <p>
+      Copyveil keeps a searchable history of what you copy. Passwords, API keys
+      and tokens are masked, kept in memory only, and erased after a short time.
+      Everything else is encrypted on disk with a key from your system keyring.
+    </p>
+    <ul>
+      <li>Opens with a shortcut and works from the keyboard</li>
+      <li>Masks secrets from password managers and detects tokens by their content</li>
+      <li>Never writes secrets to disk</li>
+      <li>Pin the things you paste every day</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">@APP_ID@.desktop</launchable>
+  <developer id="io.github.joaoferrete">
+    <name>João Ferrete</name>
+  </developer>
+  <url type="homepage">https://github.com/joaoferrete/copyveil</url>
+  <url type="bugtracker">https://github.com/joaoferrete/copyveil/issues</url>
+  <url type="vcs-browser">https://github.com/joaoferrete/copyveil</url>
+  <content_rating type="oars-1.1"/>
+  <keywords>
+    <keyword>clipboard</keyword>
+    <keyword>history</keyword>
+    <keyword>secrets</keyword>
+    <keyword>password</keyword>
+  </keywords>
+  <releases>
+    <release version="0.0.0" date="2026-11-17" type="development">
+      <description><p>Project skeleton.</p></description>
+    </release>
+  </releases>
+</component>

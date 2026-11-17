@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest something new, or a change to how Copyveil works.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the situation and what gets in the way, before the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help?
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Does this touch how secrets are handled?
+      description: Copyveil never writes Secret or Suspected Items to disk (docs/adr/0002). Proposals that change this need a strong case.

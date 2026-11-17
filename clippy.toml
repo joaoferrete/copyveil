@@ -1,0 +1,13 @@
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+
+# Formatting Item content is how secrets leak. Logging goes through `tracing`
+# with explicit, content-free fields; these std macros are never the right tool.
+disallowed-macros = [
+  { path = "std::eprint", reason = "use tracing with content-free fields" },
+  { path = "std::eprintln", reason = "use tracing with content-free fields" },
+  { path = "std::print", reason = "use tracing with content-free fields" },
+  { path = "std::println", reason = "use tracing with content-free fields" },
+]

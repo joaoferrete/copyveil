@@ -1,0 +1,36 @@
+name: Detector got it wrong
+description: Copyveil flagged something as Suspected that isn't a secret, or missed one that is.
+labels: [detector]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every report here becomes a case in the detector corpus, so it never regresses.
+        **Never paste a real secret.** For a missed secret, describe the format or paste a value you made up that has the same shape.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What went wrong?
+      options:
+        - Flagged as Suspected, but it isn't a secret (false positive)
+        - Not flagged, but it is a secret (false negative)
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample
+      description: The text that was flagged (false positive), or a made-up value with the same shape (false negative).
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: detector
+    attributes:
+      label: Description shown in Copyveil
+      placeholder: Looks like a GitHub token
+  - type: textarea
+    id: context
+    attributes:
+      label: Where does this text come from?
+      placeholder: UUIDs from our database, git commit hashes, …

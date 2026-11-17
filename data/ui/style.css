@@ -1,0 +1,12 @@
+/* Generated from design/tokens.json by tools/tokens.py. Do not edit. */
+@define-color cv_ink #191C22;
+@define-color cv_ink_2 #575D69;
+@define-color cv_sheet #FFFFFF;
+@define-color cv_slate #34465F;
+@define-color cv_slate_soft #DCE3EC;
+@define-color cv_tint #8C9CB3;
+@define-color cv_kraft #C49A5C;
+@define-color cv_marker #F1DF74;
+@define-color cv_on_marker #191C22;
+@define-color cv-sensitivity_secret #262B35;
+@define-color cv-sensitivity_suspected #262B35;

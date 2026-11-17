@@ -1,0 +1,49 @@
+name: Bug report
+description: Something does not work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste a real secret, token or password here.** Describe its format instead (e.g. "a 40-character GitHub token").
+        Security problems go to the private advisory form instead: https://github.com/joaoferrete/copyveil/security/advisories/new
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Copy …
+        2. Open Copyveil with Super+V
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Copyveil version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: desktop
+    attributes:
+      label: Desktop
+      options: [GNOME, KDE Plasma, COSMIC, Sway / wlroots, Hyprland, Other]
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution and version
+      placeholder: Ubuntu 26.04
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed from
+      options: [Source (Meson), Flatpak, Distribution package, Other]

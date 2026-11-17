@@ -1,0 +1,76 @@
+# Design
+
+Copyveil should be pleasant to use, not just safe. The interface is part of the product: the way a secret is hidden is how the user learns it's safe.
+
+## Principles
+
+1. **Native first.** The app chrome is plain libadwaita and follows the user's accent colour. The brand appears only where it carries meaning: the icon, Sensitivity, onboarding.
+2. **Shape carries meaning.** A Mask's shape tells the user what kind of Item it is, so colour is never the only cue ([ADR 0003](../adr/0003-design-tokens-as-single-source-and-sensitivity-by-shape.md)).
+3. **Keyboard first.** Everything in the popup works without a mouse. Every action has a visible shortcut hint.
+4. **Motion explains.** Animation appears only in the four signature moments below. Everything else is still.
+5. **Nothing leaks through the UI.** Not the value, not its length (Secret Masks are fixed width), not through search, not to a screen reader.
+
+## Concept: the security envelope
+
+Bank envelopes carry a printed blue tint on the inside, so nobody can read the letter against the light. It's a veil made of paper. Copyveil borrows that object and the things around it: the kraft hardboard of a clipboard, the white sheet, the slate tint.
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| Ink | `#191C22` | `#E7E9ED` | Text |
+| Sheet | `#FFFFFF` | `#181B21` | Content surface |
+| Slate | `#34465F` | `#A7B8D3` | Brand: ExpiryRing, onboarding |
+| Security tint | pattern | pattern | Suspected Mask, onboarding art |
+| Kraft | `#C49A5C` | `#C9A26A` | App icon only |
+| Marker | `#F1DF74` | `#E2D068` | Search match highlight only |
+
+In dark theme the Secret Mask turns light, like correction tape on carbon paper.
+
+## Tokens
+
+`design/tokens.json` is the only place colours, spacing, radii, Mask geometry and motion are defined. After editing it, run `just tokens-gen` to regenerate `data/ui/style.css` and `data/ui/style-dark.css` (libadwaita loads the dark file automatically). CI checks that the generated files are current and that every pair listed under `contrast` meets WCAG AA in both themes.
+
+Typography uses the system fonts: Adwaita Sans for UI, Adwaita Mono for Item content.
+
+## Components
+
+Each component is a reusable GTK widget. A component's entry here lists its purpose, states and keyboard behaviour, plus light and dark screenshots once it exists.
+
+| Component | Purpose | Status |
+|---|---|---|
+| `ItemRow` | One Item in the popup: type glyph, content, meta line, and its number (1–9) for <kbd>Ctrl</kbd>+number paste. Fixed height, so the list doesn't jump on Reveal. | Planned |
+| `MaskedText` | Solid bar (Secret, fixed width) or security-tint hatch (Suspected, first and last characters visible). | Planned |
+| `ExpiryRing` | Ring that empties until the Item's Expiry. | Planned |
+| `SensitivityBadge` | Shape swatch plus label. Plain has no badge. | Planned |
+| `OverrideButton` | "Not a secret" on a Suspected Item; offers to stop flagging similar text. | Planned |
+| `PinToggle` | Plain Items only. On Secret or Suspected, the shortcut shows a toast explaining why. | Planned |
+| `EmptyState` | Names what will appear and how to get there. | Planned |
+| `OnboardingStep` | One page of the four-step onboarding. | Planned |
+
+## Motion
+
+| Moment | What happens | Timing |
+|---|---|---|
+| Veil draw | A sensitive Item arrives; its Mask draws left to right. The value is never visible first. | 280 ms, `cubic-bezier(.2,.7,.2,1)` |
+| Hold to reveal | The Mask peels away while held, and drops back on release. At most 5 s. | 170 ms ease-out |
+| Expiry | The Mask dissolves, then the row collapses. No tombstone. | 300 ms + 460 ms |
+| Carbon copy | On paste, a ghost copy lifts off the row and fades. | 360 ms ease-out |
+
+With reduced motion enabled, all four become instant state changes.
+
+## Accessibility
+
+- WCAG AA contrast in both themes, checked in CI.
+- Full keyboard operation; focus is always visible.
+- Screen readers never hear a masked value. They hear the Sensitivity, the description and the time left: "Secret, hidden. From password manager. Expires in 24 seconds."
+
+## Voice
+
+- Say what happened, briefly: "Pasted. Clipboard clears in 30 s."
+- In errors, say what to do: "No keyring found. History will clear when you log out."
+- Use the glossary's words: Item, History, Pin, Secret, Suspected, Plain, Reveal.
+
+## Icon
+
+The app icon is a kraft clipboard holding a sheet whose lower half is covered by the security tint, with the three Mask dots. The symbolic panel icon keeps only the silhouette and the dots, and has three states: normal, capture paused (slashed), and Secret in memory (dot). Sources live in `data/icons/`. They are drafts until redrawn on the GNOME app-icon grid and checked with Icon Preview.
+
+Design exploration files (mockups) live in Penpot; icons are SVGs in the repository.

@@ -1,0 +1,38 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.91"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/joaoferrete/copyveil"
+homepage = "https://github.com/joaoferrete/copyveil"
+
+[workspace.dependencies]
+copyveil-core = { path = "crates/copyveil-core" }
+copyveil-detect = { path = "crates/copyveil-detect" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Item content must never reach a terminal or a log by accident.
+print_stdout = "deny"
+print_stderr = "deny"
+dbg_macro = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

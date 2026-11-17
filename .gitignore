@@ -1,0 +1,10 @@
+/target
+/build
+/_build
+node_modules/
+*.profraw
+lcov.info
+mutants.out*/
+/fuzz/artifacts
+/fuzz/corpus
+.flatpak-builder/

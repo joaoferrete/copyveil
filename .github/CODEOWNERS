@@ -1,0 +1,15 @@
+# Default owner.
+*                               @joaoferrete
+
+# Security-sensitive paths: a review from a code owner is required.
+# Keep in sync with .github/labeler.yml.
+/crates/copyveil-core/          @joaoferrete
+/crates/copyveil-detect/        @joaoferrete
+/crates/copyveil-capture-*/     @joaoferrete
+/gnome-extension/               @joaoferrete
+/deny.toml                      @joaoferrete
+/clippy.toml                    @joaoferrete
+/Cargo.toml                     @joaoferrete
+/.github/                       @joaoferrete
+/SECURITY.md                    @joaoferrete
+/docs/adr/                      @joaoferrete

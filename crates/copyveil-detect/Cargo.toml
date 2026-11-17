@@ -1,0 +1,16 @@
+[package]
+name = "copyveil-detect"
+description = "Content detectors that flag text which looks like a secret (tokens, keys, high-entropy strings)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["secrets", "detection", "tokens", "clipboard"]
+categories = ["text-processing"]
+publish = false
+
+[dependencies]
+
+[lints]
+workspace = true
