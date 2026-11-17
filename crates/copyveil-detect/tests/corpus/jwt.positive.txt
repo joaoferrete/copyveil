@@ -1,0 +1,4 @@
+# Synthetic JWTs (header {"alg":"HS256","typ":"JWT"}, payload {"sub":"copyveil-test"}).
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjb3B5dmVpbC10ZXN0In0.dGVzdC1zaWduYXR1cmUtbm90LXJlYWw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjb3B5dmVpbC10ZXN0In0.dGVzdC1zaWduYXR1cmUtbm90LXJlYWw
+eyJhbGciOiJub25lIn0.eyJzdWIiOiJjb3B5dmVpbC10ZXN0In0.

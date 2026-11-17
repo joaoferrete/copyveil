@@ -1,0 +1,4 @@
+# Text that mentions GitHub token prefixes without being a token.
+ghp_ is the prefix for personal access tokens
+the variable gh_token_path points at ~/.config/gh/hosts.yml
+github_pat_

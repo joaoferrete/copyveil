@@ -1,0 +1,19 @@
+# Things developers copy all day that are not secrets.
+3f34ce9a1b2c4d5e6f708192a3b4c5d6e7f80912
+550e8400-e29b-41d4-a716-446655440000
+sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+sha512-z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==
+/home/user/projects/copyveil/crates/copyveil-core/src/sensitivity.rs
+https://github.com/joaoferrete/copyveil/pull/8
+https://gitlab.gnome.org/GNOME/mutter/-/issues/1602
+git rebase -i HEAD~3
+docker compose up -d
+kubectl get pods --all-namespaces --output=wide
+SomeVeryLongIdentifierNameForTesting
+handleUserAuthenticationCallbackResponse
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+The quick brown fox jumps over the lazy dog while the clipboard remembers everything.
+Copyveil remembers what you copy and forgets your secrets.
+v0.1.0-rc.1+build.20261117
+2026-11-17T19:35:13.2598529Z
+@types/node@22.10.5

@@ -1,0 +1,2 @@
+AKIA is the prefix for long-term AWS keys
+arn:aws:iam::123456789012:user/deploy

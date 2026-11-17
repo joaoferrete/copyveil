@@ -1,0 +1,5 @@
+# Synthetic AI provider keys.
+sk-ant-api03-nhZctG1_2SB0tPbT_lH5sjlzcvZRLmmUXM9ShjbuVm9wukeN7agMFGbvTl-pUbDPWXuzR8NOy_Q_SsETfOFW3fAA
+sk-proj-L-FEC8Bv50qrK_ZbNVOOh4oQ_5_We5DFz2cN4cTi0oje9GM7
+sk-RTX5znn9Ct6hd9JS0AolxfEEKTPaauLVLv3j93txnaHCesyP
+ANTHROPIC_API_KEY="sk-ant-api03-nhZctG1_2SB0tPbT_lH5sjlzcvZRLmmUXM9ShjbuVm9wukeN7agMFGbvTl-pUbDPWXuzR8NOy_Q_SsETfOFW3fAA"
