@@ -224,14 +224,33 @@ fn sample(
     }
 }
 
+/// The mascot, drawn at twice its size so it stays sharp on `HiDPI` screens.
+const OCTOPUS: &[u8] = include_bytes!("../../../data/ui/octopus.svg");
+
+/// The Copyveil octopus, holding one Item of each Sensitivity. Decorative,
+/// so screen readers skip it; the page's title says what it's about.
+fn octopus() -> gtk::Widget {
+    if let Ok(texture) = gdk::Texture::from_bytes(&glib::Bytes::from_static(OCTOPUS)) {
+        let picture = gtk::Picture::for_paintable(&texture);
+        picture.set_can_shrink(true);
+        picture.set_content_fit(gtk::ContentFit::Contain);
+        picture.set_size_request(128, 128);
+        picture.set_halign(gtk::Align::Center);
+        picture.set_accessible_role(gtk::AccessibleRole::Presentation);
+        return picture.upcast();
+    }
+    // Without an SVG loader, fall back to the app icon.
+    let icon = gtk::Image::from_icon_name("io.github.joaoferrete.Copyveil");
+    icon.set_pixel_size(96);
+    icon.upcast()
+}
+
 fn welcome_page() -> gtk::Box {
     let page = page(
         &gettext("Welcome to Copyveil"),
         &gettext("Remembers what you copy. Forgets your secrets."),
     );
-    let icon = gtk::Image::from_icon_name("io.github.joaoferrete.Copyveil");
-    icon.set_pixel_size(96);
-    page.prepend(&icon);
+    page.prepend(&octopus());
 
     let list = gtk::ListBox::new();
     list.add_css_class("boxed-list");

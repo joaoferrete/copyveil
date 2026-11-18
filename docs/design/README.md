@@ -119,6 +119,16 @@ With reduced motion enabled, all four become instant state changes: they are lib
 
 ## Icon
 
-The app icon is a kraft clipboard holding a sheet whose lower half is covered by the security tint, with the three Mask dots. The symbolic panel icon keeps only the silhouette and the dots, and has three states: normal, capture paused (struck through, from **Pause Capture** in its menu), and Secret in memory (a dot that goes at the Secret's Expiry). A Secret in memory wins over a pause, since it means the clipboard hasn't been cleared yet (`gnome-extension/lib/icon-state.js`). The state files are `io.github.joaoferrete.Copyveil{,-paused,-secret}-symbolic.svg`. Sources live in `data/icons/`. They are drafts until redrawn on the GNOME app-icon grid and checked with Icon Preview.
+The app icon is **the veil**: a graphite cloth falling over a kraft card, leaving only its first line of text, with the security tint along its edge. It says the name (copy + veil) rather than describing a clipboard, so it's easy to remember. It's drawn on the GNOME app-icon grid (a 96 px square with a 4 px base) and checked at 128, 64, 32 and 16 px on light and dark grounds.
+
+The symbolic panel icon is the same card with the cloth over its right part, and has three states: normal, capture paused (struck through, from **Pause Capture** in its menu), and Secret in memory (a dot that goes at the Secret's Expiry). A Secret in memory wins over a pause, since it means the clipboard hasn't been cleared yet (`gnome-extension/lib/icon-state.js`). The state files are `io.github.joaoferrete.Copyveil{,-paused,-secret}-symbolic.svg`, in `data/icons/`.
+
+## Mascot
+
+<img src="../../data/ui/octopus.svg" width="128" align="right" alt="">
+
+The Copyveil octopus holds the History: one Item of each Sensitivity, a kraft Plain card, a hatched Suspected card and a Secret behind its bar, and keeps an eye on the Secret. An octopus hides what matters with ink, and holds many things at once.
+
+The mascot is for places with room: the README, the onboarding's welcome page and anything promotional. It's never the app icon, which has to read at 16 px. It's drawn as a sticker, with ink outlines and a white rim, so it reads on light and dark grounds. The source is `data/ui/octopus.svg`, which the app embeds.
 
 Design exploration files (mockups) live in Penpot; icons are SVGs in the repository.

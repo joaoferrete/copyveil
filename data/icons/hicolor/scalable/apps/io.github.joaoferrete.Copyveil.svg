@@ -1,27 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <!-- Draft. Final art follows the GNOME app icon grid; see docs/design/README.md. -->
+  <!-- The veil: a graphite cloth falling over a kraft card, leaving only its
+       first line of text. Drawn on the GNOME app-icon grid (96 px square with
+       a 4 px base). See docs/design/README.md. -->
   <defs>
-    <pattern id="tint" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="6" height="6" fill="#2F405A"/>
-      <rect width="2" height="6" fill="#4D6385"/>
-    </pattern>
-    <linearGradient id="board" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#CFA466"/>
-      <stop offset="1" stop-color="#B7894B"/>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#DDB377"/>
+      <stop offset="1" stop-color="#C69754"/>
     </linearGradient>
+    <linearGradient id="cloth" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5A77A3"/>
+      <stop offset="1" stop-color="#2C3C55"/>
+    </linearGradient>
+    <pattern id="hem" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="5" fill="#E4E9F0"/>
+      <rect width="2" height="5" fill="#6A7C98"/>
+    </pattern>
+    <clipPath id="square">
+      <rect x="16" y="16" width="96" height="96" rx="16"/>
+    </clipPath>
   </defs>
-  <rect x="16" y="16" width="96" height="104" rx="12" fill="#8A6434"/>
-  <rect x="16" y="14" width="96" height="102" rx="12" fill="url(#board)"/>
-  <rect x="27" y="28" width="74" height="80" rx="3" fill="#FBFBF9"/>
-  <rect x="36" y="40" width="44" height="5" rx="2.5" fill="#A3ABB8"/>
-  <rect x="36" y="51" width="56" height="5" rx="2.5" fill="#A3ABB8"/>
-  <rect x="36" y="62" width="34" height="5" rx="2.5" fill="#A3ABB8"/>
-  <path d="M27 74 L101 70 L101 105 a3 3 0 0 1 -3 3 L30 108 a3 3 0 0 1 -3 -3Z" fill="url(#tint)"/>
-  <path d="M27 74 L101 70" stroke="#FBFBF9" stroke-width="1.5" opacity=".6"/>
-  <circle cx="48" cy="90" r="4.5" fill="#FBFBF9"/>
-  <circle cx="64" cy="89.2" r="4.5" fill="#FBFBF9"/>
-  <circle cx="80" cy="88.4" r="4.5" fill="#FBFBF9"/>
-  <rect x="44" y="6" width="40" height="18" rx="5" fill="#596170"/>
-  <rect x="44" y="6" width="40" height="8" rx="4" fill="#737C8C"/>
-  <rect x="56" y="9" width="16" height="5" rx="2.5" fill="#3E4450"/>
+  <rect x="16" y="20" width="96" height="96" rx="16" fill="#8A6234"/>
+  <rect x="16" y="16" width="96" height="96" rx="16" fill="url(#card)"/>
+  <rect x="28" y="30" width="34" height="8" rx="4" fill="#FDFDFC"/>
+  <rect x="28" y="44" width="20" height="8" rx="4" fill="#FDFDFC" opacity=".7"/>
+  <g clip-path="url(#square)">
+    <path d="M58 8 C80 10 104 8 124 6 L124 130 L8 130 C22 116 30 102 44 92 C58 82 52 64 66 54 C76 46 64 30 58 8Z" fill="url(#cloth)"/>
+    <path d="M8 130 C22 116 30 102 44 92 C58 82 52 64 66 54 C76 46 64 30 58 8 L52 8 C58 30 70 46 60 54 C46 64 52 82 38 92 C24 102 16 116 2 130Z" fill="url(#hem)"/>
+    <g fill="none" stroke-linecap="round" stroke-width="3">
+      <path d="M82 20 C84 44 76 70 64 98 C58 110 54 118 52 124" stroke="#7690B5" opacity=".7"/>
+      <path d="M100 18 C102 50 96 80 88 124" stroke="#1E2A3D" opacity=".5"/>
+    </g>
+  </g>
 </svg>
