@@ -60,11 +60,16 @@ ext-pack:
         indicator.js keyboard.js lib schemas ../_build/extension/
     cp data/icons/hicolor/symbolic/apps/io.github.joaoferrete.Copyveil-symbolic.svg \
         _build/extension/icons/copyveil-symbolic.svg
+    # GNOME Shell loads extension settings from schemas/gschemas.compiled.
+    glib-compile-schemas --strict _build/extension/schemas
     cd _build/extension && gnome-extensions pack --force --out-dir=.. \
         --extra-source=clipboard.js --extra-source=daemon.js \
         --extra-source=indicator.js --extra-source=keyboard.js \
         --extra-source=lib --extra-source=icons \
         --schema=schemas/org.gnome.shell.extensions.copyveil.gschema.xml
+    # `gnome-extensions pack` leaves the compiled schema out; add it.
+    python3 -c 'import sys, zipfile; z = zipfile.ZipFile(sys.argv[1], "a"); z.write(sys.argv[2], "schemas/gschemas.compiled"); z.close()' \
+        _build/copyveil@joaoferrete.github.io.shell-extension.zip _build/extension/schemas/gschemas.compiled
 
 # Light and dark screenshots of the popup, from an isolated headless GNOME
 # Shell with synthetic Items (tools/app-screenshot/run.sh). For UI PRs.

@@ -20,7 +20,8 @@ trap 'rm -rf "$work" "$runtime"' EXIT
 uuid=copyveil@joaoferrete.github.io
 ext="$work/data/gnome-shell/extensions/$uuid"
 mkdir -p "$ext" "$work/home" "$work/config/glib-2.0/settings" "$work/cache" "$work/state"
-(cd "$ext" && unzip -q "$root/_build/$uuid.shell-extension.zip" && glib-compile-schemas schemas)
+# Installed exactly as users get it: the zip as packed, nothing compiled here.
+(cd "$ext" && unzip -q "$root/_build/$uuid.shell-extension.zip")
 printf "[org/gnome/shell]\nenabled-extensions=['%s']\ndisable-user-extensions=false\n" "$uuid" \
     > "$work/config/glib-2.0/settings/keyfile"
 cp "$root/tools/isolated-bus.conf" "$work/bus.conf"
