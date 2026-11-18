@@ -24,7 +24,7 @@ glib-compile-schemas --strict "$stage/schemas"
 (cd "$stage" && gnome-extensions pack --force --out-dir="$root/_build" \
     --extra-source=clipboard.js --extra-source=daemon.js \
     --extra-source=indicator.js --extra-source=keyboard.js \
-    --extra-source=lib --extra-source=icons \
+    --extra-source=lib --extra-source=icons --podir="$root/gnome-extension/po" \
     --schema=schemas/org.gnome.shell.extensions.copyveil.gschema.xml)
 # `gnome-extensions pack` leaves the compiled schema out; add it.
 python3 -c 'import sys, zipfile; z = zipfile.ZipFile(sys.argv[1], "a"); z.write(sys.argv[2], "schemas/gschemas.compiled"); z.close()' \

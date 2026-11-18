@@ -17,6 +17,7 @@ adw = { version = "0.9", package = "libadwaita", features = ["v1_5"] }
 async-channel = "2"
 copyveil-dbus.workspace = true
 futures-util = { version = "0.3", default-features = false }
+gettext-rs = { version = "0.8", default-features = false, features = ["gettext-system"] }
 gtk = { version = "0.11", package = "gtk4", features = ["v4_14"] }
 tokio = { version = "1", features = ["rt-multi-thread"] }
 zbus = { version = "6", default-features = false, features = ["tokio"] }

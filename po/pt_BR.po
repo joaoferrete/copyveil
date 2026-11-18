@@ -1,0 +1,732 @@
+# Portuguese translations for copyveil package.
+# Copyright (C) 2026 THE copyveil'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the copyveil package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: copyveil\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-18 14:27-0300\n"
+"PO-Revision-Date: 2026-11-18 14:24-0300\n"
+"Last-Translator: Copyveil contributors\n"
+"Language-Team: Brazilian Portuguese\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: crates/copyveil-app/src/mask.rs:189
+msgid "Secret"
+msgstr "Segredo"
+
+#: crates/copyveil-app/src/mask.rs:190
+msgid "Suspected"
+msgstr "Suspeito"
+
+#: crates/copyveil-app/src/onboarding.rs:79
+msgid "Copyveil captures on GNOME for now"
+msgstr "Por enquanto, o Copyveil captura no GNOME"
+
+#: crates/copyveil-app/src/onboarding.rs:80
+msgid ""
+"Support for KDE Plasma, COSMIC and wlroots desktops arrives in version 0.2."
+msgstr "O suporte a KDE Plasma, COSMIC e desktops wlroots chega na versão 0.2."
+
+#: crates/copyveil-app/src/onboarding.rs:83
+msgid "Install the GNOME Shell extension"
+msgstr "Instale a extensão do GNOME Shell"
+
+#: crates/copyveil-app/src/onboarding.rs:85
+msgid ""
+"GNOME only lets its own extensions watch the clipboard. Run “./install.sh” "
+"in the Copyveil source folder, then log out and back in."
+msgstr "O GNOME só deixa as próprias extensões observarem a área de transferência. Rode “./install.sh” na pasta do Copyveil e depois saia e entre de novo na sessão."
+
+#: crates/copyveil-app/src/onboarding.rs:89
+msgid "Turn on the GNOME Shell extension"
+msgstr "Ative a extensão do GNOME Shell"
+
+#: crates/copyveil-app/src/onboarding.rs:91
+msgid ""
+"It’s installed but not running. It passes each copy to Copyveil and stores "
+"nothing itself."
+msgstr "Ela está instalada, mas não está rodando. Ela repassa cada cópia ao Copyveil e não guarda nada."
+
+#: crates/copyveil-app/src/onboarding.rs:95
+msgid "Copies reach Copyveil"
+msgstr "As cópias chegam ao Copyveil"
+
+#: crates/copyveil-app/src/onboarding.rs:97
+msgid ""
+"The GNOME Shell extension is running. It passes each copy to Copyveil and "
+"stores nothing itself."
+msgstr "A extensão do GNOME Shell está rodando. Ela repassa cada cópia ao Copyveil e não guarda nada."
+
+#: crates/copyveil-app/src/onboarding.rs:113
+#: crates/copyveil-app/src/prefs_window.rs:39
+#: crates/copyveil-app/src/text.rs:71
+msgid "Copyveil isn’t running"
+msgstr "O Copyveil não está em execução"
+
+#: crates/copyveil-app/src/onboarding.rs:114
+msgid "Start it with “systemctl --user enable --now copyveil-daemon”."
+msgstr "Inicie com “systemctl --user enable --now copyveil-daemon”."
+
+#: crates/copyveil-app/src/onboarding.rs:117
+msgid "Your History is encrypted"
+msgstr "Seu Histórico é criptografado"
+
+#: crates/copyveil-app/src/onboarding.rs:119
+msgid ""
+"Plain Items are saved encrypted with a key that lives only in your keyring. "
+"Secrets never touch the disk."
+msgstr "Itens comuns são salvos criptografados com uma chave que fica só no seu chaveiro. Segredos nunca vão para o disco."
+
+#: crates/copyveil-app/src/onboarding.rs:123
+msgid "No keyring found"
+msgstr "Nenhum chaveiro encontrado"
+
+#: crates/copyveil-app/src/onboarding.rs:125
+msgid ""
+"Copyveil keeps the History in memory only, so it clears when you log out. "
+"Install GNOME Keyring or KWallet to keep it."
+msgstr "O Copyveil mantém o Histórico só na memória, então ele é apagado quando você sai da sessão. Instale o GNOME Keyring ou o KWallet para guardá-lo."
+
+#: crates/copyveil-app/src/onboarding.rs:129
+msgid "Your History stays in memory"
+msgstr "Seu Histórico fica na memória"
+
+#: crates/copyveil-app/src/onboarding.rs:131
+msgid ""
+"Nothing is saved to disk, so the History clears when you log out. You can "
+"change this in Settings."
+msgstr "Nada é salvo no disco, então o Histórico é apagado quando você sai da sessão. Dá para mudar isso nas Configurações."
+
+#: crates/copyveil-app/src/onboarding_window.rs:75
+msgid "Back"
+msgstr "Voltar"
+
+#: crates/copyveil-app/src/onboarding_window.rs:76
+#: crates/copyveil-app/src/onboarding_window.rs:171
+msgid "Get Started"
+msgstr "Começar"
+
+#: crates/copyveil-app/src/onboarding_window.rs:113
+#: crates/copyveil-app/src/onboarding_window.rs:229
+msgid "Welcome to Copyveil"
+msgstr "Boas-vindas ao Copyveil"
+
+#: crates/copyveil-app/src/onboarding_window.rs:172
+msgid "Finish"
+msgstr "Concluir"
+
+#: crates/copyveil-app/src/onboarding_window.rs:173
+msgid "Next"
+msgstr "Avançar"
+
+#: crates/copyveil-app/src/onboarding_window.rs:230
+msgid "Remembers what you copy. Forgets your secrets."
+msgstr "Lembra o que você copia. Esquece seus segredos."
+
+#: crates/copyveil-app/src/onboarding_window.rs:253
+msgid ""
+"Secrets from a password manager and anything that looks like a key stay "
+"masked, in memory only, and clear on their own. Everything else is encrypted "
+"on disk."
+msgstr "Segredos de gerenciadores de senhas e tudo que parece uma chave ficam mascarados, só na memória, e somem sozinhos. O resto é criptografado no disco."
+
+#: crates/copyveil-app/src/onboarding_window.rs:264
+msgid "Where copies come from"
+msgstr "De onde vêm as cópias"
+
+#: crates/copyveil-app/src/onboarding_window.rs:266
+#: crates/copyveil-app/src/onboarding_window.rs:312
+msgid "Check Again"
+msgstr "Verificar de novo"
+
+#: crates/copyveil-app/src/onboarding_window.rs:275
+msgid "Open the History with Super+V"
+msgstr "Abrir o Histórico com Super+V"
+
+#: crates/copyveil-app/src/onboarding_window.rs:276
+msgid ""
+"GNOME uses Super+V for notifications; they stay on Super+M. Otherwise it’s "
+"Super+Shift+V."
+msgstr "O GNOME usa Super+V para as notificações; elas continuam em Super+M. Sem isso, o atalho é Super+Shift+V."
+
+#: crates/copyveil-app/src/onboarding_window.rs:310
+#: crates/copyveil-app/src/onboarding_window.rs:326
+msgid "Turn On"
+msgstr "Ativar"
+
+#: crates/copyveil-app/src/onboarding_window.rs:340
+msgid "Where your History is kept"
+msgstr "Onde o seu Histórico fica"
+
+#: crates/copyveil-app/src/onboarding_window.rs:368
+msgid "Try it"
+msgstr "Experimente"
+
+#: crates/copyveil-app/src/onboarding_window.rs:370
+msgid ""
+"Copy this made-up token. Copyveil should spot it, mask it and keep it in "
+"memory only. Nothing can be done with it."
+msgstr "Copie este token inventado. O Copyveil deve identificá-lo, mascará-lo e mantê-lo só na memória. Ele não serve para nada."
+
+#: crates/copyveil-app/src/onboarding_window.rs:377
+msgid "Copy Test Token"
+msgstr "Copiar token de teste"
+
+#: crates/copyveil-app/src/onboarding_window.rs:406
+msgid ""
+"It works. The token is masked and in memory only. Copyveil removed the test "
+"Item and cleared the clipboard."
+msgstr "Funciona. O token está mascarado e só na memória. O Copyveil removeu o Item de teste e limpou a área de transferência."
+
+#: crates/copyveil-app/src/onboarding_window.rs:409
+msgid ""
+"Nothing arrived. Check that the GNOME Shell extension is on (step 2) and "
+"that Copyveil is running, then try again."
+msgstr "Nada chegou. Confira se a extensão do GNOME Shell está ativa (passo 2) e se o Copyveil está rodando, e tente de novo."
+
+#: crates/copyveil-app/src/popup.rs:38
+msgid "Secrets can’t be pinned. They expire on their own."
+msgstr "Segredos não podem ser fixados. Eles expiram sozinhos."
+
+#: crates/copyveil-app/src/prefs.rs:49
+msgid "Secrets never touch the disk"
+msgstr "Segredos nunca vão para o disco"
+
+#: crates/copyveil-app/src/prefs.rs:50
+msgid "Items from a password manager live in memory only"
+msgstr "Itens de gerenciadores de senhas ficam só na memória"
+
+#: crates/copyveil-app/src/prefs.rs:53
+msgid "Suspected Items never touch the disk"
+msgstr "Itens suspeitos nunca vão para o disco"
+
+#: crates/copyveil-app/src/prefs.rs:54
+msgid "Anything that looks like a key or token lives in memory only"
+msgstr "Tudo que parece uma chave ou token fica só na memória"
+
+#: crates/copyveil-app/src/prefs.rs:57
+msgid "Saved History is encrypted"
+msgstr "O Histórico salvo é criptografado"
+
+#: crates/copyveil-app/src/prefs.rs:58
+msgid "With a key that lives only in your keyring"
+msgstr "Com uma chave que fica só no seu chaveiro"
+
+#: crates/copyveil-app/src/prefs.rs:61
+msgid "Search never looks inside secrets"
+msgstr "A busca nunca olha dentro de segredos"
+
+#: crates/copyveil-app/src/prefs.rs:62
+msgid "Secret and Suspected Items match only on their description"
+msgstr "Itens Segredo e Suspeito só aparecem pela descrição"
+
+#: crates/copyveil-app/src/prefs.rs:65
+msgid "Pins are kept until you unpin them"
+msgstr "Fixados ficam até você desafixá-los"
+
+#: crates/copyveil-app/src/prefs.rs:66
+msgid "They don't count toward the History limit and never expire"
+msgstr "Eles não contam no limite do Histórico e nunca expiram"
+
+#: crates/copyveil-app/src/prefs.rs:72
+msgid "Erase the saved History?"
+msgstr "Apagar o Histórico salvo?"
+
+#: crates/copyveil-app/src/prefs.rs:74
+msgid ""
+"Copyveil will keep the History in memory only. The History saved on disk and "
+"its key in your keyring are erased now; what's in memory stays until you log "
+"out."
+msgstr "O Copyveil vai manter o Histórico só na memória. O Histórico salvo no disco e a chave dele no seu chaveiro são apagados agora; o que está na memória fica até você sair da sessão."
+
+#: crates/copyveil-app/src/prefs_window.rs:24
+msgid "Copyveil Settings"
+msgstr "Configurações do Copyveil"
+
+#: crates/copyveil-app/src/prefs_window.rs:40
+msgid ""
+"Start it with “systemctl --user start copyveil-daemon”, then open Settings "
+"again."
+msgstr "Inicie com “systemctl --user start copyveil-daemon” e abra as Configurações de novo."
+
+#: crates/copyveil-app/src/prefs_window.rs:62
+msgid "General"
+msgstr "Geral"
+
+#: crates/copyveil-app/src/prefs_window.rs:67
+msgid "History"
+msgstr "Histórico"
+
+#: crates/copyveil-app/src/prefs_window.rs:69
+msgid "How long sensitive Items stay, and how much the History keeps."
+msgstr "Por quanto tempo Itens sensíveis ficam e quanto o Histórico guarda."
+
+#: crates/copyveil-app/src/prefs_window.rs:75
+msgid "Secrets clear after"
+msgstr "Segredos somem após"
+
+#: crates/copyveil-app/src/prefs_window.rs:76
+msgid "Seconds. Items from a password manager."
+msgstr "Segundos. Itens de gerenciadores de senhas."
+
+#: crates/copyveil-app/src/prefs_window.rs:85
+msgid "Suspected Items clear after"
+msgstr "Itens suspeitos somem após"
+
+#: crates/copyveil-app/src/prefs_window.rs:86
+msgid "Minutes. Anything that looks like a key or token."
+msgstr "Minutos. Tudo que parece uma chave ou token."
+
+#: crates/copyveil-app/src/prefs_window.rs:95
+msgid "Keep up to"
+msgstr "Guardar até"
+
+#: crates/copyveil-app/src/prefs_window.rs:96
+msgid "Plain Items. Pins don’t count."
+msgstr "Itens comuns. Fixados não contam."
+
+#: crates/copyveil-app/src/prefs_window.rs:106
+msgid "Always on"
+msgstr "Sempre ativo"
+
+#: crates/copyveil-app/src/prefs_window.rs:108
+msgid "These protect your secrets and can’t be turned off."
+msgstr "Isto protege seus segredos e não pode ser desligado."
+
+#: crates/copyveil-app/src/prefs_window.rs:118
+msgid "Fixed"
+msgstr "Fixo"
+
+#: crates/copyveil-app/src/prefs_window.rs:183
+msgid "Keep History in memory only"
+msgstr "Manter o Histórico só na memória"
+
+#: crates/copyveil-app/src/prefs_window.rs:185
+msgid "Nothing is saved to disk. The History clears when you log out."
+msgstr "Nada é salvo no disco. O Histórico é apagado quando você sai da sessão."
+
+#: crates/copyveil-app/src/prefs_window.rs:227
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: crates/copyveil-app/src/prefs_window.rs:228
+msgid "Erase and Keep in Memory"
+msgstr "Apagar e manter na memória"
+
+#: crates/copyveil-app/src/prefs_window.rs:243
+msgid "Detection"
+msgstr "Detecção"
+
+#: crates/copyveil-app/src/prefs_window.rs:247
+msgid "Flag as Suspected"
+msgstr "Marcar como suspeito"
+
+#: crates/copyveil-app/src/prefs_window.rs:248
+msgid ""
+"What Copyveil looks for in what you copy. A flagged Item is masked, kept in "
+"memory only and cleared on its own."
+msgstr "O que o Copyveil procura no que você copia. Um Item marcado é mascarado, fica só na memória e some sozinho."
+
+#: crates/copyveil-app/src/prefs_window.rs:287
+msgid "Pins"
+msgstr "Fixados"
+
+#: crates/copyveil-app/src/prefs_window.rs:291
+msgid "Pin slots"
+msgstr "Posições fixas"
+
+#: crates/copyveil-app/src/prefs_window.rs:292
+msgid ""
+"Super+Alt+number pastes a Pin slot without opening the History. Only Plain "
+"Items can be pinned, so it can never paste a secret."
+msgstr "Super+Alt+número cola uma posição fixa sem abrir o Histórico. Só Itens comuns podem ser fixados, então isso nunca cola um segredo."
+
+#: crates/copyveil-app/src/prefs_window.rs:316
+#: crates/copyveil-app/src/window.rs:459
+msgid "No Pins yet"
+msgstr "Nenhum Fixado ainda"
+
+#: crates/copyveil-app/src/prefs_window.rs:317
+msgid "Pin a Plain Item with Ctrl+P in the History."
+msgstr "Fixe um Item comum com Ctrl+P no Histórico."
+
+#: crates/copyveil-app/src/prefs_window.rs:326
+#: crates/copyveil-app/src/row.rs:241
+#, rust-format
+msgid "Image · {mime}"
+msgstr "Imagem · {mime}"
+
+#: crates/copyveil-app/src/prefs_window.rs:335
+msgid "Move up"
+msgstr "Mover para cima"
+
+#: crates/copyveil-app/src/prefs_window.rs:336
+msgid "Move down"
+msgstr "Mover para baixo"
+
+#: crates/copyveil-app/src/prefs_window.rs:361
+msgid "Couldn’t move the Pin."
+msgstr "Não foi possível mover o Fixado."
+
+#: crates/copyveil-app/src/prefs_window.rs:378
+#: crates/copyveil-app/src/prefs_window.rs:382
+msgid "Shortcuts"
+msgstr "Atalhos"
+
+#: crates/copyveil-app/src/prefs_window.rs:384
+msgid "Global shortcuts are provided by the Copyveil GNOME Shell extension."
+msgstr "Os atalhos globais vêm da extensão do Copyveil para o GNOME Shell."
+
+#: crates/copyveil-app/src/prefs_window.rs:392
+msgid "The GNOME Shell extension isn’t installed"
+msgstr "A extensão do GNOME Shell não está instalada"
+
+#: crates/copyveil-app/src/prefs_window.rs:394
+msgid "Install it with “./install.sh” to capture copies and use shortcuts."
+msgstr "Instale com “./install.sh” para capturar cópias e usar atalhos."
+
+#: crates/copyveil-app/src/prefs_window.rs:407
+msgid "Open the History"
+msgstr "Abrir o Histórico"
+
+#: crates/copyveil-app/src/prefs_window.rs:412
+msgid "Use Super+V"
+msgstr "Usar Super+V"
+
+#: crates/copyveil-app/src/prefs_window.rs:414
+msgid "GNOME opens notifications with Super+V; they stay on Super+M."
+msgstr "O GNOME abre as notificações com Super+V; elas continuam em Super+M."
+
+#: crates/copyveil-app/src/prefs_window.rs:432
+msgid "Paste a Pin slot"
+msgstr "Colar uma posição fixa"
+
+#: crates/copyveil-app/src/row.rs:160
+#, rust-format
+msgid "clears in {time}"
+msgstr "some em {time}"
+
+#: crates/copyveil-app/src/row.rs:163
+#, rust-format
+msgid "Pin {n}"
+msgstr "Fixado {n}"
+
+#: crates/copyveil-app/src/row.rs:287
+msgid "Time until it’s erased"
+msgstr "Tempo até ser apagado"
+
+#: crates/copyveil-app/src/row.rs:292
+msgid "Not a secret"
+msgstr "Não é segredo"
+
+#: crates/copyveil-app/src/row.rs:297
+msgid "Show and keep it as Plain (Ctrl+N)"
+msgstr "Mostrar e manter como comum (Ctrl+N)"
+
+#: crates/copyveil-app/src/row.rs:306 crates/copyveil-app/src/text.rs:207
+#, rust-format
+msgid "Pin slot {n}"
+msgstr "Posição fixa {n}"
+
+#: crates/copyveil-app/src/text.rs:25
+msgid "just now"
+msgstr "agora mesmo"
+
+#: crates/copyveil-app/src/text.rs:26
+#, rust-format
+msgid "{n} min ago"
+msgstr "há {n} min"
+
+#: crates/copyveil-app/src/text.rs:27
+#, rust-format
+msgid "{n} h ago"
+msgstr "há {n} h"
+
+#: crates/copyveil-app/src/text.rs:28
+msgid "yesterday"
+msgstr "ontem"
+
+#: crates/copyveil-app/src/text.rs:33
+#, rust-format
+msgid "{n} day ago"
+msgid_plural "{n} days ago"
+msgstr[0] "há {n} dia"
+msgstr[1] "há {n} dias"
+
+#: crates/copyveil-app/src/text.rs:48
+#, rust-format
+msgid "{n} s"
+msgstr "{n} s"
+
+#: crates/copyveil-app/src/text.rs:50
+#, rust-format
+msgid "{n} min"
+msgstr "{n} min"
+
+#: crates/copyveil-app/src/text.rs:59
+#, rust-format
+msgid "{n} second"
+msgid_plural "{n} seconds"
+msgstr[0] "{n} segundo"
+msgstr[1] "{n} segundos"
+
+#: crates/copyveil-app/src/text.rs:62
+#, rust-format
+msgid "{n} minute"
+msgid_plural "{n} minutes"
+msgstr[0] "{n} minuto"
+msgstr[1] "{n} minutos"
+
+#: crates/copyveil-app/src/text.rs:72
+msgid "Encrypted on disk"
+msgstr "Criptografado no disco"
+
+#: crates/copyveil-app/src/text.rs:73
+msgid "Memory only"
+msgstr "Só na memória"
+
+#: crates/copyveil-app/src/text.rs:82
+msgid "No keyring found. History will clear when you log out."
+msgstr "Nenhum chaveiro encontrado. O Histórico será apagado quando você sair da sessão."
+
+#: crates/copyveil-app/src/text.rs:85
+msgid "History can’t be saved, so it will clear when you log out."
+msgstr "Não é possível salvar o Histórico, então ele será apagado quando você sair da sessão."
+
+#: crates/copyveil-app/src/text.rs:88
+msgid ""
+"The saved History couldn’t be opened with your keyring, so it was erased."
+msgstr "O Histórico salvo não pôde ser aberto com o seu chaveiro, então foi apagado."
+
+#: crates/copyveil-app/src/text.rs:91
+msgid "Some saved Items couldn’t be read and were erased."
+msgstr "Alguns Itens salvos não puderam ser lidos e foram apagados."
+
+#: crates/copyveil-app/src/text.rs:94
+msgid "Saving the History failed. Copyveil retries on the next copy."
+msgstr "Falha ao salvar o Histórico. O Copyveil tenta de novo na próxima cópia."
+
+#: crates/copyveil-app/src/text.rs:153
+msgid "From password manager"
+msgstr "Do gerenciador de senhas"
+
+#: crates/copyveil-app/src/text.rs:154
+msgid "Changed by you"
+msgstr "Alterado por você"
+
+#: crates/copyveil-app/src/text.rs:155
+msgid "Looks like a GitHub token"
+msgstr "Parece um token do GitHub"
+
+#: crates/copyveil-app/src/text.rs:156
+msgid "Looks like an AWS access key"
+msgstr "Parece uma chave de acesso da AWS"
+
+#: crates/copyveil-app/src/text.rs:157
+msgid "Looks like an AI provider API key"
+msgstr "Parece uma chave de API de provedor de IA"
+
+#: crates/copyveil-app/src/text.rs:158
+msgid "Looks like a JSON Web Token"
+msgstr "Parece um JSON Web Token"
+
+#: crates/copyveil-app/src/text.rs:159
+msgid "Looks like a private key"
+msgstr "Parece uma chave privada"
+
+#: crates/copyveil-app/src/text.rs:160
+msgid "Looks like a payment card number"
+msgstr "Parece um número de cartão de pagamento"
+
+#: crates/copyveil-app/src/text.rs:161
+msgid "Looks like a random secret"
+msgstr "Parece um segredo aleatório"
+
+#: crates/copyveil-app/src/text.rs:172
+msgid "GitHub tokens"
+msgstr "Tokens do GitHub"
+
+#: crates/copyveil-app/src/text.rs:173
+msgid "AWS access keys"
+msgstr "Chaves de acesso da AWS"
+
+#: crates/copyveil-app/src/text.rs:174
+msgid "AI provider API keys"
+msgstr "Chaves de API de provedores de IA"
+
+#: crates/copyveil-app/src/text.rs:175
+msgid "JSON Web Tokens"
+msgstr "JSON Web Tokens"
+
+#: crates/copyveil-app/src/text.rs:176
+msgid "Private keys"
+msgstr "Chaves privadas"
+
+#: crates/copyveil-app/src/text.rs:177
+msgid "Payment card numbers"
+msgstr "Números de cartão de pagamento"
+
+#: crates/copyveil-app/src/text.rs:178
+msgid "Random-looking text"
+msgstr "Texto com cara de aleatório"
+
+#: crates/copyveil-app/src/text.rs:190
+msgid "Secret, hidden"
+msgstr "Segredo, oculto"
+
+#: crates/copyveil-app/src/text.rs:191
+msgid "Suspected secret, hidden"
+msgstr "Suspeito de ser segredo, oculto"
+
+#: crates/copyveil-app/src/text.rs:193
+#, rust-format
+msgid "Image, {mime}"
+msgstr "Imagem, {mime}"
+
+#: crates/copyveil-app/src/text.rs:202
+#, rust-format
+msgid "Expires in {time}"
+msgstr "Expira em {time}"
+
+#: crates/copyveil-app/src/window.rs:63
+msgid "All"
+msgstr "Todos"
+
+#: crates/copyveil-app/src/window.rs:64
+msgid "Pinned"
+msgstr "Fixados"
+
+#: crates/copyveil-app/src/window.rs:79
+msgid "Settings (Ctrl+,)"
+msgstr "Configurações (Ctrl+,)"
+
+#: crates/copyveil-app/src/window.rs:84
+msgid "Search the History"
+msgstr "Buscar no Histórico"
+
+#: crates/copyveil-app/src/window.rs:100 crates/copyveil-app/src/window.rs:465
+msgid "Nothing copied yet"
+msgstr "Nada copiado ainda"
+
+#: crates/copyveil-app/src/window.rs:102 crates/copyveil-app/src/window.rs:467
+msgid ""
+"Copy something and it appears here. Secrets are hidden and erased on their "
+"own."
+msgstr "Copie algo e ele aparece aqui. Segredos ficam ocultos e somem sozinhos."
+
+#: crates/copyveil-app/src/window.rs:130
+#: data/io.github.joaoferrete.Copyveil.desktop.in:2
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:6
+msgid "Copyveil"
+msgstr "Copyveil"
+
+#: crates/copyveil-app/src/window.rs:455
+msgid "No matches"
+msgstr "Nada encontrado"
+
+#: crates/copyveil-app/src/window.rs:456
+msgid "Secret and Suspected Items match only on their description."
+msgstr "Itens Segredo e Suspeito só aparecem pela descrição."
+
+#: crates/copyveil-app/src/window.rs:461
+msgid ""
+"Pin a Plain Item with Ctrl+P to keep it here and paste it with "
+"Super+Alt+number."
+msgstr "Fixe um Item comum com Ctrl+P para guardá-lo aqui e colar com Super+Alt+número."
+
+#: crates/copyveil-app/src/window.rs:634
+msgid "Couldn’t change the Pin. Is Copyveil running?"
+msgstr "Não foi possível mudar o Fixado. O Copyveil está rodando?"
+
+#: crates/copyveil-app/src/window.rs:670
+msgid "Couldn’t change it. Is Copyveil running?"
+msgstr "Não foi possível mudar. O Copyveil está rodando?"
+
+#: crates/copyveil-app/src/window.rs:674
+msgid "Marked as not a secret"
+msgstr "Marcado como não secreto"
+
+#: crates/copyveil-app/src/window.rs:677
+#, rust-format
+msgid "Stop flagging {kind}"
+msgstr "Parar de marcar {kind}"
+
+#: crates/copyveil-app/src/window.rs:774
+msgid "Paste"
+msgstr "Colar"
+
+#: crates/copyveil-app/src/window.rs:775
+msgid "Plain text"
+msgstr "Texto puro"
+
+#: crates/copyveil-app/src/window.rs:776
+msgid "Hold to reveal"
+msgstr "Segure para revelar"
+
+#: crates/copyveil-app/src/window.rs:777
+msgid "Pin"
+msgstr "Fixar"
+
+#: crates/copyveil-app/src/window.rs:778
+msgid "Remove"
+msgstr "Remover"
+
+#: data/io.github.joaoferrete.Copyveil.desktop.in:3
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:7
+msgid "Clipboard history that forgets your secrets"
+msgstr "Histórico da área de transferência que esquece seus segredos"
+
+#: data/io.github.joaoferrete.Copyveil.desktop.in:9
+msgid "clipboard;history;paste;secrets;password;token;"
+msgstr "área de transferência;histórico;colar;segredos;senha;token;clipboard;"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:9
+msgid ""
+"Copyveil keeps a searchable history of what you copy. Passwords, API keys "
+"and tokens are masked, kept in memory only, and erased after a short time. "
+"Everything else is encrypted on disk with a key from your system keyring."
+msgstr "O Copyveil guarda um histórico pesquisável do que você copia. Senhas, chaves de API e tokens ficam mascarados, só na memória, e são apagados depois de pouco tempo. O resto é criptografado no disco com uma chave do chaveiro do sistema."
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:15
+msgid "Opens with a shortcut and works from the keyboard"
+msgstr "Abre com um atalho e funciona pelo teclado"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:16
+msgid ""
+"Masks secrets from password managers and detects tokens by their content"
+msgstr "Mascara segredos vindos de gerenciadores de senhas e detecta tokens pelo conteúdo"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:17
+msgid "Never writes secrets to disk"
+msgstr "Nunca grava segredos no disco"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:18
+msgid "Pin the things you paste every day"
+msgstr "Fixe o que você cola todo dia"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:30
+msgid "clipboard"
+msgstr "área de transferência"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:31
+msgid "history"
+msgstr "histórico"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:32
+msgid "secrets"
+msgstr "segredos"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:33
+msgid "password"
+msgstr "senha"
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:37
+msgid "Project skeleton."
+msgstr "Esqueleto do projeto."

@@ -4,7 +4,14 @@
 //! A screen reader never hears a masked value: it hears the Sensitivity, the
 //! description and the time left (`docs/design/README.md`).
 
+use crate::N_;
 use copyveil_dbus::{ItemSummary, kind, notice, sensitivity};
+use gettextrs::{gettext, ngettext};
+
+/// Fills `{n}` in a translated template.
+fn with_count(template: &str, count: u64) -> String {
+    template.replace("{n}", &count.to_string())
+}
 
 const SECOND: u64 = 1_000;
 const MINUTE: u64 = 60 * SECOND;
@@ -15,11 +22,21 @@ const DAY: u64 = 24 * HOUR;
 #[must_use]
 pub fn age(ms: u64) -> String {
     match ms {
-        ms if ms < MINUTE => "just now".to_owned(),
-        ms if ms < HOUR => format!("{} min ago", ms / MINUTE),
-        ms if ms < DAY => format!("{} h ago", ms / HOUR),
-        ms if ms < 2 * DAY => "yesterday".to_owned(),
-        ms => format!("{} days ago", ms / DAY),
+        ms if ms < MINUTE => gettext("just now"),
+        ms if ms < HOUR => with_count(&gettext("{n} min ago"), ms / MINUTE),
+        ms if ms < DAY => with_count(&gettext("{n} h ago"), ms / HOUR),
+        ms if ms < 2 * DAY => gettext("yesterday"),
+        ms => {
+            let days = ms / DAY;
+            with_count(
+                &ngettext(
+                    "{n} day ago",
+                    "{n} days ago",
+                    u32::try_from(days).unwrap_or(u32::MAX),
+                ),
+                days,
+            )
+        }
     }
 }
 
@@ -28,51 +45,54 @@ pub fn age(ms: u64) -> String {
 #[must_use]
 pub fn time_left(ms: u64) -> String {
     if ms <= MINUTE {
-        format!("{} s", ms.div_ceil(SECOND))
+        with_count(&gettext("{n} s"), ms.div_ceil(SECOND))
     } else {
-        format!("{} min", ms.div_ceil(MINUTE))
+        with_count(&gettext("{n} min"), ms.div_ceil(MINUTE))
     }
 }
 
 /// The same time left, spelled out for a screen reader: "24 seconds", "1 minute".
 fn time_left_spoken(ms: u64) -> String {
-    let (count, unit) = if ms <= MINUTE {
-        (ms.div_ceil(SECOND), "second")
+    let as_u32 = |value: u64| u32::try_from(value).unwrap_or(u32::MAX);
+    if ms <= MINUTE {
+        let count = ms.div_ceil(SECOND);
+        with_count(&ngettext("{n} second", "{n} seconds", as_u32(count)), count)
     } else {
-        (ms.div_ceil(MINUTE), "minute")
-    };
-    let plural = if count == 1 { "" } else { "s" };
-    format!("{count} {unit}{plural}")
+        let count = ms.div_ceil(MINUTE);
+        with_count(&ngettext("{n} minute", "{n} minutes", as_u32(count)), count)
+    }
 }
 
 /// The popup's subtitle: where the History is kept. `None` means the
 /// daemon isn't reachable.
 #[must_use]
-pub fn storage_title(on_disk: Option<bool>) -> &'static str {
+pub fn storage_title(on_disk: Option<bool>) -> String {
     match on_disk {
-        None => "Copyveil isn’t running",
-        Some(true) => "Encrypted on disk",
-        Some(false) => "Memory only",
+        None => gettext("Copyveil isn’t running"),
+        Some(true) => gettext("Encrypted on disk"),
+        Some(false) => gettext("Memory only"),
     }
 }
 
 /// What the banner under the header says about a storage notice, if anything.
 #[must_use]
-pub fn storage_notice(storage_notice: &str) -> Option<&'static str> {
+pub fn storage_notice(storage_notice: &str) -> Option<String> {
     match storage_notice {
-        notice::KEYRING_UNAVAILABLE => {
-            Some("No keyring found. History will clear when you log out.")
-        }
-        notice::STORE_UNAVAILABLE => {
-            Some("History can’t be saved, so it will clear when you log out.")
-        }
-        notice::STORE_WIPED => {
-            Some("The saved History couldn’t be opened with your keyring, so it was erased.")
-        }
-        notice::ITEMS_UNREADABLE => Some("Some saved Items couldn’t be read and were erased."),
-        notice::SYNC_FAILED => {
-            Some("Saving the History failed. Copyveil retries on the next copy.")
-        }
+        notice::KEYRING_UNAVAILABLE => Some(gettext(
+            "No keyring found. History will clear when you log out.",
+        )),
+        notice::STORE_UNAVAILABLE => Some(gettext(
+            "History can’t be saved, so it will clear when you log out.",
+        )),
+        notice::STORE_WIPED => Some(gettext(
+            "The saved History couldn’t be opened with your keyring, so it was erased.",
+        )),
+        notice::ITEMS_UNREADABLE => Some(gettext(
+            "Some saved Items couldn’t be read and were erased.",
+        )),
+        notice::SYNC_FAILED => Some(gettext(
+            "Saving the History failed. Copyveil retries on the next copy.",
+        )),
         _ => None,
     }
 }
@@ -124,30 +144,69 @@ pub fn expiry_fraction(remaining_ms: u64, total_ms: u64) -> f64 {
     fraction.clamp(0.0, 1.0)
 }
 
+/// An Item's reason, translated. The daemon sends it in English (it's also
+/// what search matches); the app shows it in the user's language. Unknown
+/// reasons pass through as they are.
+#[must_use]
+pub fn reason(english: &str) -> String {
+    let marked = match english {
+        "From password manager" => N_!("From password manager"),
+        "Changed by you" => N_!("Changed by you"),
+        "Looks like a GitHub token" => N_!("Looks like a GitHub token"),
+        "Looks like an AWS access key" => N_!("Looks like an AWS access key"),
+        "Looks like an AI provider API key" => N_!("Looks like an AI provider API key"),
+        "Looks like a JSON Web Token" => N_!("Looks like a JSON Web Token"),
+        "Looks like a private key" => N_!("Looks like a private key"),
+        "Looks like a payment card number" => N_!("Looks like a payment card number"),
+        "Looks like a random secret" => N_!("Looks like a random secret"),
+        other => return other.to_owned(),
+    };
+    gettext(marked)
+}
+
+/// A detector's title from `Settings1.Detectors` ("GitHub tokens"),
+/// translated. Unknown titles pass through as they are.
+#[must_use]
+pub fn detector_title(english: &str) -> String {
+    let marked = match english {
+        "GitHub tokens" => N_!("GitHub tokens"),
+        "AWS access keys" => N_!("AWS access keys"),
+        "AI provider API keys" => N_!("AI provider API keys"),
+        "JSON Web Tokens" => N_!("JSON Web Tokens"),
+        "Private keys" => N_!("Private keys"),
+        "Payment card numbers" => N_!("Payment card numbers"),
+        "Random-looking text" => N_!("Random-looking text"),
+        other => return other.to_owned(),
+    };
+    gettext(marked)
+}
+
 /// What a screen reader hears for a row. Masked Items are announced by
 /// Sensitivity, description and time left; their content never is.
 #[must_use]
 pub fn accessible_label(item: &ItemSummary) -> String {
     let mut parts = Vec::new();
     match item.sensitivity.as_str() {
-        sensitivity::SECRET => parts.push("Secret, hidden".to_owned()),
-        sensitivity::SUSPECTED => parts.push("Suspected secret, hidden".to_owned()),
+        sensitivity::SECRET => parts.push(gettext("Secret, hidden")),
+        sensitivity::SUSPECTED => parts.push(gettext("Suspected secret, hidden")),
         _ => parts.push(match item.kind.as_str() {
-            kind::IMAGE => format!("Image, {}", item.mime),
+            kind::IMAGE => gettext("Image, {mime}").replace("{mime}", &item.mime),
             _ => item.preview.chars().take(120).collect(),
         }),
     }
     if !item.reason.is_empty() {
-        parts.push(item.reason.clone());
+        parts.push(reason(&item.reason));
     }
     if item.expires_in_ms > 0 {
-        parts.push(format!(
-            "Expires in {}",
-            time_left_spoken(item.expires_in_ms)
-        ));
+        parts.push(
+            gettext("Expires in {time}").replace("{time}", &time_left_spoken(item.expires_in_ms)),
+        );
     }
     if item.pin_slot > 0 {
-        parts.push(format!("Pin slot {}", item.pin_slot));
+        parts.push(with_count(
+            &gettext("Pin slot {n}"),
+            u64::from(item.pin_slot),
+        ));
     }
     parts.join(". ") + "."
 }
@@ -293,4 +352,53 @@ mod tests {
         assert!((expiry_fraction(40_000, 30_000) - 1.0).abs() < f64::EPSILON);
         assert!(expiry_fraction(10, 0).abs() < f64::EPSILON);
     }
+
+    #[test]
+    fn every_reason_the_daemon_sends_is_translatable() {
+        for detector in copyveil_detect::Detector::ALL {
+            let description = detector.description();
+            assert!(
+                REASONS.contains(&description),
+                "{description} is missing from text::reason"
+            );
+        }
+        assert_eq!(super::reason("Something new"), "Something new");
+        assert_eq!(super::reason("Changed by you"), "Changed by you");
+    }
+
+    /// The reasons `text::reason` knows, kept in sync with it.
+    const REASONS: [&str; 9] = [
+        "From password manager",
+        "Changed by you",
+        "Looks like a GitHub token",
+        "Looks like an AWS access key",
+        "Looks like an AI provider API key",
+        "Looks like a JSON Web Token",
+        "Looks like a private key",
+        "Looks like a payment card number",
+        "Looks like a random secret",
+    ];
+
+    #[test]
+    fn every_detector_title_is_translatable() {
+        for detector in copyveil_detect::Detector::ALL {
+            let title = detector.title();
+            assert!(
+                TITLES.contains(&title),
+                "{title} is missing from text::detector_title"
+            );
+        }
+        assert_eq!(super::detector_title("New detector"), "New detector");
+    }
+
+    /// The titles `text::detector_title` knows, kept in sync with it.
+    const TITLES: [&str; 7] = [
+        "GitHub tokens",
+        "AWS access keys",
+        "AI provider API keys",
+        "JSON Web Tokens",
+        "Private keys",
+        "Payment card numbers",
+        "Random-looking text",
+    ];
 }

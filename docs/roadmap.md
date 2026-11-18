@@ -14,7 +14,7 @@ Each release is small and finished. v0.1 is polished on GNOME before Copyveil re
 - [x] App: settings with Pin reordering, owned and validated by the daemon.
 - [x] App: four-step onboarding, ending in a live test of capture, detection and masking.
 - [x] Text, images, and rich text with a plain-text fallback.
-- [ ] Design system v1, i18n (English, Brazilian Portuguese).
+- [x] Design system v1, i18n (English, Brazilian Portuguese).
 - [x] Install from source with Meson. Full CI and repository rules.
 
 ## v0.2 (beyond GNOME)

@@ -11,6 +11,7 @@ use std::rc::Rc;
 const APP_ID: &str = "io.github.joaoferrete.Copyveil";
 
 fn main() -> glib::ExitCode {
+    copyveil_app::i18n::init();
     let app = adw::Application::builder().application_id(APP_ID).build();
     let popup: Rc<OnceCell<PopupWindow>> = Rc::new(OnceCell::new());
 

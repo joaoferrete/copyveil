@@ -17,6 +17,7 @@ use gtk::glib;
 use std::time::Duration;
 
 fn main() -> glib::ExitCode {
+    copyveil_app::i18n::init();
     let mut args = std::env::args().skip(1);
     let Some(out) = args.next() else {
         return glib::ExitCode::FAILURE;

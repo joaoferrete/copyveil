@@ -149,20 +149,18 @@ impl ItemRow {
         let elapsed = millis(now.saturating_duration_since(self.listed_at));
         let mut parts = vec![text::age(self.age_ms.saturating_add(elapsed))];
         if !self.reason.is_empty() {
-            parts.push(self.reason.clone());
+            parts.push(text::reason(&self.reason));
         }
         if let (Some(at), Some((ring, total))) = (self.expires_at, &self.ring) {
             let left = millis(at.saturating_duration_since(now));
             ring.set_fraction(text::expiry_fraction(left, millis(*total)));
         }
         if let Some(at) = self.expires_at {
-            parts.push(format!(
-                "clears in {}",
-                text::time_left(millis(at.saturating_duration_since(now)).max(1))
-            ));
+            let left = text::time_left(millis(at.saturating_duration_since(now)).max(1));
+            parts.push(gettextrs::gettext("clears in {time}").replace("{time}", &left));
         }
         if self.pin_slot > 0 {
-            parts.push(format!("Pin {}", self.pin_slot));
+            parts.push(gettextrs::gettext("Pin {n}").replace("{n}", &self.pin_slot.to_string()));
         }
         self.meta.set_text(&parts.join(" · "));
     }
@@ -239,7 +237,8 @@ fn append_content(
 ) -> Option<gtk::Box> {
     let Some(mask) = mask else {
         let label = if item.kind == kind::IMAGE {
-            let label = content_label(&format!("Image · {}", item.mime));
+            let label =
+                content_label(&gettextrs::gettext("Image · {mime}").replace("{mime}", &item.mime));
             label.add_css_class("dim-label");
             label
         } else {
@@ -284,23 +283,28 @@ fn append_trailing(
             row.suspected_expiry
         };
         let ring = ExpiryRing::new(1.0);
-        ring.area.set_tooltip_text(Some("Time until it’s erased"));
+        ring.area
+            .set_tooltip_text(Some(&gettextrs::gettext("Time until it’s erased")));
         line.append(&ring.area);
         (ring, total)
     });
     let unflag = (item.sensitivity == sensitivity::SUSPECTED).then(|| {
-        let button = gtk::Button::with_label("Not a secret");
+        let button = gtk::Button::with_label(&gettextrs::gettext("Not a secret"));
         button.add_css_class("flat");
         button.add_css_class("item-unflag");
         button.set_valign(gtk::Align::Center);
-        button.set_tooltip_text(Some("Show and keep it as Plain (Ctrl+N)"));
+        button.set_tooltip_text(Some(&gettextrs::gettext(
+            "Show and keep it as Plain (Ctrl+N)",
+        )));
         line.append(&button);
         button
     });
     if item.pin_slot > 0 {
         let pin = gtk::Image::from_icon_name("view-pin-symbolic");
         pin.add_css_class("item-pin");
-        pin.set_tooltip_text(Some(&format!("Pin slot {}", item.pin_slot)));
+        pin.set_tooltip_text(Some(
+            &gettextrs::gettext("Pin slot {n}").replace("{n}", &item.pin_slot.to_string()),
+        ));
         line.append(&pin);
     }
     (ring, unflag)

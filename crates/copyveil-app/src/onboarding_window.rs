@@ -5,10 +5,12 @@
 //! it as a masked Suspected Item; it can't be skipped the first time.
 
 use crate::daemon::Daemon;
+use crate::i18n::tr;
 use crate::onboarding::{self, Extension, Step};
 use crate::row::{ItemRow, RowContext};
 use adw::prelude::*;
 use copyveil_dbus::ItemSummary;
+use gettextrs::gettext;
 use gtk::{gdk, glib};
 use std::cell::Cell;
 use std::path::PathBuf;
@@ -70,8 +72,8 @@ pub fn present(
     stack.add_named(&capture_page(daemon), Some("capture"));
     stack.add_named(&storage_page(daemon), Some("storage"));
 
-    let back = gtk::Button::with_label("Back");
-    let next = gtk::Button::with_label("Get Started");
+    let back = gtk::Button::with_label(&gettext("Back"));
+    let next = gtk::Button::with_label(&gettext("Get Started"));
     next.add_css_class("suggested-action");
     next.add_css_class("pill");
     back.add_css_class("pill");
@@ -108,7 +110,7 @@ pub fn present(
 
     let window = adw::ApplicationWindow::builder()
         .application(app)
-        .title("Welcome to Copyveil")
+        .title(gettext("Welcome to Copyveil"))
         .default_width(640)
         .default_height(660)
         .content(&toolbar)
@@ -165,10 +167,10 @@ fn update(pages: &Pages) {
     });
     pages.back.set_visible(step.previous().is_some());
     let last = step.next().is_none();
-    pages.next.set_label(match step {
-        Step::Welcome => "Get Started",
-        Step::LiveTest => "Finish",
-        _ => "Next",
+    pages.next.set_label(&match step {
+        Step::Welcome => gettext("Get Started"),
+        Step::LiveTest => gettext("Finish"),
+        _ => gettext("Next"),
     });
     pages
         .next
@@ -224,8 +226,8 @@ fn sample(
 
 fn welcome_page() -> gtk::Box {
     let page = page(
-        "Welcome to Copyveil",
-        "Remembers what you copy. Forgets your secrets.",
+        &gettext("Welcome to Copyveil"),
+        &gettext("Remembers what you copy. Forgets your secrets."),
     );
     let icon = gtk::Image::from_icon_name("io.github.joaoferrete.Copyveil");
     icon.set_pixel_size(96);
@@ -247,9 +249,9 @@ fn welcome_page() -> gtk::Box {
         list.append(&row.widget);
     }
     page.append(&list);
-    let legend = gtk::Label::new(Some(
+    let legend = gtk::Label::new(Some(&gettext(
         "Secrets from a password manager and anything that looks like a key stay masked, in memory only, and clear on their own. Everything else is encrypted on disk.",
-    ));
+    )));
     legend.set_wrap(true);
     legend.set_justify(gtk::Justification::Center);
     legend.add_css_class("caption");
@@ -259,9 +261,9 @@ fn welcome_page() -> gtk::Box {
 }
 
 fn capture_page(daemon: &Daemon) -> gtk::Box {
-    let page = page("Where copies come from", "");
+    let page = page(&gettext("Where copies come from"), "");
     let status = adw::ActionRow::new();
-    let action = gtk::Button::with_label("Check Again");
+    let action = gtk::Button::with_label(&gettext("Check Again"));
     action.set_valign(gtk::Align::Center);
     status.add_suffix(&action);
     let list = gtk::ListBox::new();
@@ -270,8 +272,8 @@ fn capture_page(daemon: &Daemon) -> gtk::Box {
     list.append(&status);
 
     let super_v = adw::SwitchRow::builder()
-        .title("Open the History with Super+V")
-        .subtitle("GNOME uses Super+V for notifications; they stay on Super+M. Otherwise it’s Super+Shift+V.")
+        .title(gettext("Open the History with Super+V"))
+        .subtitle(gettext("GNOME uses Super+V for notifications; they stay on Super+M. Otherwise it’s Super+Shift+V."))
         .build();
     if let Some(settings) = crate::prefs_window::extension_settings() {
         super_v.set_active(settings.boolean("take-super-v"));
@@ -301,12 +303,13 @@ fn capture_page(daemon: &Daemon) -> gtk::Box {
                     Some(state) => Extension::from_state(state),
                 };
                 let (title, body) = state.describe();
-                status.set_title(title);
-                status.set_subtitle(body);
-                action.set_label(if state == Extension::Off {
-                    "Turn On"
+                let (title, body) = (tr(title), tr(body));
+                status.set_title(&title);
+                status.set_subtitle(&body);
+                action.set_label(&if state == Extension::Off {
+                    gettext("Turn On")
                 } else {
-                    "Check Again"
+                    gettext("Check Again")
                 });
                 action.set_visible(state != Extension::On);
             });
@@ -320,7 +323,7 @@ fn capture_page(daemon: &Daemon) -> gtk::Box {
             let (daemon, refresh, turn_on) = (
                 daemon.clone(),
                 Rc::clone(&refresh),
-                button.label().as_deref() == Some("Turn On"),
+                button.label().as_deref() == Some(gettext("Turn On").as_str()),
             );
             glib::spawn_future_local(async move {
                 if turn_on {
@@ -334,7 +337,7 @@ fn capture_page(daemon: &Daemon) -> gtk::Box {
 }
 
 fn storage_page(daemon: &Daemon) -> gtk::Box {
-    let page = page("Where your History is kept", "");
+    let page = page(&gettext("Where your History is kept"), "");
     let icon = gtk::Image::from_icon_name("channel-secure-symbolic");
     icon.set_pixel_size(64);
     icon.add_css_class("onboarding-brand");
@@ -353,22 +356,25 @@ fn storage_page(daemon: &Daemon) -> gtk::Box {
             None => (None, ""),
         };
         let (title, body) = onboarding::describe_storage(on_disk, notice);
-        row.set_title(title);
-        row.set_subtitle(body);
+        let (title, body) = (tr(title), tr(body));
+        row.set_title(&title);
+        row.set_subtitle(&body);
     });
     page
 }
 
 fn live_test_page(daemon: &Daemon, status: &gtk::Box, pages: Rc<Pages>) -> gtk::Box {
     let page = page(
-        "Try it",
-        "Copy this made-up token. Copyveil should spot it, mask it and keep it in memory only. Nothing can be done with it.",
+        &gettext("Try it"),
+        &gettext(
+            "Copy this made-up token. Copyveil should spot it, mask it and keep it in memory only. Nothing can be done with it.",
+        ),
     );
     let token = gtk::Label::new(None);
     token.add_css_class("monospace");
     token.add_css_class("onboarding-token");
     token.set_selectable(false);
-    let copy = gtk::Button::with_label("Copy Test Token");
+    let copy = gtk::Button::with_label(&gettext("Copy Test Token"));
     copy.add_css_class("pill");
     copy.set_halign(gtk::Align::Center);
     page.append(&token);
@@ -397,14 +403,10 @@ fn live_test_page(daemon: &Daemon, status: &gtk::Box, pages: Rc<Pages>) -> gtk::
                 list.set_selection_mode(gtk::SelectionMode::None);
                 list.append(&ItemRow::new(&item, None, &RowContext::now()).widget);
                 status.append(&list);
-                status.append(&gtk::Label::new(Some(
-                    "It works. The token is masked and in memory only. Copyveil removed the test Item and cleared the clipboard.",
-                )));
+                status.append(&gtk::Label::new(Some(&gettext("It works. The token is masked and in memory only. Copyveil removed the test Item and cleared the clipboard."))));
                 pages.passed.set(true);
             } else {
-                let failed = gtk::Label::new(Some(
-                    "Nothing arrived. Check that the GNOME Shell extension is on (step 2) and that Copyveil is running, then try again.",
-                ));
+                let failed = gtk::Label::new(Some(&gettext("Nothing arrived. Check that the GNOME Shell extension is on (step 2) and that Copyveil is running, then try again.")));
                 failed.set_wrap(true);
                 failed.set_justify(gtk::Justification::Center);
                 status.append(&failed);

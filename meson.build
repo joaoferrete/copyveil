@@ -8,10 +8,14 @@ project(
 app_id = 'io.github.joaoferrete.Copyveil'
 daemon_bus_name = app_id + '.Daemon'
 
+i18n = import('i18n')
+
 prefix = get_option('prefix')
 bindir = prefix / get_option('bindir')
 datadir = prefix / get_option('datadir')
+localedir = prefix / get_option('localedir')
 
+subdir('po')
 subdir('data')
 
 cargo = find_program('cargo')
@@ -32,5 +36,6 @@ custom_target(
     meson.project_build_root() / 'target',
     get_option('profile'),
     '@OUTDIR@',
+    localedir,
   ],
 )

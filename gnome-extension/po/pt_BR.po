@@ -1,0 +1,57 @@
+# Brazilian Portuguese translation of the Copyveil GNOME Shell extension.
+# SPDX-License-Identifier: GPL-3.0-or-later
+msgid ""
+msgstr ""
+"Project-Id-Version: copyveil-extension\n"
+"PO-Revision-Date: 2026-11-18 14:00-0300\n"
+"Last-Translator: Copyveil contributors\n"
+"Language-Team: Brazilian Portuguese\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: indicator.js:18
+msgid "No keyring: History is kept in memory only"
+msgstr "Sem chaveiro: o Histórico fica só na memória"
+
+#: indicator.js:19
+msgid "History can’t be saved: kept in memory only"
+msgstr "Não é possível salvar o Histórico: ele fica só na memória"
+
+#: indicator.js:20
+msgid "The saved History couldn’t be opened and was erased"
+msgstr "O Histórico salvo não pôde ser aberto e foi apagado"
+
+#: indicator.js:21
+msgid "Some saved Items couldn’t be read and were erased"
+msgstr "Alguns Itens salvos não puderam ser lidos e foram apagados"
+
+#: indicator.js:22
+msgid "Saving the History failed; retrying on the next copy"
+msgstr "Falha ao salvar o Histórico; nova tentativa na próxima cópia"
+
+#: indicator.js:45
+msgid "Open History"
+msgstr "Abrir Histórico"
+
+#: indicator.js:46
+msgid "Settings"
+msgstr "Configurações"
+
+#: indicator.js:47
+msgid "Pause Capture"
+msgstr "Pausar captura"
+
+#: indicator.js:73
+msgid "Copyveil, capture paused"
+msgstr "Copyveil, captura pausada"
+
+#: indicator.js:74
+msgid "Copyveil, a Secret is in memory"
+msgstr "Copyveil, há um Segredo na memória"
+
+#: indicator.js:86
+msgid "Copyveil isn’t running"
+msgstr "O Copyveil não está em execução"

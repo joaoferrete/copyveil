@@ -5,6 +5,7 @@
 //! one is selected, what <kbd>Ctrl</kbd>+number pastes, and what may be
 //! pinned.
 
+use crate::N_;
 use copyveil_dbus::{ItemSummary, sensitivity};
 
 /// The most rows that get a number for <kbd>Ctrl</kbd>+1…9.
@@ -34,7 +35,7 @@ impl PinRefusal {
     #[must_use]
     pub const fn message(self) -> &'static str {
         match self {
-            Self::Secret => "Secrets can’t be pinned. They expire on their own.",
+            Self::Secret => N_!("Secrets can’t be pinned. They expire on their own."),
             Self::Suspected => {
                 "This looks like a secret, so it can’t be pinned. Mark it “Not a secret” first."
             }
