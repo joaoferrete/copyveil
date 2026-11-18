@@ -5,7 +5,7 @@
 //! daemon's value. The rules that never change are shown as locked rows.
 //! Shortcuts live in the Shell extension's own settings, read directly.
 
-use crate::daemon::{Daemon, SettingChange, SettingsValues};
+use crate::daemon::{Daemon, EXTENSION_UUID, SettingChange, SettingsValues};
 use crate::prefs::{self, Limits};
 use adw::prelude::*;
 use copyveil_dbus::ItemSummary;
@@ -13,7 +13,6 @@ use gtk::{gio, glib};
 use std::cell::Cell;
 use std::rc::Rc;
 
-const EXTENSION_UUID: &str = "copyveil@joaoferrete.github.io";
 const EXTENSION_SCHEMA: &str = "org.gnome.shell.extensions.copyveil";
 
 /// Opens the settings in a window of their own and returns it.
@@ -428,7 +427,7 @@ fn shortcuts_page() -> adw::PreferencesPage {
 }
 
 /// The extension's settings, from wherever GNOME Shell installed it.
-fn extension_settings() -> Option<gio::Settings> {
+pub(crate) fn extension_settings() -> Option<gio::Settings> {
     let mut dirs = vec![glib::user_data_dir()];
     dirs.extend(glib::system_data_dirs());
     let default = gio::SettingsSchemaSource::default();

@@ -11,6 +11,9 @@ use std::sync::OnceLock;
 use tokio::runtime::Runtime;
 use zbus::proxy::CacheProperties;
 
+/// The Copyveil GNOME Shell extension.
+pub const EXTENSION_UUID: &str = "copyveil@joaoferrete.github.io";
+
 /// The runtime zbus runs on, or `None` if it couldn't be started (then
 /// every call fails, as if the daemon were unreachable).
 fn runtime() -> Option<&'static Runtime> {
@@ -142,6 +145,65 @@ impl Daemon {
             },
             other => other.to_string(),
         })
+    }
+
+    /// The Copyveil extension's state from GNOME Shell: `None` when GNOME
+    /// Shell isn't reachable, `Some(None)` when the extension isn't
+    /// installed, `Some(Some(state))` otherwise (1 is running).
+    pub async fn extension_state(&self) -> Option<Option<f64>> {
+        let connection = self.history.as_ref()?.inner().connection().clone();
+        runtime()?
+            .spawn(async move {
+                let reply = connection
+                    .call_method(
+                        Some("org.gnome.Shell"),
+                        "/org/gnome/Shell",
+                        Some("org.gnome.Shell.Extensions"),
+                        "GetExtensionInfo",
+                        &(EXTENSION_UUID,),
+                    )
+                    .await
+                    .ok()?;
+                let mut info: std::collections::HashMap<String, zbus::OwnedVariant> =
+                    reply.body().deserialize().ok()?;
+                Some(
+                    info.remove("state")
+                        .and_then(|state| f64::try_from(state).ok()),
+                )
+            })
+            .await
+            .ok()?
+    }
+
+    /// Asks GNOME Shell to turn the Copyveil extension on.
+    pub async fn enable_extension(&self) -> bool {
+        let Some(connection) = self
+            .history
+            .as_ref()
+            .map(|h| h.inner().connection().clone())
+        else {
+            return false;
+        };
+        let Some(runtime) = runtime() else {
+            return false;
+        };
+        runtime
+            .spawn(async move {
+                connection
+                    .call_method(
+                        Some("org.gnome.Shell"),
+                        "/org/gnome/Shell",
+                        Some("org.gnome.Shell.Extensions"),
+                        "EnableExtension",
+                        &(EXTENSION_UUID,),
+                    )
+                    .await
+                    .ok()
+                    .and_then(|reply| reply.body().deserialize::<bool>().ok())
+                    .unwrap_or(false)
+            })
+            .await
+            .unwrap_or(false)
     }
 
     /// Moves a pinned Item to Pin slot `slot`.

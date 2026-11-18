@@ -73,7 +73,7 @@ just ext-install
 gnome-extensions enable copyveil@joaoferrete.github.io
 ```
 
-Log out and back in, then press <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to open the History. Settings are one click away in the popup, or <kbd>Ctrl</kbd>+<kbd>,</kbd>. Onboarding will offer to switch the shortcut to <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default.
+Log out and back in, then open Copyveil from your apps. A short onboarding checks that everything works on your desktop: its last step copies a made-up token and shows it masked. After that, press <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to open the History. Settings are one click away in the popup, or <kbd>Ctrl</kbd>+<kbd>,</kbd>. Onboarding will offer to switch the shortcut to <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default.
 
 Flatpak (Flathub) is planned for v0.2.
 

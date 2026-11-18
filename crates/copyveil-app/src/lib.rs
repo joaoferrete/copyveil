@@ -7,6 +7,8 @@
 
 pub mod daemon;
 pub mod mask;
+pub mod onboarding;
+pub mod onboarding_window;
 pub mod popup;
 pub mod prefs;
 pub mod prefs_window;

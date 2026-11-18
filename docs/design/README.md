@@ -45,7 +45,7 @@ Each component is a reusable GTK widget. A component's entry here lists its purp
 | `PinToggle` | Plain Items only. On Secret or Suspected, the shortcut shows a toast explaining why. | Planned |
 | `EmptyState` | Names what will appear and how to get there. | Built (in `window.rs`) |
 | `SettingsWindow` | libadwaita preferences in their own window: General (expiry, History size, memory-only with a confirmation), Detection (a switch per detector), Pins (reorder Pin slots) and Shortcuts (from the extension's settings). An “Always on” group shows the rules that can't change, with a lock. | Built (`prefs_window.rs`) |
-| `OnboardingStep` | One page of the four-step onboarding. | Planned |
+| `OnboardingStep` | One page of the four-step onboarding: Welcome (the three Sensitivities as sample rows), Capture (the extension, and Super+V), Storage (keyring or memory only) and the live test, which can't be skipped the first time. The current step's dot is Slate. | Built (`onboarding_window.rs`) |
 
 ### Screenshots
 
@@ -55,6 +55,7 @@ The app as of the latest UI change, generated with `just app-screenshot` from sy
 |---|---|---|
 | Popup | ![Popup, light](screenshots/popup-light.png) | ![Popup, dark](screenshots/popup-dark.png) |
 | Settings | ![Settings, light](screenshots/settings-light.png) | ![Settings, dark](screenshots/settings-dark.png) |
+| Onboarding | ![Onboarding, light](screenshots/onboarding-light.png) | ![Onboarding, dark](screenshots/onboarding-dark.png) |
 
 Regenerate them in any PR that changes how the app looks.
 
