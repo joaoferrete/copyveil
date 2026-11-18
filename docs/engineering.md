@@ -76,6 +76,7 @@ Code is layered. Each crate depends only on the layers below it, and `tools/laye
 
 - It's a capture source: it captures, pastes, clears and binds keys. It stores nothing but the id of the Item it last put on the clipboard.
 - It never logs content. `console`, `log` and `logError` are banned by ESLint; nothing goes to the journal.
+- Decisions that need no GNOME API (which MIME type to read, when to clear, which bindings to change) live in `gnome-extension/lib/`, with no `gi://` imports, and are unit tested with `node --test`. The rest is thin glue over Shell and D-Bus.
 - Logic that grows beyond calling D-Bus and Shell APIs belongs in the daemon, where it can be tested.
 
 ## Before you open a PR
