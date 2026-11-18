@@ -34,7 +34,21 @@ Every "Detector got it wrong" issue becomes a corpus line in the PR that fixes i
 
 ### Fuzzing
 
-Nightly fuzzing with `cargo fuzz` covers the detectors and the store's decoding paths once they exist. Every crash becomes a regression test.
+`fuzz/` holds three `cargo fuzz` targets, run for ten minutes each every night by `.github/workflows/fuzz.yml`:
+
+| Target | Input | Must hold |
+|---|---|---|
+| `detect` | Any text | No detector panics |
+| `records` | Any bytes as a stored record | Decoding never panics, and whatever decodes encodes back to the same bytes |
+| `sealed` | Any bytes as a sealed value | Opening never panics, and no forged value opens |
+
+The targets reach `copyveil-core`'s private decoding paths through its `fuzzing` feature, which no shipped binary enables. To run one locally (needs nightly):
+
+```sh
+cd fuzz && cargo +nightly fuzz run records -- -max_total_time=60
+```
+
+Every crash becomes a regression test in the PR that fixes it.
 
 ## App and capture sources
 

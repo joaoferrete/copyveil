@@ -16,6 +16,8 @@ You need the Rust toolchain pinned in `rust-toolchain.toml` (rustup picks it up 
 
 Optional tools that CI also runs: `cargo install cargo-llvm-cov cargo-mutants cargo-deny`.
 
+To fuzz locally (`just fuzz`), you also need a nightly toolchain and `cargo-fuzz`: `rustup toolchain install nightly && cargo +nightly install cargo-fuzz`. CI fuzzes every night, so this is only for changes to the detectors or to how the store decodes what it reads.
+
 `just --list` shows every task. `just ci` runs the full gate that CI runs.
 
 ## Vocabulary

@@ -18,6 +18,11 @@ copyveil-detect.workspace = true
 rusqlite = { version = "0.43", features = ["bundled"] }
 zeroize = { version = "1.8", features = ["std"] }
 
+[features]
+# Exposes the store's decoding paths to the fuzz targets in fuzz/. Never
+# enabled by a shipped binary.
+fuzzing = []
+
 [lints]
 workspace = true
 

@@ -53,3 +53,7 @@ install prefix="/usr/local":
 ext-install:
     mkdir -p ~/.local/share/gnome-shell/extensions/copyveil@joaoferrete.github.io
     cp gnome-extension/metadata.json gnome-extension/extension.js ~/.local/share/gnome-shell/extensions/copyveil@joaoferrete.github.io/
+
+# Fuzz one target (detect, records or sealed). Needs nightly and cargo-fuzz.
+fuzz target="records" seconds="60":
+    cd fuzz && cargo +nightly fuzz run {{target}} -- -max_total_time={{seconds}}
