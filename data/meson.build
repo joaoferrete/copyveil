@@ -35,18 +35,28 @@ configure_file(
   install_dir: datadir / 'dbus-1' / 'services',
 )
 
-desktop_file = configure_file(
-  input: 'io.github.joaoferrete.Copyveil.desktop.in',
+# The desktop file and metainfo are configured, then translated from po/.
+desktop_file = i18n.merge_file(
+  input: configure_file(
+    input: 'io.github.joaoferrete.Copyveil.desktop.in',
+    output: app_id + '.desktop.in',
+    configuration: conf,
+  ),
   output: app_id + '.desktop',
-  configuration: conf,
+  type: 'desktop',
+  po_dir: '../po',
   install: true,
   install_dir: datadir / 'applications',
 )
 
-metainfo_file = configure_file(
-  input: 'io.github.joaoferrete.Copyveil.metainfo.xml.in',
+metainfo_file = i18n.merge_file(
+  input: configure_file(
+    input: 'io.github.joaoferrete.Copyveil.metainfo.xml.in',
+    output: app_id + '.metainfo.xml.in',
+    configuration: conf,
+  ),
   output: app_id + '.metainfo.xml',
-  configuration: conf,
+  po_dir: '../po',
   install: true,
   install_dir: datadir / 'metainfo',
 )

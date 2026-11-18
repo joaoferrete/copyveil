@@ -8,6 +8,8 @@ source_root="$2"
 target_dir="$3"
 profile="$4"
 out_dir="$(cd "$5" && pwd)"
+# Where the app finds its translations (compiled in, see copyveil-app's i18n).
+export COPYVEIL_LOCALEDIR="${6:-/usr/local/share/locale}"
 
 # rustup picks the toolchain from rust-toolchain.toml in the working
 # directory, and Meson runs this from the build directory.

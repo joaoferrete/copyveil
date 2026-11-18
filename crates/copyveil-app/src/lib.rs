@@ -6,6 +6,7 @@
 //! render them.
 
 pub mod daemon;
+pub mod i18n;
 pub mod mask;
 pub mod onboarding;
 pub mod onboarding_window;
