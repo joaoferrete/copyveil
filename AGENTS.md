@@ -12,6 +12,10 @@ Item content flows only through `copyveil-core`'s content types, which implement
 
 The hard floors in `docs/adr/0002-*` are not settings: Secret and Suspected Items live in memory only, Plain Items are encrypted, and the key lives only in the keyring. Read that ADR before touching storage, expiry or the keyring.
 
+## Docs stay alive
+
+A change isn't done until the docs it made stale are fixed in the same PR: README, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/` and `GLOSSARY.md`. Search the Markdown for the crates, commands and terms you touched.
+
 ## Done means `just ci` is green
 
 `just --list` shows the tasks. Before reporting work as done, run `just ci` (or the subset for what you touched: `lint`, `test`, `cov`, `mutants`, `tokens`, `ext-lint`) and fix what fails. A surviving mutant or a coverage drop in `copyveil-core` or `copyveil-detect` is a failing test suite. Write the missing test; leave the threshold where it is.
@@ -19,6 +23,7 @@ The hard floors in `docs/adr/0002-*` are not settings: Secret and Suspected Item
 ## Where things go
 
 - Changing `copyveil-core` or `copyveil-detect`: read `docs/testing.md` first. Every detector change adds corpus cases.
+- Changing the D-Bus API (`crates/copyveil-daemon/src/bus.rs`): update `docs/dbus.md` in the same change. A breaking change adds a new interface version (`History2`), never edits `History1`.
 - Adding or changing a UI component, colour or animation: follow `docs/design/README.md`, and change colours only in `design/tokens.json`, then run `just tokens-gen`.
 - Making a decision that is hard to reverse, surprising, and a real trade-off: propose an ADR using `docs/adr/README.md`.
 - Writing a commit message or PR title: Conventional Commits with the types and scopes in `CONTRIBUTING.md`.

@@ -1,0 +1,32 @@
+[package]
+name = "copyveil-daemon"
+description = "Copyveil daemon: the History over D-Bus, with Expiry and the encrypted store"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "copyveil-daemon"
+path = "src/main.rs"
+
+[dependencies]
+copyveil-core.workspace = true
+copyveil-keyring.workspace = true
+rustix = { version = "1", default-features = false, features = ["std", "process"] }
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1", features = ["rt", "macros", "time", "sync", "signal"] }
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
+zbus = { version = "6", default-features = false, features = ["tokio", "proxy", "service"] }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+futures-util = { version = "0.3.34", default-features = false }
+tempfile = "3.27.0"
+tokio = { version = "1", features = ["rt", "macros", "time", "sync", "test-util", "net"] }
+zbus = { version = "6", default-features = false, features = ["tokio", "proxy", "service", "p2p"] }

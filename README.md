@@ -14,7 +14,7 @@
 
 Copyveil is a clipboard history manager for Linux, built for people who copy API keys, tokens and passwords all day. Press <kbd>Super</kbd>+<kbd>V</kbd>, find what you copied, paste it again. Secrets are masked, kept in memory only, and erased after a short time. Everything else is encrypted on disk.
 
-> **Status: pre-alpha.** The repository holds the project skeleton, design system and decisions. Nothing is usable yet. See the [roadmap](docs/roadmap.md).
+> **Status: pre-alpha.** The daemon works: it keeps the History, detects secrets, expires them and encrypts the rest on disk. The GNOME Shell extension and the app come next, so there's nothing to click yet. See the [roadmap](docs/roadmap.md).
 
 ## How it treats what you copy
 
@@ -39,7 +39,7 @@ GNOME doesn't let regular apps watch the clipboard, so a small Shell extension p
 
 ## Install from source
 
-Requirements: Rust (the version in `rust-toolchain.toml`), Meson ≥ 1.1, Ninja, and GTK 4 / libadwaita development files once the app lands.
+Requirements: Rust (the version in `rust-toolchain.toml`), Meson ≥ 1.1, Ninja, a Secret Service keyring (GNOME Keyring or KWallet) to keep the History on disk, and GTK 4 / libadwaita development files once the app lands.
 
 ```sh
 git clone https://github.com/joaoferrete/copyveil.git
@@ -47,7 +47,10 @@ cd copyveil
 meson setup _build --prefix=/usr/local
 meson compile -C _build
 sudo meson install -C _build
+systemctl --user enable --now copyveil-daemon.service
 ```
+
+The daemon keeps the History. It starts with your session, and capture sources and the app can also start it through D-Bus.
 
 GNOME also needs the Shell extension. Until it's published on extensions.gnome.org, install it from the repository with `just ext-install`, then log out and back in.
 

@@ -25,7 +25,7 @@ Before 1.0, only the latest release gets security fixes.
 
 ### What Copyveil does not protect against
 
-- **Malicious code running as your user.** A process with your user's privileges can read the daemon's memory, talk to your unlocked keyring and watch the clipboard directly. No clipboard manager can defend against that, and Copyveil does not claim to.
+- **Malicious code running as your user.** A process with your user's privileges can talk to your unlocked keyring, call the daemon's D-Bus API and watch the clipboard directly. No clipboard manager can defend against that, and Copyveil does not claim to. It does raise the cost: the daemon makes itself non-dumpable at start-up, so it leaves no core dump and other processes can't attach to it with `ptrace` or read its memory through `/proc`.
 - **Other apps reading the clipboard.** While something is on the system clipboard, any app allowed to read it can. Copyveil shortens how long a Secret stays there, but cannot hide it from the compositor or from apps it grants access to.
 - **Secrets the detectors miss.** Content detection is a heuristic. A secret that looks like ordinary text is stored as Plain, which is why Plain Items are encrypted too.
 - **A keyring unlocked by your login.** Anyone who can log in as you can read Plain History.

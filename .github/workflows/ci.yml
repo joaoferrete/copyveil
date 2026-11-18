@@ -46,7 +46,6 @@ jobs:
           tool: cargo-llvm-cov
       - run: >
           cargo llvm-cov --locked -p copyveil-core -p copyveil-detect
-          --ignore-filename-regex 'src/bin/'
           --fail-under-lines 90
 
   mutants:
@@ -87,7 +86,7 @@ jobs:
         working-directory: gnome-extension
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm

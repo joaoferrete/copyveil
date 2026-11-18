@@ -7,7 +7,11 @@ cargo="$1"
 source_root="$2"
 target_dir="$3"
 profile="$4"
-out_dir="$5"
+out_dir="$(cd "$5" && pwd)"
+
+# rustup picks the toolchain from rust-toolchain.toml in the working
+# directory, and Meson runs this from the build directory.
+cd "$source_root"
 
 if [ "$profile" = "release" ]; then
   "$cargo" build --locked --release --manifest-path "$source_root/Cargo.toml" --target-dir "$target_dir"
