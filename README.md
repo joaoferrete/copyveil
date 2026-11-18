@@ -22,6 +22,8 @@ Copyveil is a clipboard history manager for Linux, built for people who copy API
 
 ## How it treats what you copy
 
+<img src="data/ui/octopus.svg" width="140" align="right" alt="The Copyveil octopus, holding a Plain, a Suspected and a Secret Item">
+
 Every Item in the History has a **Sensitivity**:
 
 | | How Copyveil knows | Stored | Shown | Erased |

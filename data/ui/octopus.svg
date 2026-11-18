@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
+  <!-- The Copyveil octopus, the project's mascot: it holds the History, one
+       Item of each Sensitivity (Plain, Suspected, Secret), and keeps an eye on
+       the Secret. Not the app icon; see docs/design/README.md. -->
+  <defs>
+    <linearGradient id="skin" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#6A88B4"/><stop offset="1" stop-color="#3A4E6C"/>
+    </linearGradient>
+    <pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="4" height="4" fill="#FDFDFC"/><rect width="1.6" height="4" fill="#5E6E88"/>
+    </pattern>
+  </defs>
+  <g fill="#FFFFFF" stroke="#FFFFFF" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M44 74 C38 84 30 88 22 86" fill="none" stroke-width="20"/>
+    <path d="M84 74 C90 84 98 88 106 86" fill="none" stroke-width="20"/>
+    <path d="M54 80 C50 96 46 106 40 114" fill="none" stroke-width="20"/>
+    <path d="M74 80 C78 96 82 106 88 114" fill="none" stroke-width="20"/>
+    <path d="M30 52 C30 26 46 10 64 10 C82 10 98 26 98 52 C98 72 84 84 64 84 C44 84 30 72 30 52Z" stroke-width="10"/>
+    <rect transform="rotate(-16 22 92)" x="8" y="78" width="28" height="34" rx="4" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+    <rect x="50" y="88" width="28" height="34" rx="4" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+    <rect transform="rotate(16 106 92)" x="92" y="78" width="28" height="34" rx="4" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <path d="M44 74 C38 84 30 88 22 86" stroke="#1F232B" stroke-width="14"/>
+    <path d="M84 74 C90 84 98 88 106 86" stroke="#1F232B" stroke-width="14"/>
+    <path d="M54 80 C50 96 46 106 40 114" stroke="#1F232B" stroke-width="14"/>
+    <path d="M74 80 C78 96 82 106 88 114" stroke="#1F232B" stroke-width="14"/>
+    <path d="M44 74 C38 84 30 88 22 86" stroke="#4A6288" stroke-width="9"/>
+    <path d="M84 74 C90 84 98 88 106 86" stroke="#4A6288" stroke-width="9"/>
+    <path d="M54 80 C50 96 46 106 40 114" stroke="#4A6288" stroke-width="9"/>
+    <path d="M74 80 C78 96 82 106 88 114" stroke="#4A6288" stroke-width="9"/>
+  </g>
+  <g transform="rotate(-16 22 92)">
+    <rect x="8" y="78" width="28" height="34" rx="4" fill="#E6C08A" stroke="#1F232B" stroke-width="2.5"/>
+    <rect x="13" y="86" width="16" height="4" rx="2" fill="#93683A"/>
+    <rect x="13" y="94" width="11" height="4" rx="2" fill="#93683A"/>
+  </g>
+  <rect x="50" y="88" width="28" height="34" rx="4" fill="#FDFDFC" stroke="#1F232B" stroke-width="2.5"/>
+  <rect x="54" y="98" width="20" height="12" rx="2" fill="url(#hatch)" stroke="#5E6E88" stroke-width="1"/>
+  <g transform="rotate(16 106 92)">
+    <rect x="92" y="78" width="28" height="34" rx="4" fill="#FDFDFC" stroke="#1F232B" stroke-width="2.5"/>
+    <rect x="96" y="90" width="20" height="9" rx="2" fill="#1F232B"/>
+  </g>
+  <path d="M30 52 C30 26 46 10 64 10 C82 10 98 26 98 52 C98 72 84 84 64 84 C44 84 30 72 30 52Z" fill="url(#skin)" stroke="#1F232B" stroke-width="2.5"/>
+  <path d="M44 20 C50 15 57 13 64 13" fill="none" stroke="#9BB3D4" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="52" cy="54" r="9" fill="#FDFDFC" stroke="#1F232B" stroke-width="2"/>
+  <circle cx="76" cy="54" r="9" fill="#FDFDFC" stroke="#1F232B" stroke-width="2"/>
+  <circle cx="55" cy="56" r="4.5" fill="#1F232B"/><circle cx="79" cy="56" r="4.5" fill="#1F232B"/>
+  <circle cx="56.5" cy="54.5" r="1.4" fill="#FDFDFC"/><circle cx="80.5" cy="54.5" r="1.4" fill="#FDFDFC"/>
+  <ellipse cx="43" cy="67" rx="5" ry="3" fill="#D4A86A"/><ellipse cx="85" cy="67" rx="5" ry="3" fill="#D4A86A"/>
+</svg>
