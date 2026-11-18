@@ -14,7 +14,11 @@
 
 Copyveil is a clipboard history manager for Linux, built for people who copy API keys, tokens and passwords all day. It speaks English and Brazilian Portuguese ([help translate](docs/translating.md)). Press a shortcut, find what you copied, paste it again. Secrets are masked, kept in memory only, and erased after a short time. Everything else is encrypted on disk.
 
-> **Status: pre-alpha.** The daemon and the GNOME Shell extension work: copies are captured, secrets are detected and expire, the clipboard is cleared after a Secret's Expiry, and the rest is encrypted on disk. The app (popup, settings, onboarding) comes next, so there's nothing to click yet. See the [roadmap](docs/roadmap.md).
+> **Status: 0.1, GNOME only.** Capture, detection, Masks, Expiry, Pins, the encrypted store, the popup, settings and onboarding all work on GNOME Shell 50. KDE Plasma, COSMIC and wlroots arrive in 0.2. See the [roadmap](docs/roadmap.md).
+
+<p align="center">
+  <img src="docs/design/screenshots/popup-dark.png" width="560" alt="The Copyveil popup: a Secret behind a solid Mask, a Suspected GitHub token behind a hatched Mask with its ends visible, and Plain Items as text">
+</p>
 
 ## How it treats what you copy
 
@@ -64,13 +68,13 @@ To keep the History across logins you need a Secret Service keyring: GNOME Keyri
 <details>
 <summary>Installing by hand</summary>
 
-You need Rust through [rustup](https://rustup.rs) (it installs the version pinned in `rust-toolchain.toml` on its own), plus Meson ≥ 1.1, Ninja, `pkg-config` and the GTK 4 (≥ 4.14) and libadwaita (≥ 1.5) development files. SQLite is built in.
+You need Rust through [rustup](https://rustup.rs) (it installs the version pinned in `rust-toolchain.toml` on its own), plus Meson ≥ 1.1, Ninja, `pkg-config`, gettext and the GTK 4 (≥ 4.14) and libadwaita (≥ 1.5) development files. SQLite is built in.
 
 | Distribution | Command |
 |---|---|
-| Ubuntu 24.04+, Debian 13+ | `sudo apt install build-essential pkg-config meson ninja-build libgtk-4-dev libadwaita-1-dev` |
-| Fedora | `sudo dnf install gcc pkgconf-pkg-config meson ninja-build gtk4-devel libadwaita-devel` |
-| Arch Linux | `sudo pacman -S --needed base-devel meson ninja gtk4 libadwaita` |
+| Ubuntu 24.04+, Debian 13+ | `sudo apt install build-essential pkg-config meson ninja-build gettext libgtk-4-dev libadwaita-1-dev` |
+| Fedora | `sudo dnf install gcc pkgconf-pkg-config meson ninja-build gettext gtk4-devel libadwaita-devel` |
+| Arch Linux | `sudo pacman -S --needed base-devel meson ninja gettext gtk4 libadwaita` |
 
 ```sh
 meson setup _build --prefix=/usr/local

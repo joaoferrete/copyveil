@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: copyveil\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 14:27-0300\n"
+"POT-Creation-Date: 2026-11-18 15:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -728,6 +728,33 @@ msgstr ""
 msgid "password"
 msgstr ""
 
-#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:37
-msgid "Project skeleton."
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:38
+msgid "The first release, for GNOME."
+msgstr ""
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:40
+msgid ""
+"Secrets from password managers are masked, kept in memory only, and erased "
+"with the clipboard after 30 seconds"
+msgstr ""
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:41
+msgid ""
+"Tokens and keys are detected by their content and erased after 15 minutes"
+msgstr ""
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:42
+msgid "Everything else is encrypted on disk with a key from the system keyring"
+msgstr ""
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:43
+msgid "A popup on Super+Shift+V with search, Pins, and paste by number"
+msgstr ""
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:44
+msgid "Rich text keeps its formatting; Shift+Enter pastes plain text"
+msgstr ""
+
+#: data/io.github.joaoferrete.Copyveil.metainfo.xml.in:45
+msgid "English and Brazilian Portuguese"
 msgstr ""

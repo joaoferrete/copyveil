@@ -9,7 +9,7 @@ These gates run in CI on every PR and block merging:
 | Gate | Tool | Bar |
 |---|---|---|
 | Line coverage | `cargo llvm-cov` | ≥ 90% (`just cov`) |
-| Mutation testing | `cargo mutants` | No surviving mutants (`just mutants`) |
+| Mutation testing | `cargo mutants` | No surviving mutants (`just mutants`; CI splits it across four shards) |
 | Lints | `clippy` pedantic | Warnings are errors |
 
 When a mutant survives, the test suite has a hole: add the test that kills it. A mutant that genuinely can't be caught (for example, an equivalent mutation) is excluded in `.cargo/mutants.toml` with a comment explaining why, and the PR's reviewer must agree.

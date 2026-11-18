@@ -33,8 +33,18 @@
     <keyword>password</keyword>
   </keywords>
   <releases>
-    <release version="0.0.0" date="2026-11-17" type="development">
-      <description><p>Project skeleton.</p></description>
+    <release version="0.1.0" date="2026-11-18" type="stable">
+      <description>
+        <p>The first release, for GNOME.</p>
+        <ul>
+          <li>Secrets from password managers are masked, kept in memory only, and erased with the clipboard after 30 seconds</li>
+          <li>Tokens and keys are detected by their content and erased after 15 minutes</li>
+          <li>Everything else is encrypted on disk with a key from the system keyring</li>
+          <li>A popup on Super+Shift+V with search, Pins, and paste by number</li>
+          <li>Rich text keeps its formatting; Shift+Enter pastes plain text</li>
+          <li>English and Brazilian Portuguese</li>
+        </ul>
+      </description>
     </release>
   </releases>
 </component>
