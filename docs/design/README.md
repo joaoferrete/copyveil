@@ -21,13 +21,13 @@ Bank envelopes carry a printed blue tint on the inside, so nobody can read the l
 | Slate | `#34465F` | `#A7B8D3` | Brand: ExpiryRing, onboarding |
 | Security tint | pattern | pattern | Suspected Mask, onboarding art |
 | Kraft | `#C49A5C` | `#C9A26A` | App icon only |
-| Marker | `#F1DF74` | `#E2D068` | Search match highlight only |
+| Marker | `#F1DF74` | `#E2D068` | Search match highlight only, in Plain previews |
 
 In dark theme the Secret Mask turns light, like correction tape on carbon paper.
 
 ## Tokens
 
-`design/tokens.json` is the only place colours, spacing, radii, Mask geometry and motion are defined. After editing it, run `just tokens-gen` to regenerate `data/ui/style.css` and `data/ui/style-dark.css` (libadwaita loads the dark file automatically). CI checks that the generated files are current and that every pair listed under `contrast` meets WCAG AA in both themes.
+`design/tokens.json` is the only place colours, spacing, radii, Mask geometry and motion are defined. After editing it, run `just tokens-gen` to regenerate `data/ui/style.css` and `data/ui/style-dark.css`, and `crates/copyveil-app/src/tokens.rs` for the few colours drawn outside CSS (the search highlight is a Pango attribute). CI checks that the generated files are current and that every pair listed under `contrast` meets WCAG AA in both themes.
 
 Typography uses the system fonts: Adwaita Sans for UI, Adwaita Mono for Item content.
 
@@ -39,7 +39,7 @@ Each component is a reusable GTK widget. A component's entry here lists its purp
 |---|---|---|
 | `ItemRow` | One Item in the popup: type glyph, content, meta line, and its number (1–9) for <kbd>Ctrl</kbd>+number paste. Fixed height, so the list doesn't jump on Reveal. | Built (`row.rs`) |
 | `MaskedText` | Solid bar (Secret) or security-tint hatch (Suspected), both a fixed width. Showing a Suspected Item's first and last characters needs them in the D-Bus summary, which `History1` doesn't carry yet. | Built (`mask.rs`), without the visible ends |
-| `ExpiryRing` | Ring that empties until the Item's Expiry. | Planned |
+| `ExpiryRing` | Ring in Slate that empties until the Item's Expiry, measured against the current Expiry setting. | Built (`ring.rs`) |
 | `SensitivityBadge` | Shape swatch plus label, in the row's meta line. Plain has no badge. | Built (`mask.rs`) |
 | `OverrideButton` | "Not a secret" on a Suspected Item (or <kbd>Ctrl</kbd>+<kbd>N</kbd>): Overrides it to Plain, then a toast offers to stop flagging similar text by turning its detector off. | Built (`row.rs`, `window.rs`) |
 | `PinToggle` | Plain Items only. On Secret or Suspected, the shortcut shows a toast explaining why. | Planned |
@@ -54,6 +54,7 @@ The app as of the latest UI change, generated with `just app-screenshot` from sy
 | | Light | Dark |
 |---|---|---|
 | Popup | ![Popup, light](screenshots/popup-light.png) | ![Popup, dark](screenshots/popup-dark.png) |
+| Search | ![Search, light](screenshots/search-light.png) | ![Search, dark](screenshots/search-dark.png) |
 | Settings | ![Settings, light](screenshots/settings-light.png) | ![Settings, dark](screenshots/settings-dark.png) |
 | Onboarding | ![Onboarding, light](screenshots/onboarding-light.png) | ![Onboarding, dark](screenshots/onboarding-dark.png) |
 

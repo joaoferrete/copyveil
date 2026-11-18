@@ -36,7 +36,7 @@ capture 'ghp_SyntheticTokenForScreenshots0123456' false
 capture 'cargo test --workspace --locked' false
 capture 'correct-horse-battery-staple' true
 busctl --user call \$O \$P io.github.joaoferrete.Copyveil.History1 Pin t 4 > /dev/null
-for view in popup settings onboarding; do
+for view in popup search settings onboarding; do
     for theme in light dark; do
         WAYLAND_DISPLAY=copyveil-shot "$root/target/debug/examples/screenshot" "$out/\$view-\$theme.png" \$theme \$view
     done

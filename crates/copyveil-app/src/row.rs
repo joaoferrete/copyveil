@@ -6,10 +6,37 @@
 //! [`crate::text::accessible_label`], never from the content.
 
 use crate::mask::{self, Shape};
+use crate::ring::ExpiryRing;
 use crate::text;
 use copyveil_dbus::{ItemSummary, kind, sensitivity};
 use gtk::prelude::*;
 use std::time::{Duration, Instant};
+
+/// What every row is built with, beyond its Item.
+#[derive(Debug, Clone)]
+pub struct RowContext {
+    /// When the Items were listed; ages and Expiry count from here.
+    pub listed_at: Instant,
+    /// How long a Secret lives, for the `ExpiryRing`'s full circle.
+    pub secret_expiry: Duration,
+    /// How long a Suspected Item lives.
+    pub suspected_expiry: Duration,
+    /// The search, highlighted in Plain previews.
+    pub query: String,
+}
+
+impl RowContext {
+    /// Listed now, with the default Expiry times and no search.
+    #[must_use]
+    pub fn now() -> Self {
+        Self {
+            listed_at: Instant::now(),
+            secret_expiry: Duration::from_secs(30),
+            suspected_expiry: Duration::from_mins(15),
+            query: String::new(),
+        }
+    }
+}
 
 /// The parts of a row that change after it's built.
 pub struct ItemRow {
@@ -30,12 +57,14 @@ pub struct ItemRow {
     reason: String,
     pin_slot: u32,
     listed_at: Instant,
+    ring: Option<(ExpiryRing, Duration)>,
 }
 
 impl ItemRow {
     /// Builds the row for `item`, numbered `number` when it is among the first nine.
     #[must_use]
-    pub fn new(item: &ItemSummary, number: Option<usize>, listed_at: Instant) -> Self {
+    pub fn new(item: &ItemSummary, number: Option<usize>, row: &RowContext) -> Self {
+        let listed_at = row.listed_at;
         let masked = item.sensitivity != sensitivity::PLAIN;
         let line = gtk::Box::new(gtk::Orientation::Horizontal, 12);
         line.add_css_class("item-row");
@@ -64,7 +93,9 @@ impl ItemRow {
             label.add_css_class("dim-label");
             content.add_named(&label, Some("mask"));
         } else {
-            content.add_named(&content_label(&first_line(&item.preview)), Some("mask"));
+            let preview = content_label(&first_line(&item.preview));
+            highlight(&preview, &row.query);
+            content.add_named(&preview, Some("mask"));
         }
         content.add_named(&revealed, Some("revealed"));
         content.set_visible_child_name("mask");
@@ -81,6 +112,18 @@ impl ItemRow {
         meta_line.append(&meta);
         body.append(&meta_line);
         line.append(&body);
+
+        let ring = (item.expires_in_ms > 0).then(|| {
+            let total = if item.sensitivity == sensitivity::SECRET {
+                row.secret_expiry
+            } else {
+                row.suspected_expiry
+            };
+            let ring = ExpiryRing::new(1.0);
+            ring.area.set_tooltip_text(Some("Time until it’s erased"));
+            line.append(&ring.area);
+            (ring, total)
+        });
 
         let unflag = (item.sensitivity == sensitivity::SUSPECTED).then(|| {
             let button = gtk::Button::with_label("Not a secret");
@@ -118,6 +161,7 @@ impl ItemRow {
             reason: item.reason.clone(),
             pin_slot: item.pin_slot,
             listed_at,
+            ring,
         };
         row.tick(listed_at);
         row
@@ -129,6 +173,10 @@ impl ItemRow {
         let mut parts = vec![text::age(self.age_ms.saturating_add(elapsed))];
         if !self.reason.is_empty() {
             parts.push(self.reason.clone());
+        }
+        if let (Some(at), Some((ring, total))) = (self.expires_at, &self.ring) {
+            let left = millis(at.saturating_duration_since(now));
+            ring.set_fraction(text::expiry_fraction(left, millis(*total)));
         }
         if let Some(at) = self.expires_at {
             parts.push(format!(
@@ -171,6 +219,42 @@ fn glyph_for(item: &ItemSummary) -> &'static str {
         (_, kind::RICH_TEXT) => "format-text-rich-symbolic",
         _ => "text-x-generic-symbolic",
     }
+}
+
+/// Marks where the search matches in a Plain preview, in the Marker
+/// colour (`design/tokens.json`) for the current theme.
+fn highlight(label: &gtk::Label, query: &str) {
+    let ranges = text::search_matches(&label.text(), query);
+    if ranges.is_empty() {
+        return;
+    }
+    let dark = adw::StyleManager::default().is_dark();
+    let pick = |(light, dark_colour): crate::tokens::Themed| if dark { dark_colour } else { light };
+    let channel = |value: f32| {
+        // Colours are 0..=1, so this is 0..=65535.
+        let scaled = (value.clamp(0.0, 1.0) * 65535.0).round();
+        format!("{scaled:.0}").parse::<u16>().unwrap_or(u16::MAX)
+    };
+    let attributes = gtk::pango::AttrList::new();
+    for range in ranges {
+        let (r, g, b) = pick(crate::tokens::MARKER);
+        let mut background =
+            gtk::pango::AttrColor::new_background(channel(r), channel(g), channel(b));
+        let (r, g, b) = pick(crate::tokens::ON_MARKER);
+        let mut foreground =
+            gtk::pango::AttrColor::new_foreground(channel(r), channel(g), channel(b));
+        let (start, end) = (
+            u32::try_from(range.start).unwrap_or(u32::MAX),
+            u32::try_from(range.end).unwrap_or(u32::MAX),
+        );
+        background.set_start_index(start);
+        background.set_end_index(end);
+        foreground.set_start_index(start);
+        foreground.set_end_index(end);
+        attributes.insert(background);
+        attributes.insert(foreground);
+    }
+    label.set_attributes(Some(&attributes));
 }
 
 fn content_label(text: &str) -> gtk::Label {
