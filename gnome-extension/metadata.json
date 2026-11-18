@@ -2,7 +2,10 @@
   "uuid": "copyveil@joaoferrete.github.io",
   "name": "Copyveil",
   "description": "Capture source for the Copyveil clipboard manager. Forwards clipboard changes to the Copyveil daemon and stores nothing itself.",
-  "shell-version": ["50"],
+  "shell-version": [
+    "50"
+  ],
   "url": "https://github.com/joaoferrete/copyveil",
-  "version-name": "0.0.0"
+  "version-name": "0.0.0",
+  "settings-schema": "org.gnome.shell.extensions.copyveil"
 }

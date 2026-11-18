@@ -12,6 +12,9 @@ export default [
                 log: 'readonly',
                 logError: 'readonly',
                 console: 'readonly',
+                // Present in both GJS and Node, which runs the lib/ tests.
+                TextDecoder: 'readonly',
+                TextEncoder: 'readonly',
             },
         },
         rules: {

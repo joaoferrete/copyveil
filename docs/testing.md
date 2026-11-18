@@ -64,7 +64,8 @@ Every crash becomes a regression test in the PR that fixes it.
 There's no coverage target here; coverage of GTK glue code says little. Instead:
 
 - Logic that can live outside the widget code (formatting, state machines, view models) does, and it's unit tested.
-- The GNOME extension is linted (`just ext-lint`) and kept thin enough to review by eye.
+- The GNOME extension is linted and kept thin enough to review by eye. Its pure logic lives in `gnome-extension/lib/`, with no GNOME imports, and is unit tested with `node --test`. `just ext-lint` runs both, and so does CI.
+- `just ext-smoke` runs the extension against the real daemon in a headless GNOME Shell (`tools/ext-smoke/run.sh`). It checks capture, Secret detection from the password-manager hint, clearing the clipboard after a Secret's Expiry, paste, and the Super+V hand-over. It runs isolated: a private D-Bus session with no activatable services, throwaway XDG directories and a keyfile GSettings backend. It never touches your session or your keyring. Run it after changing the extension; it needs GNOME Shell installed, so CI doesn't run it.
 - UI changes ship with light and dark screenshots in the PR.
 
 ## Writing tests
