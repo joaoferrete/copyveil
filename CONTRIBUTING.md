@@ -14,7 +14,7 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Report se
 
 You need:
 
-- **The build dependencies**: `./install.sh --check` lists what's missing and the command to install it (`--install-deps` runs it). By hand: see [Install from source](README.md#install-from-source).
+- **The build dependencies**: `./install.sh --check` lists what's missing and the command to install it (`--install-deps` runs it). By hand: see "Installing by hand" under [Install](README.md#install).
 - **[`just`](https://github.com/casey/just)** for the tasks below.
 - **Python 3** for the design-token and layer tools (standard library only).
 - **Node.js 22** for the GNOME extension's lint and tests.

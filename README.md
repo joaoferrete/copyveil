@@ -41,29 +41,42 @@ You can change an Item's Sensitivity by hand. Search never looks inside Secret o
 
 GNOME doesn't let regular apps watch the clipboard, so a small Shell extension passes each copy to Copyveil and stores nothing itself. See [ADR 0001](docs/adr/0001-desktop-agnostic-core-with-pluggable-capture-sources.md).
 
-## Install from source
+## Install
+
+One command checks, installs and sets up everything, on Ubuntu 24.04+, Debian 13+, Fedora and Arch Linux:
 
 ```sh
 git clone https://github.com/joaoferrete/copyveil.git
 cd copyveil
-./install.sh
+./install.sh --install-deps
 ```
 
-`install.sh` checks every dependency (with the versions it needs), builds Copyveil, installs it into `~/.local` without sudo, starts the daemon with your session, and installs and turns on the GNOME Shell extension. When something is missing, it prints the exact command for your distribution. Add `--install-deps` to have it run that command for you.
+`install.sh` does it in this order:
+
+1. Checks every dependency against the version Copyveil needs.
+2. Installs the missing system packages with your distribution's package manager. It asks for sudo, and shows the command first.
+3. Builds Copyveil.
+4. Installs it into `~/.local`, without sudo.
+5. Starts the daemon with your session.
+6. Installs and turns on the GNOME Shell extension.
+
+Rust is the one thing it won't install for you: it points you to [rustup](https://rustup.rs), which then installs the toolchain pinned in `rust-toolchain.toml` on its own.
+
+Then log out and back in, and open Copyveil from your apps. A short onboarding checks that everything works on your desktop: its last step copies a made-up token and shows it masked. After that, <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> opens the History (onboarding offers <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default), and Settings are one click away in the popup, or <kbd>Ctrl</kbd>+<kbd>,</kbd>.
+
+To keep the History across logins you need a Secret Service keyring: GNOME Keyring (GNOME's default) or KWallet. Without one, Copyveil keeps the History in memory only and says so.
+
+**Updating**: `git pull`, then `./install.sh` again. It rebuilds, reinstalls and restarts the daemon. Secret and Suspected Items live in memory only, so a restart clears them. GNOME Shell loads the new extension at your next login.
 
 | Option | What it does |
 |---|---|
 | `--check` | Only check the dependencies |
-| `--install-deps` | Install missing system packages first (asks for sudo). Rust is never installed for you: it points you to [rustup](https://rustup.rs) |
+| `--install-deps` | Install missing system packages first (asks for sudo) |
 | `--system` | Install for every user, in `/usr/local` (asks for sudo) |
 | `--uninstall` | Remove Copyveil, keeping your History and settings |
 | `--uninstall --purge` | Also erase your History, settings and onboarding state |
 | `--no-session` | Skip systemd and the extension (for packaging and tests) |
 | `--yes` | Don't ask before acting |
-
-Then log out and back in, and open Copyveil from your apps. A short onboarding checks that everything works on your desktop: its last step copies a made-up token and shows it masked. After that, <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> opens the History (onboarding offers <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default), and Settings are one click away in the popup, or <kbd>Ctrl</kbd>+<kbd>,</kbd>.
-
-To keep the History across logins you need a Secret Service keyring: GNOME Keyring (GNOME's default) or KWallet. Without one, Copyveil keeps the History in memory only and says so.
 
 <details>
 <summary>Installing by hand</summary>
