@@ -594,6 +594,25 @@ fn a_busy_database_is_an_error_not_a_wipe() {
 }
 
 #[test]
+fn erase_removes_a_store_without_opening_it() {
+    let fx = Fixture::new();
+    let (mut store, _) = fx.open();
+    let mut history = History::new(Settings::default());
+    history.capture(Capture::text("a"), fx.now);
+    fx.sync(&mut store, &history);
+    drop(store);
+    std::fs::write(fx.dir.path().join("history.db-wal"), b"stale").unwrap();
+
+    Store::erase(&fx.path()).unwrap();
+    assert!(files_in(fx.dir.path()).is_empty());
+    Store::erase(&fx.path()).unwrap();
+    assert!(matches!(
+        Store::erase(fx.dir.path()),
+        Err(StoreError::Io(_))
+    ));
+}
+
+#[test]
 fn erasing_reports_files_it_cannot_remove() {
     let fx = Fixture::new();
     assert!(erase_files(fx.dir.path()).is_err());

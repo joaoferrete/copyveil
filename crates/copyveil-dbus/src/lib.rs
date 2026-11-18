@@ -19,6 +19,8 @@ pub const OBJECT_PATH: &str = "/io/github/joaoferrete/Copyveil/Daemon";
 pub const HISTORY_INTERFACE: &str = "io.github.joaoferrete.Copyveil.History1";
 /// The interface capture sources use.
 pub const CAPTURE_INTERFACE: &str = "io.github.joaoferrete.Copyveil.Capture1";
+/// The interface the settings window uses.
+pub const SETTINGS_INTERFACE: &str = "io.github.joaoferrete.Copyveil.Settings1";
 /// Prefix of every error name the daemon returns.
 pub const ERROR_PREFIX: &str = "io.github.joaoferrete.Copyveil.Error";
 
@@ -144,4 +146,48 @@ pub trait Capture {
     /// The user asked to paste this Item.
     #[zbus(signal)]
     fn paste_requested(&self, id: u64) -> zbus::Result<()>;
+}
+
+/// Client side of `io.github.joaoferrete.Copyveil.Settings1`. The daemon
+/// validates every value against its limits and saves it.
+#[zbus::proxy(
+    interface = "io.github.joaoferrete.Copyveil.Settings1",
+    default_service = "io.github.joaoferrete.Copyveil.Daemon",
+    default_path = "/io/github/joaoferrete/Copyveil/Daemon"
+)]
+pub trait Settings {
+    /// `(secret_min_s, secret_max_s, suspected_min_s, suspected_max_s, items_min, items_max)`.
+    fn limits(&self) -> zbus::Result<(u32, u32, u32, u32, u32, u32)>;
+    /// Every detector: `(name, title, description)`.
+    fn detectors(&self) -> zbus::Result<Vec<(String, String, String)>>;
+    /// Seconds a Secret lives before its Expiry.
+    #[zbus(property)]
+    fn secret_expiry(&self) -> zbus::Result<u32>;
+    /// Sets it; refused outside the limits.
+    #[zbus(property)]
+    fn set_secret_expiry(&self, value: u32) -> zbus::Result<()>;
+    /// Seconds a Suspected Item lives before its Expiry.
+    #[zbus(property)]
+    fn suspected_expiry(&self) -> zbus::Result<u32>;
+    /// Sets it; refused outside the limits.
+    #[zbus(property)]
+    fn set_suspected_expiry(&self, value: u32) -> zbus::Result<()>;
+    /// How many unpinned Plain Items the History keeps.
+    #[zbus(property)]
+    fn max_plain_items(&self) -> zbus::Result<u32>;
+    /// Sets it; refused outside the limits.
+    #[zbus(property)]
+    fn set_max_plain_items(&self, value: u32) -> zbus::Result<()>;
+    /// Names of the detectors turned off.
+    #[zbus(property)]
+    fn disabled_detectors(&self) -> zbus::Result<Vec<String>>;
+    /// Sets them; unknown names are refused.
+    #[zbus(property)]
+    fn set_disabled_detectors(&self, value: Vec<String>) -> zbus::Result<()>;
+    /// Whether the History is kept in memory only.
+    #[zbus(property)]
+    fn memory_only(&self) -> zbus::Result<bool>;
+    /// Turning it on erases the saved History and its key.
+    #[zbus(property)]
+    fn set_memory_only(&self, value: bool) -> zbus::Result<()>;
 }
