@@ -140,14 +140,23 @@ pub fn test_token(mut random: impl FnMut() -> u32) -> String {
 /// recognises the test by these, not by the value.
 #[must_use]
 pub fn find_test_item(before: &[u64], now: &[ItemSummary]) -> Option<u64> {
+    find_test_items(before, now).first().copied()
+}
+
+/// Every Item that could be the test's, newest first. A copy can be
+/// captured more than once (Mutter re-offers the clipboard), so cleaning
+/// up removes them all.
+#[must_use]
+pub fn find_test_items(before: &[u64], now: &[ItemSummary]) -> Vec<u64> {
     now.iter()
-        .find(|item| {
+        .filter(|item| {
             !before.contains(&item.id)
                 && item.kind == kind::TEXT
                 && item.sensitivity == sensitivity::SUSPECTED
                 && item.reason == "Looks like a GitHub token"
         })
         .map(|item| item.id)
+        .collect()
 }
 
 /// Whether the live test may be skipped: only after onboarding was
@@ -169,8 +178,8 @@ pub fn done_marker(state_home: Option<PathBuf>, home: Option<PathBuf>) -> Option
 #[cfg(test)]
 mod tests {
     use super::{
-        Extension, Step, describe_storage, done_marker, find_test_item, live_test_skippable,
-        test_token,
+        Extension, Step, describe_storage, done_marker, find_test_item, find_test_items,
+        live_test_skippable, test_token,
     };
     use copyveil_dbus::ItemSummary;
     use std::path::PathBuf;
@@ -273,6 +282,11 @@ mod tests {
         ];
         assert_eq!(find_test_item(&before, &now), Some(5));
         assert_eq!(find_test_item(&[1, 2, 5], &now), None);
+        let twice = [
+            item(6, "suspected", "Looks like a GitHub token"),
+            now[3].clone(),
+        ];
+        assert_eq!(find_test_items(&before, &twice), [6, 5]);
     }
 
     #[test]

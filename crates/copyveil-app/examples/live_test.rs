@@ -1,6 +1,11 @@
 //! Runs the onboarding's live test against the daemon on the session bus and
-//! exits 0 if it passes. Used by `tools/ext-smoke/run.sh`; needs the GNOME
-//! Shell extension running, since that's what it proves.
+//! prints `live-test: pass` or `live-test: fail`. Used by
+//! `tools/ext-smoke/run.sh`; needs the GNOME Shell extension running, since
+//! that's what it proves.
+//!
+//! It then keeps running, like the app does, until it's killed: when a
+//! clipboard owner exits, Mutter puts back the last non-empty content it
+//! held, which would bring the test token back.
 
 use adw::prelude::*;
 use copyveil_app::daemon::Daemon;
@@ -18,13 +23,23 @@ fn main() -> glib::ExitCode {
         window.present();
         let app = app.clone();
         glib::spawn_future_local(async move {
+            // Wayland lets a client set the clipboard only once its window
+            // has focus, as it has when someone clicks the onboarding's button.
+            while !window.is_active() {
+                glib::timeout_future(std::time::Duration::from_millis(50)).await;
+            }
             let token = onboarding::test_token(glib::random_int);
             let passed = live_test(&Daemon::connect(), &token)
                 .await
                 .is_some_and(|item| item.sensitivity == "suspected" && item.preview.is_empty());
-            app.quit();
-            // 0 when the test passed, 1 otherwise.
-            std::process::exit(i32::from(!passed));
+            let line = if passed {
+                "live-test: pass"
+            } else {
+                "live-test: fail"
+            };
+            std::io::Write::write_all(&mut std::io::stdout(), format!("{line}\n").as_bytes()).ok();
+            std::io::Write::flush(&mut std::io::stdout()).ok();
+            let _keep = app;
         });
     });
     app.run_with_args::<&str>(&[])

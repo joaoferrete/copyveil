@@ -68,6 +68,18 @@ gnome-extensions enable $uuid; sleep 1
 \$S set org.gnome.shell.extensions.copyveil take-super-v false; sleep 1
 check "declining gives Super+V back" "\$(gsettings get org.gnome.shell.keybindings toggle-message-tray)" "\['<Super>v', '<Super>m'\]"
 
+WAYLAND_DISPLAY=copyveil-smoke "$root/target/debug/examples/live_test" > "$work/live_test.log" 2>&1 &
+live=\$!
+for _ in \$(seq 1 60); do grep -q "live-test:" "$work/live_test.log" && break; sleep 0.5; done
+if grep -q "live-test: pass" "$work/live_test.log"; then
+    echo "ok   the onboarding's live test passes"
+else
+    echo "FAIL the onboarding's live test: nothing was captured as a masked Suspected Item"; failed=1
+fi
+check "the live test leaves no test Item behind" "\$(list)" '^a(tssssuttts) 1 '
+check "the live test leaves the clipboard empty" "\$(clip read)" 'CLIP:\[\]'
+kill \$live 2>/dev/null
+
 if grep -q "JS ERROR\|Extension $uuid:" "$work/shell.log"; then
     echo "FAIL the shell logged errors from the extension:"; grep -A3 "JS ERROR\|Extension $uuid:" "$work/shell.log"; failed=1
 else

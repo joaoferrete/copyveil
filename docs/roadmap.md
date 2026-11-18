@@ -12,7 +12,7 @@ Each release is small and finished. v0.1 is polished on GNOME before Copyveil re
 - [ ] Paste by number: <kbd>Ctrl</kbd>+<kbd>1…9</kbd> in the popup (History position), <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>1…9</kbd> globally (Pin slot) ([ADR 0004](adr/0004-blind-paste-targets-pin-slots-not-history-positions.md)).
 - [x] App: popup (search, keyboard navigation, Masks, Reveal, Pin).
 - [x] App: settings with Pin reordering, owned and validated by the daemon.
-- [ ] App: four-step onboarding.
+- [x] App: four-step onboarding, ending in a live test of capture, detection and masking.
 - [ ] Text, images, and rich text with a plain-text fallback.
 - [ ] Design system v1, i18n (English, Brazilian Portuguese).
 - [ ] Install from source with Meson. Full CI and repository rules.

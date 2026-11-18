@@ -1,7 +1,7 @@
 //! Renders the popup to a PNG, for the light and dark screenshots UI PRs
 //! need (`docs/design/README.md`).
 //!
-//!     screenshot OUT.png [light|dark] [popup|settings]
+//!     screenshot OUT.png [light|dark] [popup|settings|onboarding]
 //!
 //! It talks to whatever daemon is on the session bus, so run it inside
 //! `tools/app-screenshot/run.sh`, which starts an isolated one with
@@ -19,7 +19,7 @@ fn main() -> glib::ExitCode {
         return glib::ExitCode::FAILURE;
     };
     let dark = args.next().as_deref() == Some("dark");
-    let settings = args.next().as_deref() == Some("settings");
+    let view = args.next().unwrap_or_default();
 
     let app = adw::Application::builder()
         .application_id("io.github.joaoferrete.Copyveil.Screenshot")
@@ -33,11 +33,15 @@ fn main() -> glib::ExitCode {
         });
         copyveil_app::style::load();
         let popup = PopupWindow::new(app, Daemon::connect());
-        let shown: gtk::Widget = if settings {
-            popup.open_settings().upcast()
-        } else {
-            popup.toggle();
-            popup.window().clone().upcast()
+        let shown: gtk::Widget = match view.as_str() {
+            "settings" => popup.open_settings().upcast(),
+            "onboarding" => {
+                copyveil_app::onboarding_window::present(app, &Daemon::connect(), || {}).upcast()
+            }
+            _ => {
+                popup.toggle();
+                popup.window().clone().upcast()
+            }
         };
         let (app, out) = (app.clone(), out.clone());
         glib::timeout_add_local_once(Duration::from_millis(2500), move || {

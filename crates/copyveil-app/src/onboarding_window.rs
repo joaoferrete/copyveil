@@ -17,6 +17,8 @@ use std::time::{Duration, Instant};
 
 /// How long the live test waits for the copy to show up.
 const LIVE_TEST_TIMEOUT: Duration = Duration::from_secs(10);
+/// How long to let a second capture of the test token land before cleaning up.
+const SETTLE: Duration = Duration::from_secs(1);
 
 /// Where the "done" mark lives, from the environment.
 #[must_use]
@@ -100,6 +102,7 @@ pub fn present(
     let toolbar = adw::ToolbarView::new();
     let header = adw::HeaderBar::new();
     header.set_show_title(false);
+    header.set_decoration_layout(Some(":close"));
     toolbar.add_top_bar(&header);
     toolbar.set_content(Some(&content));
 
@@ -438,9 +441,21 @@ pub async fn live_test(daemon: &Daemon, token: &str) -> Option<ItemSummary> {
             break None;
         }
     };
-    if let Some(item) = &found {
-        daemon.remove(item.id).await;
-        clipboard.set_text("");
+    if found.is_some() {
+        // Empty the clipboard first, so the token isn't offered again; let
+        // any second capture land; then remove every copy of the test Item.
+        // `set_text("")` would leave the token in place; an empty provider
+        // replaces it, as the extension does after a Secret's Expiry.
+        let empty = gdk::ContentProvider::for_bytes(
+            "text/plain;charset=utf-8",
+            &glib::Bytes::from_static(b""),
+        );
+        let _ = clipboard.set_content(Some(&empty));
+        glib::timeout_future(SETTLE).await;
+        let now = daemon.list().await.unwrap_or_default();
+        for id in onboarding::find_test_items(&before, &now) {
+            daemon.remove(id).await;
+        }
     }
     found
 }
