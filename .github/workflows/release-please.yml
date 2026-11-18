@@ -62,10 +62,9 @@ jobs:
         with:
           tool: cargo-cyclonedx
       - name: Install GTK 4 and libadwaita
-        uses: awalsh128/cache-apt-pkgs-action@v1
+        uses: ./.github/actions/apt-install
         with:
           packages: libgtk-4-dev libadwaita-1-dev
-          version: gtk4-adw1
       - run: cargo build --workspace --release --locked
       - name: Package
         run: |

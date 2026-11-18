@@ -1,0 +1,27 @@
+name: Install apt packages
+description: >
+  apt-get install with the downloaded .deb files cached between runs. The
+  runners' Ubuntu mirror sometimes serves at ~45 kB/s, which turned a
+  20-second install into 10 minutes; with the cache, apt downloads nothing
+  and still installs normally (dependencies, maintainer scripts).
+inputs:
+  packages:
+    description: Space-separated package names
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Restore downloaded packages
+      uses: actions/cache@v4
+      with:
+        path: ~/apt-archives
+        key: apt-${{ runner.os }}-${{ runner.arch }}-${{ inputs.packages }}
+    - name: Install ${{ inputs.packages }}
+      shell: bash
+      run: |
+        mkdir -p ~/apt-archives/partial
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          -o Dir::Cache::Archives="$HOME/apt-archives" ${{ inputs.packages }}
+        sudo chown -R "$USER" ~/apt-archives
+        rm -rf ~/apt-archives/partial ~/apt-archives/lock
