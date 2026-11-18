@@ -33,13 +33,16 @@ RULES = {
         "workspace": {"copyveil-core"},
         "external": {"oo7", "zeroize"},
     },
+    # The D-Bus contract: names, the Item summary and client proxies. No
+    # logic and no Item content, so clients can share it with the daemon.
+    "copyveil-dbus": {"workspace": set(), "external": {"serde", "zbus"}},
     # Glue: D-Bus, the async runtime, files, process setup.
     "copyveil-daemon": {
-        "workspace": {"copyveil-core", "copyveil-keyring"},
+        "workspace": {"copyveil-core", "copyveil-keyring", "copyveil-dbus"},
         "external": None,
     },
     # The app and capture sources reach the History only over D-Bus.
-    "copyveil-app": {"workspace": set(), "external": None},
+    "copyveil-app": {"workspace": {"copyveil-dbus"}, "external": None},
     "copyveil-capture-datacontrol": {"workspace": set(), "external": None},
 }
 

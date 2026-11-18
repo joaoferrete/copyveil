@@ -1,0 +1,16 @@
+[package]
+name = "copyveil-dbus"
+description = "Copyveil's D-Bus contract: names, the Item summary and client proxies"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+zbus = { version = "6", default-features = false, features = ["proxy"] }
+
+[lints]
+workspace = true

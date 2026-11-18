@@ -251,6 +251,7 @@ name = "copyveil-daemon"
 version = "0.0.0"
 dependencies = [
  "copyveil-core",
+ "copyveil-dbus",
  "copyveil-keyring",
  "futures-util",
  "rustix",
@@ -259,6 +260,14 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "zbus",
+]
+
+[[package]]
+name = "copyveil-dbus"
+version = "0.0.0"
+dependencies = [
+ "serde",
  "zbus",
 ]
 

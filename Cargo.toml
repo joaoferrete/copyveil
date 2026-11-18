@@ -12,6 +12,7 @@ homepage = "https://github.com/joaoferrete/copyveil"
 
 [workspace.dependencies]
 copyveil-core = { path = "crates/copyveil-core" }
+copyveil-dbus = { path = "crates/copyveil-dbus" }
 copyveil-detect = { path = "crates/copyveil-detect" }
 copyveil-keyring = { path = "crates/copyveil-keyring" }
 

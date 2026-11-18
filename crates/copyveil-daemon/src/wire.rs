@@ -5,46 +5,19 @@
 //! crosses the bus only through an explicit `Content` call for one Item.
 
 use copyveil_core::{History, Item, Kind, Sensitivity};
-use serde::{Deserialize, Serialize};
+use copyveil_dbus::{ItemSummary, kind, sensitivity};
 use std::time::Instant;
-use zbus::zvariant::Type;
 
 /// How many characters of a Plain Item's text the summary previews.
 pub const PREVIEW_CHARS: usize = 300;
-
-/// One Item as the app lists it. D-Bus signature `(tssssuttts)`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-pub struct ItemSummary {
-    /// The Item id.
-    pub id: u64,
-    /// `text`, `rich-text` or `image`.
-    pub kind: String,
-    /// The MIME type of an image; empty otherwise.
-    pub mime: String,
-    /// `plain`, `suspected` or `secret`.
-    pub sensitivity: String,
-    /// Why it has its Sensitivity ("Looks like a GitHub token"), or empty.
-    pub reason: String,
-    /// Pin slot counting from 1, or 0 when not pinned.
-    pub pin_slot: u32,
-    /// Milliseconds since the Item was last copied.
-    pub age_ms: u64,
-    /// Milliseconds until its Expiry, or 0 for Plain Items.
-    pub expires_in_ms: u64,
-    /// Size of the content in bytes.
-    pub size: u64,
-    /// The start of a Plain Item's text, for display. Always empty for
-    /// Secret and Suspected Items and for images.
-    pub preview: String,
-}
 
 /// The name of a Sensitivity on the bus.
 #[must_use]
 pub const fn sensitivity_name(sensitivity: Sensitivity) -> &'static str {
     match sensitivity {
-        Sensitivity::Plain => "plain",
-        Sensitivity::Suspected => "suspected",
-        Sensitivity::Secret => "secret",
+        Sensitivity::Plain => sensitivity::PLAIN,
+        Sensitivity::Suspected => sensitivity::SUSPECTED,
+        Sensitivity::Secret => sensitivity::SECRET,
     }
 }
 
@@ -52,9 +25,9 @@ pub const fn sensitivity_name(sensitivity: Sensitivity) -> &'static str {
 #[must_use]
 pub fn parse_sensitivity(name: &str) -> Option<Sensitivity> {
     match name {
-        "plain" => Some(Sensitivity::Plain),
-        "suspected" => Some(Sensitivity::Suspected),
-        "secret" => Some(Sensitivity::Secret),
+        sensitivity::PLAIN => Some(Sensitivity::Plain),
+        sensitivity::SUSPECTED => Some(Sensitivity::Suspected),
+        sensitivity::SECRET => Some(Sensitivity::Secret),
         _ => None,
     }
 }
@@ -92,9 +65,9 @@ pub fn summaries(history: &History, now: Instant) -> Vec<ItemSummary> {
 
 fn summary(item: &Item, pin_slot: u32, now: Instant) -> ItemSummary {
     let (kind, mime) = match item.kind() {
-        Kind::Text => ("text", ""),
-        Kind::RichText => ("rich-text", ""),
-        Kind::Image { mime } => ("image", mime.as_str()),
+        Kind::Text => (kind::TEXT, ""),
+        Kind::RichText => (kind::RICH_TEXT, ""),
+        Kind::Image { mime } => (kind::IMAGE, mime.as_str()),
     };
     ItemSummary {
         id: item.id().value(),

@@ -1,22 +1,21 @@
 //! The D-Bus service: `History1` for the app, `Capture1` for capture sources.
 //!
 //! Both interfaces live at [`OBJECT_PATH`] on the session bus under
-//! [`BUS_NAME`]. Signals carry Item ids only. Content leaves the daemon only
+//! [`BUS_NAME`]. Clients use the proxies in `copyveil-dbus`, which also
+//! holds the names and the Item summary, so both sides share one contract. Signals carry Item ids only. Content leaves the daemon only
 //! as the reply to `Content`, for one Item the caller names.
 
 use crate::state::State;
-use crate::wire::{self, ItemSummary};
+use crate::wire;
 use copyveil_core::{Capture, Content, HistoryError, ItemId};
+use copyveil_dbus::ItemSummary;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::{Mutex, Notify};
 use zbus::object_server::SignalEmitter;
 use zbus::{Connection, interface};
 
-/// The daemon's well-known name on the session bus.
-pub const BUS_NAME: &str = "io.github.joaoferrete.Copyveil.Daemon";
-/// The object that implements both interfaces.
-pub const OBJECT_PATH: &str = "/io/github/joaoferrete/Copyveil/Daemon";
+pub use copyveil_dbus::{BUS_NAME, OBJECT_PATH};
 
 /// Errors returned over D-Bus. Messages name Item ids, never content.
 #[derive(Debug, zbus::DBusError)]
@@ -93,13 +92,7 @@ impl HistoryService {
     }
 }
 
-#[interface(
-    name = "io.github.joaoferrete.Copyveil.History1",
-    proxy(
-        default_service = "io.github.joaoferrete.Copyveil.Daemon",
-        default_path = "/io/github/joaoferrete/Copyveil/Daemon",
-    )
-)]
+#[interface(name = "io.github.joaoferrete.Copyveil.History1")]
 impl HistoryService {
     /// Every Item, newest first, without the content of masked Items.
     async fn list(&self) -> Vec<ItemSummary> {
@@ -250,13 +243,7 @@ impl HistoryService {
     async fn changed(emitter: &SignalEmitter<'_>) -> zbus::Result<()>;
 }
 
-#[interface(
-    name = "io.github.joaoferrete.Copyveil.Capture1",
-    proxy(
-        default_service = "io.github.joaoferrete.Copyveil.Daemon",
-        default_path = "/io/github/joaoferrete/Copyveil/Daemon",
-    )
-)]
+#[interface(name = "io.github.joaoferrete.Copyveil.Capture1")]
 impl CaptureService {
     /// Reports a clipboard change and returns the Item's id.
     ///
