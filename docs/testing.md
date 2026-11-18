@@ -70,6 +70,16 @@ There's no coverage target here; coverage of GTK glue code says little. Instead:
 - UI changes ship with light and dark screenshots: run `just app-screenshot`, which updates the popup, settings and onboarding screenshots in `docs/design/screenshots/` from an isolated headless GNOME Shell with synthetic Items.
 - The popup's decisions (what's listed, the selection, Ctrl+number, what may be pinned, what offers "Not a secret" and which detector it can turn off, every string a screen reader hears) live in `crates/copyveil-app/src/popup.rs` and `text.rs`, the settings window's (limits, minutes, Pin moves, shortcut labels) in `prefs.rs`, and the onboarding's (steps, the extension and storage states, the test token, finding the test Item) in `onboarding.rs`. A test checks that the test token is flagged by the real detector. None of them touch GTK, and all are unit tested. Mask geometry is checked against `design/tokens.json`.
 
+## The install script
+
+`install.sh` is checked by hand before each release, in a throwaway `HOME` so nothing of yours is touched:
+
+```sh
+HOME=$(mktemp -d) RUSTUP_HOME=~/.rustup CARGO_HOME=~/.cargo ./install.sh --no-session -y
+```
+
+It must install the two binaries, the desktop file, both D-Bus services, the icons, the metainfo and the systemd unit under that `HOME`, and `--uninstall --purge --no-session` must leave nothing behind.
+
 ## Writing tests
 
 - Name tests after the behaviour: `secret_items_never_reach_disk`, not `test_persist_2`.

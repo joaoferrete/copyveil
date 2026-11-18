@@ -5,3 +5,10 @@ option(
   value: 'release',
   description: 'Cargo profile used to build the binaries',
 )
+
+option(
+  'systemd_user_unit_dir',
+  type: 'string',
+  value: '',
+  description: 'Where the systemd user unit goes. Empty: <prefix>/lib/systemd/user. ./install.sh sets ~/.local/share/systemd/user for a user install.',
+)

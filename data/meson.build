@@ -5,12 +5,16 @@ conf.set('DAEMON_BUS_NAME', daemon_bus_name)
 
 # The daemon starts with the graphical session (systemd user unit), and a
 # capture source or the app can also start it through D-Bus activation.
+unit_dir = get_option('systemd_user_unit_dir')
+if unit_dir == ''
+  unit_dir = prefix / 'lib' / 'systemd' / 'user'
+endif
 configure_file(
   input: 'copyveil-daemon.service.in',
   output: 'copyveil-daemon.service',
   configuration: conf,
   install: true,
-  install_dir: prefix / 'lib' / 'systemd' / 'user',
+  install_dir: unit_dir,
 )
 
 configure_file(
