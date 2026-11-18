@@ -54,7 +54,7 @@ flowchart LR
 
 ## Lifecycle
 
-- **Native install**: a systemd user unit starts the daemon at login. The onboarding enables it.
+- **Native install**: `./install.sh` installs a systemd user unit and enables it, so the daemon starts at login.
 - **Flatpak**: the app asks the Background portal for autostart.
 - **Both**: the daemon is also D-Bus activatable, so a capture source can start it.
 - When the daemon is unreachable, capture sources drop the change. They never buffer content.

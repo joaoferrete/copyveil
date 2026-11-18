@@ -39,9 +39,32 @@ GNOME doesn't let regular apps watch the clipboard, so a small Shell extension p
 
 ## Install from source
 
-### 1. Install the dependencies
+```sh
+git clone https://github.com/joaoferrete/copyveil.git
+cd copyveil
+./install.sh
+```
 
-You need Rust through [rustup](https://rustup.rs) (it installs the version pinned in `rust-toolchain.toml` on its own), plus Meson, Ninja, `pkg-config` and the GTK 4 (≥ 4.14) and libadwaita (≥ 1.5) development files. SQLite is built in, so there's nothing to install for it.
+`install.sh` checks every dependency (with the versions it needs), builds Copyveil, installs it into `~/.local` without sudo, starts the daemon with your session, and installs and turns on the GNOME Shell extension. When something is missing, it prints the exact command for your distribution. Add `--install-deps` to have it run that command for you.
+
+| Option | What it does |
+|---|---|
+| `--check` | Only check the dependencies |
+| `--install-deps` | Install missing system packages first (asks for sudo). Rust is never installed for you: it points you to [rustup](https://rustup.rs) |
+| `--system` | Install for every user, in `/usr/local` (asks for sudo) |
+| `--uninstall` | Remove Copyveil, keeping your History and settings |
+| `--uninstall --purge` | Also erase your History, settings and onboarding state |
+| `--no-session` | Skip systemd and the extension (for packaging and tests) |
+| `--yes` | Don't ask before acting |
+
+Then log out and back in, and open Copyveil from your apps. A short onboarding checks that everything works on your desktop: its last step copies a made-up token and shows it masked. After that, <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> opens the History (onboarding offers <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default), and Settings are one click away in the popup, or <kbd>Ctrl</kbd>+<kbd>,</kbd>.
+
+To keep the History across logins you need a Secret Service keyring: GNOME Keyring (GNOME's default) or KWallet. Without one, Copyveil keeps the History in memory only and says so.
+
+<details>
+<summary>Installing by hand</summary>
+
+You need Rust through [rustup](https://rustup.rs) (it installs the version pinned in `rust-toolchain.toml` on its own), plus Meson ≥ 1.1, Ninja, `pkg-config` and the GTK 4 (≥ 4.14) and libadwaita (≥ 1.5) development files. SQLite is built in.
 
 | Distribution | Command |
 |---|---|
@@ -49,31 +72,18 @@ You need Rust through [rustup](https://rustup.rs) (it installs the version pinne
 | Fedora | `sudo dnf install gcc pkgconf-pkg-config meson ninja-build gtk4-devel libadwaita-devel` |
 | Arch Linux | `sudo pacman -S --needed base-devel meson ninja gtk4 libadwaita` |
 
-To keep the History across logins you also need a Secret Service keyring: GNOME Keyring (GNOME's default) or KWallet. Without one, Copyveil keeps the History in memory only and says so.
-
-### 2. Build and install
-
 ```sh
-git clone https://github.com/joaoferrete/copyveil.git
-cd copyveil
 meson setup _build --prefix=/usr/local
 meson compile -C _build
 sudo meson install -C _build
 systemctl --user enable --now copyveil-daemon.service
+tools/pack-extension.sh
+gnome-extensions install --force _build/copyveil@joaoferrete.github.io.shell-extension.zip
 ```
 
-This installs `copyveil-daemon`, which keeps the History, and the `copyveil` app, which shows it. The daemon starts with your session, and both also start on demand through D-Bus.
+For an install in `~/.local`, add `-Dsystemd_user_unit_dir=$HOME/.local/share/systemd/user` to `meson setup`, since the systemd user manager doesn't look in `~/.local/lib`.
 
-### 3. On GNOME, add the Shell extension
-
-GNOME doesn't let regular apps watch the clipboard, so Copyveil needs its Shell extension. Until it's on extensions.gnome.org, install it with [`just`](https://github.com/casey/just) (`gnome-extensions` comes with GNOME Shell):
-
-```sh
-just ext-install
-gnome-extensions enable copyveil@joaoferrete.github.io
-```
-
-Log out and back in, then open Copyveil from your apps. A short onboarding checks that everything works on your desktop: its last step copies a made-up token and shows it masked. After that, press <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to open the History. Settings are one click away in the popup, or <kbd>Ctrl</kbd>+<kbd>,</kbd>. Onboarding will offer to switch the shortcut to <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default.
+</details>
 
 Flatpak (Flathub) is planned for v0.2.
 
