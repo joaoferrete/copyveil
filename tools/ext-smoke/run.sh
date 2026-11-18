@@ -23,20 +23,7 @@ mkdir -p "$ext" "$work/home" "$work/config/glib-2.0/settings" "$work/cache" "$wo
 (cd "$ext" && unzip -q "$root/_build/$uuid.shell-extension.zip" && glib-compile-schemas schemas)
 printf "[org/gnome/shell]\nenabled-extensions=['%s']\ndisable-user-extensions=false\n" "$uuid" \
     > "$work/config/glib-2.0/settings/keyfile"
-cat > "$work/bus.conf" <<'CONF'
-<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
- "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
-<busconfig>
-  <type>session</type>
-  <listen>unix:tmpdir=/tmp</listen>
-  <auth>EXTERNAL</auth>
-  <policy context="default">
-    <allow send_destination="*" eavesdrop="true"/>
-    <allow eavesdrop="true"/>
-    <allow own="*"/>
-  </policy>
-</busconfig>
-CONF
+cp "$root/tools/isolated-bus.conf" "$work/bus.conf"
 
 cat > "$work/steps.sh" <<STEPS
 #!/bin/sh

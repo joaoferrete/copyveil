@@ -66,6 +66,12 @@ ext-pack:
         --extra-source=lib --extra-source=icons \
         --schema=schemas/org.gnome.shell.extensions.copyveil.gschema.xml
 
+# Light and dark screenshots of the popup, from an isolated headless GNOME
+# Shell with synthetic Items (tools/app-screenshot/run.sh). For UI PRs.
+app-screenshot out="docs/design/screenshots":
+    cargo build --locked -p copyveil-daemon -p copyveil-app --example screenshot
+    tools/app-screenshot/run.sh {{out}}
+
 # Run the extension against the real daemon in an isolated, headless GNOME
 # Shell (tools/ext-smoke/run.sh). Touches nothing in your session or keyring.
 ext-smoke: ext-pack
