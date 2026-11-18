@@ -59,3 +59,12 @@
   background-color: @cv_slate_soft;
   color: @cv_ink;
 }
+
+/* SensitivityBadge: the Mask's shape in miniature, plus its name. */
+.sensitivity-badge {
+  color: @cv_ink_2;
+}
+
+.item-unflag {
+  font-size: smaller;
+}

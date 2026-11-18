@@ -49,35 +49,45 @@ pub fn masked_text(shape: Shape) -> gtk::DrawingArea {
     area.set_content_height(line_height);
 
     area.set_draw_func(move |area, cr, width, height| {
-        let colour = area.color();
-        cr.set_source_rgba(
-            f64::from(colour.red()),
-            f64::from(colour.green()),
-            f64::from(colour.blue()),
-            f64::from(colour.alpha()),
-        );
-        rounded_rect(cr, f64::from(width), f64::from(height));
-        match shape {
-            Shape::Solid => {
-                let _ = cr.fill();
-            }
-            Shape::Hatch => {
-                cr.clip();
-                cr.set_line_width(HATCH_LINE_PX);
-                let (width, height) = (f64::from(width), f64::from(height));
-                let step = HATCH_LINE_PX + HATCH_GAP_PX;
-                let mut x = -height;
-                while x < width {
-                    cr.move_to(x, height);
-                    cr.line_to(x + height, 0.0);
-                    x += step;
-                }
-                let _ = cr.stroke();
-            }
-        }
+        paint(area, cr, width, height, shape, RADIUS_PX);
     });
     area
 }
+
+/// `SensitivityBadge`: a small swatch in the Mask's shape plus its name, so
+/// the Sensitivity reads by shape and word, never by colour alone. Plain
+/// Items have no badge.
+#[must_use]
+pub fn badge(shape: Shape) -> gtk::Box {
+    let swatch = gtk::DrawingArea::new();
+    swatch.add_css_class(match shape {
+        Shape::Solid => "mask-secret",
+        Shape::Hatch => "mask-suspected",
+    });
+    swatch.set_content_width(BADGE_PX);
+    swatch.set_content_height(BADGE_PX);
+    swatch.set_valign(gtk::Align::Center);
+    swatch.set_accessible_role(gtk::AccessibleRole::Presentation);
+    swatch.set_draw_func(move |area, cr, width, height| {
+        paint(area, cr, width, height, shape, BADGE_RADIUS_PX);
+    });
+
+    let label = gtk::Label::new(Some(match shape {
+        Shape::Solid => "Secret",
+        Shape::Hatch => "Suspected",
+    }));
+    label.add_css_class("caption-heading");
+    let badge = gtk::Box::new(gtk::Orientation::Horizontal, 4);
+    badge.add_css_class("sensitivity-badge");
+    badge.append(&swatch);
+    badge.append(&label);
+    badge
+}
+
+/// `SensitivityBadge` swatch size and corner radius: small enough to stay a
+/// square, like the Mask it stands for.
+const BADGE_PX: i32 = 9;
+const BADGE_RADIUS_PX: f64 = 1.5;
 
 /// Width of one character and the line height, in the Item font.
 fn char_size(widget: &impl IsA<gtk::Widget>) -> (i32, i32) {
@@ -89,8 +99,45 @@ fn char_size(widget: &impl IsA<gtk::Widget>) -> (i32, i32) {
     (width.max(1), height.max(1))
 }
 
-fn rounded_rect(cr: &gtk::cairo::Context, width: f64, height: f64) {
-    let r = RADIUS_PX.min(height / 2.0);
+/// Paints a Mask shape in the widget's CSS colour.
+fn paint(
+    area: &gtk::DrawingArea,
+    cr: &gtk::cairo::Context,
+    width: i32,
+    height: i32,
+    shape: Shape,
+    radius: f64,
+) {
+    let colour = area.color();
+    cr.set_source_rgba(
+        f64::from(colour.red()),
+        f64::from(colour.green()),
+        f64::from(colour.blue()),
+        f64::from(colour.alpha()),
+    );
+    rounded_rect(cr, f64::from(width), f64::from(height), radius);
+    match shape {
+        Shape::Solid => {
+            let _ = cr.fill();
+        }
+        Shape::Hatch => {
+            cr.clip();
+            cr.set_line_width(HATCH_LINE_PX);
+            let (width, height) = (f64::from(width), f64::from(height));
+            let step = HATCH_LINE_PX + HATCH_GAP_PX;
+            let mut x = -height;
+            while x < width {
+                cr.move_to(x, height);
+                cr.line_to(x + height, 0.0);
+                x += step;
+            }
+            let _ = cr.stroke();
+        }
+    }
+}
+
+fn rounded_rect(cr: &gtk::cairo::Context, width: f64, height: f64, radius: f64) {
+    let r = radius.min(height / 2.0);
     let quarter = std::f64::consts::FRAC_PI_2;
     cr.new_sub_path();
     cr.arc(width - r, r, r, -quarter, 0.0);

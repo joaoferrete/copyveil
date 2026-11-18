@@ -1,4 +1,4 @@
-use super::{NUMBERED_ROWS, PinRefusal, Popup, Tab, row_number};
+use super::{NUMBERED_ROWS, PinRefusal, Popup, Tab, detector_for, row_number};
 use copyveil_dbus::ItemSummary;
 
 fn item(id: u64, sensitivity: &str, pin_slot: u32) -> ItemSummary {
@@ -169,4 +169,32 @@ fn only_plain_items_may_be_pinned() {
     );
     assert!(PinRefusal::Secret.message().contains("expire"));
     assert!(PinRefusal::Suspected.message().contains("Not a secret"));
+}
+
+#[test]
+fn only_suspected_items_offer_not_a_secret() {
+    assert!(Popup::may_unflag(&item(1, "suspected", 0)));
+    assert!(!Popup::may_unflag(&item(1, "secret", 0)));
+    assert!(!Popup::may_unflag(&item(1, "plain", 0)));
+}
+
+#[test]
+fn the_flagging_detector_is_found_by_its_description() {
+    let detectors = vec![
+        (
+            "github-token".to_owned(),
+            "GitHub tokens".to_owned(),
+            "Looks like a GitHub token".to_owned(),
+        ),
+        (
+            "jwt".to_owned(),
+            "JSON Web Tokens".to_owned(),
+            "Looks like a JSON Web Token".to_owned(),
+        ),
+    ];
+    assert_eq!(
+        detector_for("Looks like a JSON Web Token", &detectors),
+        Some(("jwt", "JSON Web Tokens"))
+    );
+    assert_eq!(detector_for("From password manager", &detectors), None);
 }

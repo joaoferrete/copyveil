@@ -292,6 +292,7 @@ impl PopupWindow {
                 target.set_active(true);
             }
             gdk::Key::p | gdk::Key::P if ctrl => self.toggle_pin(),
+            gdk::Key::n | gdk::Key::N if ctrl => self.unflag_selected(),
             key if ctrl && number_key(key).is_some() => {
                 let id = number_key(key)
                     .and_then(|n| self.state.borrow().popup.numbered(n).map(|item| item.id));
@@ -352,6 +353,10 @@ impl PopupWindow {
             .collect();
         for row in &rows {
             self.list.append(&row.widget);
+            if let Some(button) = &row.unflag {
+                let (this, id) = (self.clone(), row.id);
+                button.connect_clicked(move |_| this.unflag(id));
+            }
         }
         let selected = state.popup.selected_index();
         state.rows = rows;
@@ -438,6 +443,73 @@ impl PopupWindow {
                     "Couldn’t change the Pin. Is Copyveil running?",
                 ));
             }
+        });
+    }
+
+    /// "Not a secret": Overrides a Suspected Item to Plain, then offers to
+    /// stop flagging text like it (turning its detector off).
+    fn unflag_selected(&self) {
+        let selected = self.state.borrow().popup.selected().cloned();
+        if let Some(item) = selected.filter(Popup::may_unflag) {
+            self.unflag(item.id);
+        }
+    }
+
+    fn unflag(&self, id: u64) {
+        let Some(item) = self
+            .state
+            .borrow()
+            .popup
+            .visible()
+            .into_iter()
+            .find(|item| item.id == id)
+            .cloned()
+        else {
+            return;
+        };
+        let this = self.clone();
+        glib::spawn_future_local(async move {
+            if this
+                .daemon
+                .override_sensitivity(item.id, copyveil_dbus::sensitivity::PLAIN)
+                .await
+                .is_none()
+            {
+                this.toasts
+                    .add_toast(adw::Toast::new("Couldn’t change it. Is Copyveil running?"));
+                return;
+            }
+            let toast = adw::Toast::new("Marked as not a secret");
+            let detectors = this.daemon.detectors().await.unwrap_or_default();
+            if let Some((name, title)) = crate::popup::detector_for(&item.reason, &detectors) {
+                toast.set_button_label(Some(&format!("Stop flagging {}", title.to_lowercase())));
+                let (daemon, toasts, name) =
+                    (this.daemon.clone(), this.toasts.clone(), name.to_owned());
+                toast.connect_button_clicked(move |_| {
+                    let (daemon, toasts, name) = (daemon.clone(), toasts.clone(), name.clone());
+                    glib::spawn_future_local(async move {
+                        let mut disabled = daemon
+                            .settings()
+                            .await
+                            .map(|values| values.disabled_detectors)
+                            .unwrap_or_default();
+                        if !disabled.contains(&name) {
+                            disabled.push(name);
+                        }
+                        let message = match daemon
+                            .change(crate::daemon::SettingChange::DisabledDetectors(disabled))
+                            .await
+                        {
+                            Ok(()) => {
+                                "Turned off. Change it back in Settings › Detection.".to_owned()
+                            }
+                            Err(message) => message,
+                        };
+                        toasts.add_toast(adw::Toast::new(&message));
+                    });
+                });
+            }
+            this.toasts.add_toast(toast);
         });
     }
 

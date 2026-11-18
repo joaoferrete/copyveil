@@ -19,6 +19,8 @@ pub struct ItemRow {
     pub widget: gtk::ListBoxRow,
     /// Whether the content is masked (Secret or Suspected).
     pub masked: bool,
+    /// "Not a secret", on Suspected Items only. The popup connects it.
+    pub unflag: Option<gtk::Button>,
     /// Shows `mask` or `revealed`, for a Reveal.
     content: gtk::Stack,
     revealed: gtk::Label,
@@ -56,12 +58,7 @@ impl ItemRow {
         content.set_hhomogeneous(false);
         let revealed = content_label("");
         if masked {
-            let shape = if item.sensitivity == sensitivity::SECRET {
-                Shape::Solid
-            } else {
-                Shape::Hatch
-            };
-            content.add_named(&mask::masked_text(shape), Some("mask"));
+            content.add_named(&mask::masked_text(shape_for(item)), Some("mask"));
         } else if item.kind == kind::IMAGE {
             let label = content_label(&format!("Image · {}", item.mime));
             label.add_css_class("dim-label");
@@ -77,8 +74,23 @@ impl ItemRow {
         meta.add_css_class("item-meta");
         meta.add_css_class("caption");
         meta.set_xalign(0.0);
-        body.append(&meta);
+        let meta_line = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+        if masked {
+            meta_line.append(&mask::badge(shape_for(item)));
+        }
+        meta_line.append(&meta);
+        body.append(&meta_line);
         line.append(&body);
+
+        let unflag = (item.sensitivity == sensitivity::SUSPECTED).then(|| {
+            let button = gtk::Button::with_label("Not a secret");
+            button.add_css_class("flat");
+            button.add_css_class("item-unflag");
+            button.set_valign(gtk::Align::Center);
+            button.set_tooltip_text(Some("Show and keep it as Plain (Ctrl+N)"));
+            line.append(&button);
+            button
+        });
 
         if item.pin_slot > 0 {
             let pin = gtk::Image::from_icon_name("view-pin-symbolic");
@@ -96,6 +108,7 @@ impl ItemRow {
             id: item.id,
             widget,
             masked,
+            unflag,
             content,
             revealed,
             meta,
@@ -139,6 +152,14 @@ impl ItemRow {
     pub fn conceal(&self) {
         self.content.set_visible_child_name("mask");
         self.revealed.set_text("");
+    }
+}
+
+fn shape_for(item: &ItemSummary) -> Shape {
+    if item.sensitivity == sensitivity::SECRET {
+        Shape::Solid
+    } else {
+        Shape::Hatch
     }
 }
 

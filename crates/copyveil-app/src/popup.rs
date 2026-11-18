@@ -164,6 +164,13 @@ impl Popup {
         }
     }
 
+    /// Whether the Item offers "Not a secret": only Suspected Items do. A
+    /// Secret was declared by its source, so the popup doesn't second-guess it.
+    #[must_use]
+    pub fn may_unflag(item: &ItemSummary) -> bool {
+        item.sensitivity == sensitivity::SUSPECTED
+    }
+
     fn keep_selection_visible(&mut self) {
         let rows = self.visible();
         let still_there = self
@@ -183,3 +190,17 @@ pub fn row_number(index: usize) -> Option<usize> {
 
 #[cfg(test)]
 mod tests;
+
+/// The detector that flagged an Item, by matching its reason against
+/// `Settings1.Detectors()` (`(name, title, description)`). Returns the
+/// detector's name and title, for "Stop flagging GitHub tokens".
+#[must_use]
+pub fn detector_for<'a>(
+    reason: &str,
+    detectors: &'a [(String, String, String)],
+) -> Option<(&'a str, &'a str)> {
+    detectors
+        .iter()
+        .find(|(_, _, description)| description == reason)
+        .map(|(name, title, _)| (name.as_str(), title.as_str()))
+}
