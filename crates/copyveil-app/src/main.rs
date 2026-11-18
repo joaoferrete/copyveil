@@ -2,6 +2,7 @@
 
 use adw::prelude::*;
 use copyveil_app::daemon::Daemon;
+use copyveil_app::onboarding_window;
 use copyveil_app::window::PopupWindow;
 use gtk::{gio, glib};
 use std::cell::OnceCell;
@@ -22,7 +23,7 @@ fn main() -> glib::ExitCode {
     let action = gio::SimpleAction::new("popup", None);
     {
         let (app, popup) = (app.clone(), Rc::clone(&popup));
-        action.connect_activate(move |_, _| popup_for(&app, &popup).toggle());
+        action.connect_activate(move |_, _| open(&app, &popup));
     }
     app.add_action(&action);
 
@@ -45,9 +46,21 @@ fn main() -> glib::ExitCode {
 
     {
         let popup = Rc::clone(&popup);
-        app.connect_activate(move |app| popup_for(app, &popup).toggle());
+        app.connect_activate(move |app| open(app, &popup));
     }
     app.run()
+}
+
+/// Opens the popup, or the onboarding until it has been completed once.
+fn open(app: &adw::Application, popup: &Rc<OnceCell<PopupWindow>>) {
+    if onboarding_window::is_done() {
+        popup_for(app, popup).toggle();
+        return;
+    }
+    let (app_for_done, popup_for_done) = (app.clone(), Rc::clone(popup));
+    let _window = onboarding_window::present(app, &Daemon::connect(), move || {
+        popup_for(&app_for_done, &popup_for_done).toggle();
+    });
 }
 
 fn popup_for<'a>(app: &adw::Application, popup: &'a OnceCell<PopupWindow>) -> &'a PopupWindow {
