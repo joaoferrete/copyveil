@@ -12,7 +12,7 @@ The daemon is D-Bus activatable, so calling it starts it. Rust clients use the p
 
 ## Content stays put
 
-Signals carry Item ids only. `List` never includes the content of a Secret or Suspected Item. Content leaves the daemon only in the reply to `History1.Content`, for one Item the caller names: when the user Reveals or pastes it.
+Signals carry Item ids only. `List` never includes the content of a Secret or Suspected Item. `SuspectedEnds` gives at most the first and last 4 characters of a Suspected value of 20 characters or more, and nothing of a Secret. Content leaves the daemon only in the reply to `History1.Content`, for one Item the caller names: when the user Reveals or pastes it.
 
 Any process running as the user can call these methods. This is inside the threat model in [`SECURITY.md`](../SECURITY.md): code running as you can already read the clipboard and the daemon's memory.
 
@@ -21,6 +21,7 @@ Any process running as the user can call these methods. This is inside the threa
 | Member | Signature | What it does |
 |---|---|---|
 | `List()` | `→ a(tssssuttts)` | Every Item, newest first. See [Item summary](#item-summary). |
+| `SuspectedEnds()` | `→ a{t(ss)}` | The first and last 4 characters of each Suspected text Item of at least 20 characters, by id (`("ghp_", "a9f2")`), so the popup can tell tokens apart. Never for Secret Items, images or shorter values. |
 | `Search(query)` | `s → at` | Ids of matching Items, newest first. Masked Items match only on their description. |
 | `Content(id)` | `t → (ayay)` | The Item's content and its plain-text fallback (empty when there is none). |
 | `PinSlot(slot)` | `u → t` | The id of the Item in Pin slot `slot`, counting from 1. |

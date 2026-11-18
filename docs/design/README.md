@@ -38,7 +38,7 @@ Each component is a reusable GTK widget. A component's entry here lists its purp
 | Component | Purpose | Status |
 |---|---|---|
 | `ItemRow` | One Item in the popup: type glyph, content, meta line, and its number (1–9) for <kbd>Ctrl</kbd>+number paste. Fixed height, so the list doesn't jump on Reveal. | Built (`row.rs`) |
-| `MaskedText` | Solid bar (Secret) or security-tint hatch (Suspected), both a fixed width. Showing a Suspected Item's first and last characters needs them in the D-Bus summary, which `History1` doesn't carry yet. | Built (`mask.rs`), without the visible ends |
+| `MaskedText` | Solid bar (Secret) or security-tint hatch (Suspected), both a fixed width. A Suspected Item of 20 characters or more shows its first and last 4 beside the hatch (`History1.SuspectedEnds`), dimmed and hidden from screen readers. Draws in, peels off and dissolves (see Motion). | Built (`mask.rs`, `row.rs`) |
 | `ExpiryRing` | Ring in Slate that empties until the Item's Expiry, measured against the current Expiry setting. | Built (`ring.rs`) |
 | `SensitivityBadge` | Shape swatch plus label, in the row's meta line. Plain has no badge. | Built (`mask.rs`) |
 | `OverrideButton` | "Not a secret" on a Suspected Item (or <kbd>Ctrl</kbd>+<kbd>N</kbd>): Overrides it to Plain, then a toast offers to stop flagging similar text by turning its detector off. | Built (`row.rs`, `window.rs`) |

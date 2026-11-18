@@ -5,6 +5,12 @@ use copyveil_detect::Detector;
 use std::fmt;
 use std::time::Instant;
 
+/// How many characters [`Item::suspected_ends`] shows at each end.
+pub const ENDS_CHARS: usize = 4;
+/// The shortest value whose ends are shown: below this, eight characters
+/// would be more than 40% of it.
+pub const ENDS_MIN_CHARS: usize = 20;
+
 /// Identifies an Item for as long as the daemon runs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ItemId(pub(crate) u64);
@@ -147,6 +153,31 @@ impl Item {
         self.reason
     }
 
+    /// The first and last [`ENDS_CHARS`] characters of a Suspected text
+    /// Item whose value has at least [`ENDS_MIN_CHARS`], so the user can tell
+    /// which token it is ("ghp_…a9f2"). `None` for everything else: Secret
+    /// Items, Plain Items (shown in full), images, and short values, where
+    /// eight characters would give away too much.
+    #[must_use]
+    pub fn suspected_ends(&self) -> Option<(String, String)> {
+        if self.sensitivity != Sensitivity::Suspected {
+            return None;
+        }
+        let text = match self.kind {
+            Kind::Text => &self.content,
+            Kind::RichText => self.plain_fallback.as_ref().unwrap_or(&self.content),
+            Kind::Image { .. } => return None,
+        };
+        let text = String::from_utf8_lossy(text.expose());
+        let chars: Vec<char> = text.trim().chars().collect();
+        if chars.len() < ENDS_MIN_CHARS {
+            return None;
+        }
+        let first = chars[..ENDS_CHARS].iter().collect();
+        let last = chars[chars.len() - ENDS_CHARS..].iter().collect();
+        Some((first, last))
+    }
+
     /// When the content was last copied.
     #[must_use]
     pub fn captured_at(&self) -> Instant {
@@ -209,6 +240,84 @@ mod tests {
         );
         assert_eq!(Reason::Unflagged.description(), "");
         assert_eq!(Reason::Override.description(), "Changed by you");
+    }
+
+    fn item(content: &str, kind: Kind, sensitivity: Sensitivity) -> Item {
+        Item {
+            id: ItemId(1),
+            content: Content::from(content),
+            kind,
+            plain_fallback: None,
+            sensitivity,
+            reason: Reason::Unflagged,
+            captured_at: Instant::now(),
+            expires_at: None,
+        }
+    }
+
+    #[test]
+    fn suspected_text_shows_four_characters_at_each_end() {
+        let token = "ghp_TESTabcdefghijklmnopqrstuvwxyz0123a9f2";
+        assert_eq!(
+            item(token, Kind::Text, Sensitivity::Suspected).suspected_ends(),
+            Some(("ghp_".to_owned(), "a9f2".to_owned()))
+        );
+        // Surrounding whitespace doesn't count, and characters aren't bytes.
+        assert_eq!(
+            item(
+                "  ááááéééééééééééééóóóó \n",
+                Kind::Text,
+                Sensitivity::Suspected
+            )
+            .suspected_ends(),
+            Some(("áááá".to_owned(), "óóóó".to_owned()))
+        );
+    }
+
+    #[test]
+    fn short_values_show_no_ends() {
+        let nineteen = "a".repeat(19);
+        let twenty = "b".repeat(20);
+        assert_eq!(
+            item(&nineteen, Kind::Text, Sensitivity::Suspected).suspected_ends(),
+            None
+        );
+        assert_eq!(
+            item(&twenty, Kind::Text, Sensitivity::Suspected).suspected_ends(),
+            Some(("bbbb".to_owned(), "bbbb".to_owned()))
+        );
+    }
+
+    #[test]
+    fn only_suspected_text_shows_ends() {
+        let token = "ghp_TESTabcdefghijklmnopqrstuvwxyz0123a9f2";
+        assert_eq!(
+            item(token, Kind::Text, Sensitivity::Secret).suspected_ends(),
+            None
+        );
+        assert_eq!(
+            item(token, Kind::Text, Sensitivity::Plain).suspected_ends(),
+            None
+        );
+        let image = Kind::Image {
+            mime: "image/png".into(),
+        };
+        assert_eq!(
+            item(token, image, Sensitivity::Suspected).suspected_ends(),
+            None
+        );
+    }
+
+    #[test]
+    fn rich_text_shows_the_ends_of_its_fallback() {
+        let mut rich = item("<b>x</b>", Kind::RichText, Sensitivity::Suspected);
+        rich.plain_fallback = Some(Content::from("AKIAWBHK8C2D086BCGWN-extra"));
+        assert_eq!(
+            rich.suspected_ends(),
+            Some(("AKIA".to_owned(), "xtra".to_owned()))
+        );
+        rich.plain_fallback = None;
+        assert_eq!(rich.suspected_ends(), None);
     }
 
     #[test]

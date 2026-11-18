@@ -73,3 +73,8 @@
 .expiry-ring {
   color: @cv_slate;
 }
+
+/* A Suspected Item's ends, beside its hatch: enough to tell tokens apart. */
+.mask-end {
+  color: @cv_ink_2;
+}

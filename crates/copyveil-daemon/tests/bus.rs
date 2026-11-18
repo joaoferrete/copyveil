@@ -276,3 +276,37 @@ async fn plain_items_outlive_the_daemon_and_secrets_do_not() {
     assert_eq!(list[0].preview, "keep me");
     assert_eq!(list[0].pin_slot, 1);
 }
+
+#[tokio::test]
+async fn suspected_items_show_their_ends_and_secrets_never_do() {
+    let d = memory_daemon(Settings::default()).await;
+    let aws = d
+        .capture
+        .capture("text/plain", AWS.as_bytes().to_vec(), Vec::new(), false)
+        .await
+        .unwrap();
+    let secret = d
+        .capture
+        .capture(
+            "text/plain",
+            b"COPYVEIL-MARKER-a-long-password-from-a-manager".to_vec(),
+            Vec::new(),
+            true,
+        )
+        .await
+        .unwrap();
+    d.capture
+        .capture(
+            "text/plain",
+            b"docker compose up -d --build".to_vec(),
+            Vec::new(),
+            false,
+        )
+        .await
+        .unwrap();
+
+    let ends = d.history.suspected_ends().await.unwrap();
+    assert_eq!(ends.len(), 1);
+    assert_eq!(ends[&aws], ("AKIA".to_owned(), "CGWN".to_owned()));
+    assert!(!ends.contains_key(&secret));
+}

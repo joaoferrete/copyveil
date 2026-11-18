@@ -33,7 +33,7 @@ mod store;
 pub use content::Content;
 pub use crypto::{CryptoError, KEY_LEN, Key};
 pub use history::{History, HistoryError};
-pub use item::{Capture, Item, ItemId, Kind, Reason};
+pub use item::{Capture, ENDS_CHARS, ENDS_MIN_CHARS, Item, ItemId, Kind, Reason};
 pub use sensitivity::Sensitivity;
 pub use settings::{Settings, SettingsError};
 pub use store::{Loaded, MAX_PERSISTED_BYTES, Opened, Store, StoreError};

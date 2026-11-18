@@ -23,6 +23,8 @@ struct State {
     popup: Popup,
     /// Expiry times from the daemon's settings, for the rows' rings.
     expiry: (Duration, Duration),
+    /// Suspected Items' ends, from the last listing.
+    ends: std::collections::HashMap<u64, (String, String)>,
     /// Ids listed last time, to draw in only new rows; `None` right after
     /// the popup opens, so opening it animates nothing.
     listed: Option<Vec<u64>>,
@@ -149,6 +151,7 @@ impl PopupWindow {
                 popup: Popup::default(),
                 expiry: (Duration::from_secs(30), Duration::from_mins(15)),
                 listed: None,
+                ends: std::collections::HashMap::new(),
                 rows: Vec::new(),
                 revealed: None,
                 ticker: None,
@@ -334,6 +337,7 @@ impl PopupWindow {
         let this = self.clone();
         glib::spawn_future_local(async move {
             let items = this.daemon.list().await;
+            this.state.borrow_mut().ends = this.daemon.suspected_ends().await.unwrap_or_default();
             if let Some(values) = this.daemon.settings().await {
                 this.state.borrow_mut().expiry = (
                     Duration::from_secs(values.secret_expiry.into()),
@@ -410,6 +414,7 @@ impl PopupWindow {
             secret_expiry: state.expiry.0,
             suspected_expiry: state.expiry.1,
             query: self.search.text().to_string(),
+            ends: state.ends.clone(),
         };
         let rows: Vec<ItemRow> = state
             .popup
