@@ -10,7 +10,9 @@ Each release is small and finished. v0.1 is polished on GNOME before Copyveil re
 - [x] `copyveil-detect`: GitHub, AWS, AI-provider keys, JWT, PEM private keys, payment cards (Luhn), high entropy, plus the password-manager hint.
 - [ ] GNOME Shell extension as capture source: panel icon, <kbd>Super</kbd>+<kbd>V</kbd>, paste with <kbd>Ctrl</kbd>+<kbd>V</kbd> injection.
 - [ ] Paste by number: <kbd>Ctrl</kbd>+<kbd>1…9</kbd> in the popup (History position), <kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>1…9</kbd> globally (Pin slot) ([ADR 0004](adr/0004-blind-paste-targets-pin-slots-not-history-positions.md)).
-- [ ] App: popup (search, keyboard navigation, Masks, Reveal, Pin), settings with Pin reordering, four-step onboarding.
+- [x] App: popup (search, keyboard navigation, Masks, Reveal, Pin).
+- [x] App: settings with Pin reordering, owned and validated by the daemon.
+- [ ] App: four-step onboarding.
 - [ ] Text, images, and rich text with a plain-text fallback.
 - [ ] Design system v1, i18n (English, Brazilian Portuguese).
 - [ ] Install from source with Meson. Full CI and repository rules.

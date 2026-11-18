@@ -5,10 +5,11 @@
 //! `JoinHandle`, so no tokio I/O is ever polled by GTK. A failed call
 //! becomes `None`: the UI shows "Copyveil isn't running" and carries on.
 
-use copyveil_dbus::{HistoryProxy, ItemSummary};
+use copyveil_dbus::{HistoryProxy, ItemSummary, SettingsProxy};
 use std::future::Future;
 use std::sync::OnceLock;
 use tokio::runtime::Runtime;
+use zbus::proxy::CacheProperties;
 
 /// The runtime zbus runs on, or `None` if it couldn't be started (then
 /// every call fails, as if the daemon were unreachable).
@@ -26,23 +27,127 @@ fn runtime() -> Option<&'static Runtime> {
         .as_ref()
 }
 
-/// A cheap handle to the daemon's `History1`, cloned into callbacks.
+/// A cheap handle to the daemon's `History1` and `Settings1`, cloned into callbacks.
 #[derive(Clone)]
 pub struct Daemon {
     history: Option<HistoryProxy<'static>>,
+    settings: Option<SettingsProxy<'static>>,
+}
+
+/// The current settings, as the settings window shows them.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SettingsValues {
+    /// Seconds a Secret lives.
+    pub secret_expiry: u32,
+    /// Seconds a Suspected Item lives.
+    pub suspected_expiry: u32,
+    /// Unpinned Plain Items kept.
+    pub max_plain_items: u32,
+    /// Names of the detectors turned off.
+    pub disabled_detectors: Vec<String>,
+    /// Whether the History is kept in memory only.
+    pub memory_only: bool,
 }
 
 impl Daemon {
     /// Connects to the session bus. When that fails, every call returns `None`.
+    ///
+    /// Properties aren't cached: `OnDisk` and `StorageNotice` change when
+    /// memory-only does, and the window must always show the current value.
     #[must_use]
     pub fn connect() -> Self {
-        let history = runtime().and_then(|runtime| {
+        let proxies = runtime().and_then(|runtime| {
             runtime.block_on(async {
                 let connection = zbus::Connection::session().await.ok()?;
-                HistoryProxy::new(&connection).await.ok()
+                let history = HistoryProxy::builder(&connection)
+                    .cache_properties(CacheProperties::No)
+                    .build()
+                    .await
+                    .ok()?;
+                let settings = SettingsProxy::builder(&connection)
+                    .cache_properties(CacheProperties::No)
+                    .build()
+                    .await
+                    .ok()?;
+                Some((history, settings))
             })
         });
-        Self { history }
+        let (history, settings) = proxies.unzip();
+        Self { history, settings }
+    }
+
+    async fn settings_call<T, F>(&self, call: impl FnOnce(SettingsProxy<'static>) -> F) -> Option<T>
+    where
+        T: Send + 'static,
+        F: Future<Output = zbus::Result<T>> + Send + 'static,
+    {
+        let proxy = self.settings.clone()?;
+        runtime()?.spawn(call(proxy)).await.ok()?.ok()
+    }
+
+    /// The limits for every setting: see `Settings1.Limits`.
+    pub async fn limits(&self) -> Option<(u32, u32, u32, u32, u32, u32)> {
+        self.settings_call(|s| async move { s.limits().await })
+            .await
+    }
+
+    /// Every detector as `(name, title, description)`.
+    pub async fn detectors(&self) -> Option<Vec<(String, String, String)>> {
+        self.settings_call(|s| async move { s.detectors().await })
+            .await
+    }
+
+    /// Every setting's current value.
+    pub async fn settings(&self) -> Option<SettingsValues> {
+        self.settings_call(|s| async move {
+            Ok(SettingsValues {
+                secret_expiry: s.secret_expiry().await?,
+                suspected_expiry: s.suspected_expiry().await?,
+                max_plain_items: s.max_plain_items().await?,
+                disabled_detectors: s.disabled_detectors().await?,
+                memory_only: s.memory_only().await?,
+            })
+        })
+        .await
+    }
+
+    /// Changes one setting.
+    ///
+    /// # Errors
+    ///
+    /// The daemon's refusal (a value outside its limit) or "Copyveil isn’t
+    /// running", as a message to show in a toast.
+    pub async fn change(&self, change: SettingChange) -> Result<(), String> {
+        let proxy = self
+            .settings
+            .clone()
+            .ok_or_else(|| "Copyveil isn’t running".to_owned())?;
+        let runtime = runtime().ok_or_else(|| "Copyveil isn’t running".to_owned())?;
+        let result = runtime
+            .spawn(async move {
+                match change {
+                    SettingChange::SecretExpiry(v) => proxy.set_secret_expiry(v).await,
+                    SettingChange::SuspectedExpiry(v) => proxy.set_suspected_expiry(v).await,
+                    SettingChange::MaxPlainItems(v) => proxy.set_max_plain_items(v).await,
+                    SettingChange::DisabledDetectors(v) => proxy.set_disabled_detectors(v).await,
+                    SettingChange::MemoryOnly(v) => proxy.set_memory_only(v).await,
+                }
+            })
+            .await
+            .map_err(|_| "Copyveil isn’t running".to_owned())?;
+        result.map_err(|err| match err {
+            zbus::Error::FDO(fdo) => match *fdo {
+                zbus::fdo::Error::InvalidArgs(message) => message,
+                other => other.to_string(),
+            },
+            other => other.to_string(),
+        })
+    }
+
+    /// Moves a pinned Item to Pin slot `slot`.
+    pub async fn move_pin(&self, id: u64, slot: u32) -> Option<()> {
+        self.call(move |history| async move { history.move_pin(id, slot).await })
+            .await
     }
 
     async fn call<T, F>(&self, call: impl FnOnce(HistoryProxy<'static>) -> F) -> Option<T>
@@ -130,4 +235,19 @@ impl Daemon {
         }
         receiver
     }
+}
+
+/// One setting to change over `Settings1`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SettingChange {
+    /// Seconds a Secret lives.
+    SecretExpiry(u32),
+    /// Seconds a Suspected Item lives.
+    SuspectedExpiry(u32),
+    /// Unpinned Plain Items kept.
+    MaxPlainItems(u32),
+    /// Names of the detectors turned off.
+    DisabledDetectors(Vec<String>),
+    /// Keep the History in memory only.
+    MemoryOnly(bool),
 }

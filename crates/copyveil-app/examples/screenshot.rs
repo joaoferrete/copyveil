@@ -1,7 +1,7 @@
 //! Renders the popup to a PNG, for the light and dark screenshots UI PRs
 //! need (`docs/design/README.md`).
 //!
-//!     screenshot OUT.png [dark]
+//!     screenshot OUT.png [light|dark] [popup|settings]
 //!
 //! It talks to whatever daemon is on the session bus, so run it inside
 //! `tools/app-screenshot/run.sh`, which starts an isolated one with
@@ -19,6 +19,7 @@ fn main() -> glib::ExitCode {
         return glib::ExitCode::FAILURE;
     };
     let dark = args.next().as_deref() == Some("dark");
+    let settings = args.next().as_deref() == Some("settings");
 
     let app = adw::Application::builder()
         .application_id("io.github.joaoferrete.Copyveil.Screenshot")
@@ -32,11 +33,18 @@ fn main() -> glib::ExitCode {
         });
         copyveil_app::style::load();
         let popup = PopupWindow::new(app, Daemon::connect());
-        popup.toggle();
+        let shown: gtk::Widget = if settings {
+            popup.open_settings().upcast()
+        } else {
+            popup.toggle();
+            popup.window().clone().upcast()
+        };
         let (app, out) = (app.clone(), out.clone());
-        glib::timeout_add_local_once(Duration::from_millis(1500), move || {
-            let window = popup.window();
-            let paintable = gtk::WidgetPaintable::new(Some(window));
+        glib::timeout_add_local_once(Duration::from_millis(2500), move || {
+            let Some(window) = shown.root().and_downcast::<gtk::Window>() else {
+                std::process::exit(1);
+            };
+            let paintable = gtk::WidgetPaintable::new(Some(&window));
             let (width, height) = (window.width(), window.height());
             let snapshot = gtk::Snapshot::new();
             paintable.snapshot(&snapshot, f64::from(width), f64::from(height));

@@ -36,8 +36,11 @@ capture 'ghp_SyntheticTokenForScreenshots0123456' false
 capture 'cargo test --workspace --locked' false
 capture 'correct-horse-battery-staple' true
 busctl --user call \$O \$P io.github.joaoferrete.Copyveil.History1 Pin t 4 > /dev/null
-WAYLAND_DISPLAY=copyveil-shot "$root/target/debug/examples/screenshot" "$out/popup-light.png" light
-WAYLAND_DISPLAY=copyveil-shot "$root/target/debug/examples/screenshot" "$out/popup-dark.png" dark
+for view in popup settings; do
+    for theme in light dark; do
+        WAYLAND_DISPLAY=copyveil-shot "$root/target/debug/examples/screenshot" "$out/\$view-\$theme.png" \$theme \$view
+    done
+done
 kill \$daemon \$shell 2>/dev/null; wait 2>/dev/null
 STEPS
 chmod +x "$work/steps.sh"
@@ -47,4 +50,4 @@ env -u WAYLAND_DISPLAY -u DISPLAY -u GNOME_KEYRING_CONTROL -u DBUS_SESSION_BUS_A
     XDG_CACHE_HOME="$work/cache" XDG_STATE_HOME="$work/state" XDG_RUNTIME_DIR="$runtime" \
     GSETTINGS_BACKEND=keyfile \
     dbus-run-session --config-file="$work/bus.conf" -- "$work/steps.sh"
-ls "$out"/popup-*.png
+ls "$out"/*.png

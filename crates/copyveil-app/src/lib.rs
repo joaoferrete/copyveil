@@ -8,6 +8,8 @@
 pub mod daemon;
 pub mod mask;
 pub mod popup;
+pub mod prefs;
+pub mod prefs_window;
 pub mod row;
 pub mod style;
 pub mod text;

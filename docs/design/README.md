@@ -44,17 +44,19 @@ Each component is a reusable GTK widget. A component's entry here lists its purp
 | `OverrideButton` | "Not a secret" on a Suspected Item; offers to stop flagging similar text. | Planned |
 | `PinToggle` | Plain Items only. On Secret or Suspected, the shortcut shows a toast explaining why. | Planned |
 | `EmptyState` | Names what will appear and how to get there. | Built (in `window.rs`) |
+| `SettingsWindow` | libadwaita preferences in their own window: General (expiry, History size, memory-only with a confirmation), Detection (a switch per detector), Pins (reorder Pin slots) and Shortcuts (from the extension's settings). An “Always on” group shows the rules that can't change, with a lock. | Built (`prefs_window.rs`) |
 | `OnboardingStep` | One page of the four-step onboarding. | Planned |
 
 ### Screenshots
 
-The popup as of the latest UI change, generated with `just app-screenshot` from synthetic Items:
+The app as of the latest UI change, generated with `just app-screenshot` from synthetic Items:
 
-| Light | Dark |
-|---|---|
-| ![Popup, light](screenshots/popup-light.png) | ![Popup, dark](screenshots/popup-dark.png) |
+| | Light | Dark |
+|---|---|---|
+| Popup | ![Popup, light](screenshots/popup-light.png) | ![Popup, dark](screenshots/popup-dark.png) |
+| Settings | ![Settings, light](screenshots/settings-light.png) | ![Settings, dark](screenshots/settings-dark.png) |
 
-Regenerate them in any PR that changes how the popup looks.
+Regenerate them in any PR that changes how the app looks.
 
 ## Motion
 
