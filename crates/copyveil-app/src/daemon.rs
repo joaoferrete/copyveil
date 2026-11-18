@@ -206,6 +206,12 @@ impl Daemon {
             .unwrap_or(false)
     }
 
+    /// Changes an Item's Sensitivity (`plain`, `suspected` or `secret`).
+    pub async fn override_sensitivity(&self, id: u64, sensitivity: &'static str) -> Option<()> {
+        self.call(move |history| async move { history.r#override(id, sensitivity).await })
+            .await
+    }
+
     /// Moves a pinned Item to Pin slot `slot`.
     pub async fn move_pin(&self, id: u64, slot: u32) -> Option<()> {
         self.call(move |history| async move { history.move_pin(id, slot).await })

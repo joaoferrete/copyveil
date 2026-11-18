@@ -40,8 +40,8 @@ Each component is a reusable GTK widget. A component's entry here lists its purp
 | `ItemRow` | One Item in the popup: type glyph, content, meta line, and its number (1–9) for <kbd>Ctrl</kbd>+number paste. Fixed height, so the list doesn't jump on Reveal. | Built (`row.rs`) |
 | `MaskedText` | Solid bar (Secret) or security-tint hatch (Suspected), both a fixed width. Showing a Suspected Item's first and last characters needs them in the D-Bus summary, which `History1` doesn't carry yet. | Built (`mask.rs`), without the visible ends |
 | `ExpiryRing` | Ring that empties until the Item's Expiry. | Planned |
-| `SensitivityBadge` | Shape swatch plus label. Plain has no badge. | Planned |
-| `OverrideButton` | "Not a secret" on a Suspected Item; offers to stop flagging similar text. | Planned |
+| `SensitivityBadge` | Shape swatch plus label, in the row's meta line. Plain has no badge. | Built (`mask.rs`) |
+| `OverrideButton` | "Not a secret" on a Suspected Item (or <kbd>Ctrl</kbd>+<kbd>N</kbd>): Overrides it to Plain, then a toast offers to stop flagging similar text by turning its detector off. | Built (`row.rs`, `window.rs`) |
 | `PinToggle` | Plain Items only. On Secret or Suspected, the shortcut shows a toast explaining why. | Planned |
 | `EmptyState` | Names what will appear and how to get there. | Built (in `window.rs`) |
 | `SettingsWindow` | libadwaita preferences in their own window: General (expiry, History size, memory-only with a confirmation), Detection (a switch per detector), Pins (reorder Pin slots) and Shortcuts (from the extension's settings). An “Always on” group shows the rules that can't change, with a lock. | Built (`prefs_window.rs`) |
