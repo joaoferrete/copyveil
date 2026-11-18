@@ -37,8 +37,9 @@ tokens:
 tokens-gen:
     python3 tools/tokens.py
 
+# Lint the GNOME extension and run the tests of its pure logic (lib/).
 ext-lint:
-    cd gnome-extension && npm ci && npm run lint
+    cd gnome-extension && npm ci && npm run lint && npm test
 
 data-check:
     desktop-file-validate --no-hints data/io.github.joaoferrete.Copyveil.desktop.in || true
@@ -51,9 +52,29 @@ install prefix="/usr/local":
     meson install -C _build
 
 # Install the GNOME Shell extension for the current user.
-ext-install:
-    mkdir -p ~/.local/share/gnome-shell/extensions/copyveil@joaoferrete.github.io
-    cp gnome-extension/metadata.json gnome-extension/extension.js ~/.local/share/gnome-shell/extensions/copyveil@joaoferrete.github.io/
+# Build the extension zip (as extensions.gnome.org takes it) into _build/.
+# Staged from copies, so the zip holds real files and no dev tooling.
+ext-pack:
+    rm -rf _build/extension && mkdir -p _build/extension/icons
+    cd gnome-extension && cp -r metadata.json extension.js clipboard.js daemon.js \
+        indicator.js keyboard.js lib schemas ../_build/extension/
+    cp data/icons/hicolor/symbolic/apps/io.github.joaoferrete.Copyveil-symbolic.svg \
+        _build/extension/icons/copyveil-symbolic.svg
+    cd _build/extension && gnome-extensions pack --force --out-dir=.. \
+        --extra-source=clipboard.js --extra-source=daemon.js \
+        --extra-source=indicator.js --extra-source=keyboard.js \
+        --extra-source=lib --extra-source=icons \
+        --schema=schemas/org.gnome.shell.extensions.copyveil.gschema.xml
+
+# Run the extension against the real daemon in an isolated, headless GNOME
+# Shell (tools/ext-smoke/run.sh). Touches nothing in your session or keyring.
+ext-smoke: ext-pack
+    cargo build --locked -p copyveil-daemon
+    tools/ext-smoke/run.sh
+
+# Install the extension for this user; log out and back in to load it.
+ext-install: ext-pack
+    gnome-extensions install --force _build/copyveil@joaoferrete.github.io.shell-extension.zip
 
 # Fuzz one target (detect, records or sealed). Needs nightly and cargo-fuzz.
 fuzz target="records" seconds="60":

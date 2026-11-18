@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<schemalist>
+  <schema id="org.gnome.shell.extensions.copyveil" path="/org/gnome/shell/extensions/copyveil/">
+    <key name="popup-shortcut" type="as">
+      <default>['&lt;Super&gt;&lt;Shift&gt;v']</default>
+      <summary>Open the History</summary>
+      <description>Opens the Copyveil popup. Onboarding offers to switch it to Super+V.</description>
+    </key>
+    <key name="take-super-v" type="b">
+      <default>false</default>
+      <summary>Take Super+V from the notification list</summary>
+      <description>Set by onboarding when the user agrees. GNOME binds Super+V and Super+M to the notification list; Copyveil then removes only Super+V, and gives it back when the extension is disabled.</description>
+    </key>
+    <key name="took-super-v" type="b">
+      <default>false</default>
+      <summary>Super+V was taken from the notification list</summary>
+      <description>Internal: whether the extension removed Super+V and owes it back. Survives a crash so the binding is always returned.</description>
+    </key>
+    <key name="paste-pin-1" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;1']</default>
+      <summary>Paste Pin slot 1</summary>
+      <description>Pastes the Item in Pin slot 1 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-2" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;2']</default>
+      <summary>Paste Pin slot 2</summary>
+      <description>Pastes the Item in Pin slot 2 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-3" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;3']</default>
+      <summary>Paste Pin slot 3</summary>
+      <description>Pastes the Item in Pin slot 3 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-4" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;4']</default>
+      <summary>Paste Pin slot 4</summary>
+      <description>Pastes the Item in Pin slot 4 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-5" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;5']</default>
+      <summary>Paste Pin slot 5</summary>
+      <description>Pastes the Item in Pin slot 5 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-6" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;6']</default>
+      <summary>Paste Pin slot 6</summary>
+      <description>Pastes the Item in Pin slot 6 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-7" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;7']</default>
+      <summary>Paste Pin slot 7</summary>
+      <description>Pastes the Item in Pin slot 7 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-8" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;8']</default>
+      <summary>Paste Pin slot 8</summary>
+      <description>Pastes the Item in Pin slot 8 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+    <key name="paste-pin-9" type="as">
+      <default>['&lt;Super&gt;&lt;Alt&gt;9']</default>
+      <summary>Paste Pin slot 9</summary>
+      <description>Pastes the Item in Pin slot 9 without opening the History. Pin slots hold only Plain Items, so this can never paste a secret (ADR 0004).</description>
+    </key>
+  </schema>
+</schemalist>
