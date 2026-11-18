@@ -1,6 +1,6 @@
 //! End-to-end tests of the D-Bus service over a peer-to-peer connection.
 
-#![allow(clippy::unwrap_used, reason = "a failing test should panic")]
+#![expect(clippy::unwrap_used, reason = "a failing test should panic")]
 
 use copyveil_core::{Key, Settings, Store};
 use copyveil_daemon::bus::{self, CaptureServiceProxy, HistoryServiceProxy, OBJECT_PATH, Shared};

@@ -1,6 +1,6 @@
 # Architecture
 
-Copyveil has three kinds of process: a **core daemon** that owns all state, **capture sources** that report clipboard changes to it, and the **app** that shows the History. Only the core ever holds History. Why it's split this way: [ADR 0001](adr/0001-desktop-agnostic-core-with-pluggable-capture-sources.md).
+Copyveil has three kinds of process: a **daemon** that owns all state, **capture sources** that report clipboard changes to it, and the **app** that shows the History. Only the daemon ever holds History. Why it's split this way: [ADR 0001](adr/0001-desktop-agnostic-core-with-pluggable-capture-sources.md). How the crates are layered, and the rules that keep them so: [engineering guide](engineering.md#architecture).
 
 ```mermaid
 flowchart LR

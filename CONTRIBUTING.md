@@ -53,6 +53,10 @@ Commits inside your branch can be anything; only the PR title lands on `main`.
 
 [release-please](https://github.com/googleapis/release-please) opens a release PR from the commits on `main`, with the version bump and CHANGELOG. Merging it tags the release and publishes binaries, SBOMs and provenance attestations. Versioning follows [SemVer](https://semver.org/); before 1.0, `feat` bumps the minor version.
 
+## Writing code
+
+[docs/engineering.md](docs/engineering.md) is the guide to how the code is shaped: which crate a change belongs in, module design, names, errors, time and I/O, async, and comments. It ends with a checklist to run through before opening a PR. The architecture's dependency rules are checked by `python3 tools/layers.py`, which `just lint` and CI run.
+
 ## Testing
 
 The bar is strict, and highest for the code that handles secrets. Read [docs/testing.md](docs/testing.md) before changing `copyveil-core` or `copyveil-detect`. In short: at least 90% line coverage, no surviving mutants, property tests for crypto and Sensitivity rules, and a corpus case for every detector change.

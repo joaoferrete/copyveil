@@ -10,10 +10,11 @@ fmt:
 # Everything CI checks, in the same order.
 ci: lint test cov mutants deny tokens ext-lint data-check
 
-# Format check plus clippy with warnings as errors.
+# Format check, clippy with warnings as errors, and the architecture layers.
 lint:
     cargo fmt --all -- --check
     cargo clippy --workspace --all-targets --locked -- -D warnings
+    python3 tools/layers.py
 
 test:
     cargo test --workspace --locked

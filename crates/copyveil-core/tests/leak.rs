@@ -1,7 +1,7 @@
 //! The leak test from `docs/testing.md`: whatever happens in the History, no
 //! marker value ever appears in any file the store writes, in clear.
 
-#![allow(clippy::unwrap_used, reason = "a failing test should panic")]
+#![expect(clippy::unwrap_used, reason = "a failing test should panic")]
 
 use copyveil_core::{Capture, Content, History, Key, Kind, Sensitivity, Settings, Store};
 use std::path::Path;

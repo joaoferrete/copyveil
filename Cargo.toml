@@ -32,6 +32,9 @@ expect_used = "deny"
 panic = "deny"
 todo = "deny"
 unimplemented = "deny"
+# A silenced lint says why, and uses `expect` so it errors once it's no longer needed.
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
 
 [profile.release]
 lto = "thin"
