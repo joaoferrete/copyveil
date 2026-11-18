@@ -83,7 +83,7 @@ impl Extension {
             Self::NotInstalled => (
                 crate::N_!("Install the GNOME Shell extension"),
                 crate::N_!(
-                    "GNOME only lets its own extensions watch the clipboard. Run “just ext-install” in the Copyveil source folder, then log out and back in."
+                    "GNOME only lets its own extensions watch the clipboard. Run “./install.sh” in the Copyveil source folder, then log out and back in."
                 ),
             ),
             Self::Off => (
@@ -241,7 +241,7 @@ mod tests {
             Extension::NotInstalled
                 .describe()
                 .1
-                .contains("just ext-install")
+                .contains("./install.sh")
         );
     }
 

@@ -391,7 +391,7 @@ fn shortcuts_page() -> adw::PreferencesPage {
             &adw::ActionRow::builder()
                 .title(gettext("The GNOME Shell extension isn’t installed"))
                 .subtitle(gettext(
-                    "Install it with “just ext-install” to capture copies and use shortcuts.",
+                    "Install it with “./install.sh” to capture copies and use shortcuts.",
                 ))
                 .build(),
         );
