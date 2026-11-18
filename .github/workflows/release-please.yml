@@ -19,7 +19,7 @@ jobs:
       pr_branch: ${{ steps.rp.outputs.pr && fromJSON(steps.rp.outputs.pr).headBranchName }}
     steps:
       - id: rp
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           # A token other than GITHUB_TOKEN, so CI runs on the release PR.
           # See docs/maintainers/repository-settings.md.
