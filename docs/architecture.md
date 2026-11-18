@@ -36,7 +36,7 @@ flowchart LR
 | `crates/copyveil-daemon` | `copyveil-daemon` binary. Holds the History and serves it over D-Bus ([API](dbus.md)), runs Expiry, and opens the store with the key from `copyveil-keyring`. |
 | `crates/copyveil-keyring` | Reads and creates the History key in the Secret Service keyring with `oo7`. Thin on purpose: it can only be tested against a running keyring. |
 | `crates/copyveil-detect` | Pure library. Detectors that flag content as Suspected. No I/O, so it's easy to test, fuzz and reuse. |
-| `crates/copyveil-app` | `copyveil` binary. GTK4/libadwaita UI: popup, settings, onboarding. Talks to the core over D-Bus only. |
+| `crates/copyveil-app` | `copyveil` binary. GTK4/libadwaita UI (gtk-rs): popup, settings, onboarding. Talks to the daemon over D-Bus only, through `copyveil-dbus`, and is D-Bus activatable so the extension can open the popup. |
 | `crates/copyveil-capture-datacontrol` | Capture source for KDE, COSMIC and wlroots compositors (v0.2). |
 | `gnome-extension/` | GNOME capture source (GJS): forwards clipboard changes, draws the panel icon, binds the global shortcut and injects <kbd>Ctrl</kbd>+<kbd>V</kbd>. |
 | `design/tokens.json` | Design tokens, the single source for colours, spacing, radii and motion ([ADR 0003](adr/0003-design-tokens-as-single-source-and-sensitivity-by-shape.md)). |

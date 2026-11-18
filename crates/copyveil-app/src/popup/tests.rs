@@ -106,6 +106,17 @@ fn search_keeps_the_daemons_matches_in_list_order() {
 }
 
 #[test]
+fn a_refresh_during_a_search_keeps_the_selection() {
+    let mut popup = popup();
+    popup.set_matches(Some(vec![4, 3, 1]));
+    popup.move_selection(1);
+    popup.set_matches_keeping_selection(Some(vec![4, 3, 1]));
+    assert_eq!(popup.selected().map(|item| item.id), Some(3));
+    popup.set_matches_keeping_selection(Some(vec![4, 1]));
+    assert_eq!(popup.selected().map(|item| item.id), Some(4));
+}
+
+#[test]
 fn search_and_the_pinned_tab_combine() {
     let mut popup = popup();
     popup.set_tab(Tab::Pinned);

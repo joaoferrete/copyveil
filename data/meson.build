@@ -14,8 +14,18 @@ configure_file(
 )
 
 configure_file(
-  input: 'dbus.service.in',
+  input: 'daemon-dbus.service.in',
   output: daemon_bus_name + '.service',
+  configuration: conf,
+  install: true,
+  install_dir: datadir / 'dbus-1' / 'services',
+)
+
+# The app is D-Bus activatable, so the Shell extension can open the popup
+# (org.freedesktop.Application.ActivateAction) even when it isn't running.
+configure_file(
+  input: 'app-dbus.service.in',
+  output: app_id + '.service',
   configuration: conf,
   install: true,
   install_dir: datadir / 'dbus-1' / 'services',

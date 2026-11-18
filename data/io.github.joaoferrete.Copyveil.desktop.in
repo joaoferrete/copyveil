@@ -8,4 +8,4 @@ Type=Application
 Categories=Utility;Security;GTK;
 Keywords=clipboard;history;paste;secrets;password;token;
 StartupNotify=true
-DBusActivatable=false
+DBusActivatable=true

@@ -69,6 +69,13 @@ impl Popup {
         self.selected = self.visible().first().map(|item| item.id);
     }
 
+    /// Updates the search results after the History changed, keeping the
+    /// selection on the same Item when it still matches.
+    pub fn set_matches_keeping_selection(&mut self, matches: Option<Vec<u64>>) {
+        self.matches = matches;
+        self.keep_selection_visible();
+    }
+
     /// The current tab.
     #[must_use]
     pub fn tab(&self) -> Tab {

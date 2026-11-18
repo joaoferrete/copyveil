@@ -45,30 +45,35 @@ fn time_left_spoken(ms: u64) -> String {
     format!("{count} {unit}{plural}")
 }
 
-/// The line under the popup's title: where the History is kept, and any
-/// notice the daemon has for the user. `None` for `on_disk` means the daemon
-/// isn't reachable.
+/// The popup's subtitle: where the History is kept. `None` means the
+/// daemon isn't reachable.
 #[must_use]
-pub fn storage_line(on_disk: Option<bool>, storage_notice: &str) -> String {
-    let Some(on_disk) = on_disk else {
-        return "Copyveil isn’t running".to_owned();
-    };
-    let base = if on_disk {
-        "Encrypted · keyring unlocked"
-    } else {
-        "Memory only"
-    };
-    let detail = match storage_notice {
-        notice::KEYRING_UNAVAILABLE => Some("no keyring, History clears when you log out"),
-        notice::STORE_UNAVAILABLE => Some("History can’t be saved"),
-        notice::STORE_WIPED => Some("the saved History couldn’t be opened and was erased"),
-        notice::ITEMS_UNREADABLE => Some("some saved Items couldn’t be read and were erased"),
-        notice::SYNC_FAILED => Some("saving failed, retrying"),
+pub fn storage_title(on_disk: Option<bool>) -> &'static str {
+    match on_disk {
+        None => "Copyveil isn’t running",
+        Some(true) => "Encrypted on disk",
+        Some(false) => "Memory only",
+    }
+}
+
+/// What the banner under the header says about a storage notice, if anything.
+#[must_use]
+pub fn storage_notice(storage_notice: &str) -> Option<&'static str> {
+    match storage_notice {
+        notice::KEYRING_UNAVAILABLE => {
+            Some("No keyring found. History will clear when you log out.")
+        }
+        notice::STORE_UNAVAILABLE => {
+            Some("History can’t be saved, so it will clear when you log out.")
+        }
+        notice::STORE_WIPED => {
+            Some("The saved History couldn’t be opened with your keyring, so it was erased.")
+        }
+        notice::ITEMS_UNREADABLE => Some("Some saved Items couldn’t be read and were erased."),
+        notice::SYNC_FAILED => {
+            Some("Saving the History failed. Copyveil retries on the next copy.")
+        }
         _ => None,
-    };
-    match detail {
-        Some(detail) => format!("{base} · {detail}"),
-        None => base.to_owned(),
     }
 }
 
@@ -102,7 +107,9 @@ pub fn accessible_label(item: &ItemSummary) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{accessible_label, age, storage_line, time_left, time_left_spoken};
+    use super::{
+        accessible_label, age, storage_notice, storage_title, time_left, time_left_spoken,
+    };
     use copyveil_dbus::ItemSummary;
 
     fn summary(sensitivity: &str) -> ItemSummary {
@@ -147,30 +154,28 @@ mod tests {
     }
 
     #[test]
-    fn storage_lines() {
-        assert_eq!(storage_line(None, ""), "Copyveil isn’t running");
-        assert_eq!(storage_line(Some(true), ""), "Encrypted · keyring unlocked");
-        assert_eq!(
-            storage_line(Some(false), "keyring-unavailable"),
-            "Memory only · no keyring, History clears when you log out"
+    fn storage_titles_and_notices() {
+        assert_eq!(storage_title(None), "Copyveil isn’t running");
+        assert_eq!(storage_title(Some(true)), "Encrypted on disk");
+        assert_eq!(storage_title(Some(false)), "Memory only");
+        assert_eq!(storage_notice(""), None);
+        assert_eq!(storage_notice("unknown"), None);
+        for name in [
+            "keyring-unavailable",
+            "store-unavailable",
+            "store-wiped",
+            "items-unreadable",
+            "sync-failed",
+        ] {
+            let message = storage_notice(name).unwrap();
+            assert!(message.ends_with('.'), "{name}");
+        }
+        assert!(
+            storage_notice("keyring-unavailable")
+                .unwrap()
+                .contains("log out")
         );
-        assert_eq!(
-            storage_line(Some(false), "store-unavailable"),
-            "Memory only · History can’t be saved"
-        );
-        assert_eq!(
-            storage_line(Some(true), "store-wiped"),
-            "Encrypted · keyring unlocked · the saved History couldn’t be opened and was erased"
-        );
-        assert_eq!(
-            storage_line(Some(true), "items-unreadable"),
-            "Encrypted · keyring unlocked · some saved Items couldn’t be read and were erased"
-        );
-        assert_eq!(
-            storage_line(Some(true), "sync-failed"),
-            "Encrypted · keyring unlocked · saving failed, retrying"
-        );
-        assert_eq!(storage_line(Some(false), "unknown"), "Memory only");
+        assert!(storage_notice("store-wiped").unwrap().contains("erased"));
     }
 
     #[test]
