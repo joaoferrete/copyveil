@@ -6,7 +6,7 @@
     "50"
   ],
   "url": "https://github.com/joaoferrete/copyveil",
-  "version-name": "0.0.0",
+  "version-name": "0.1.0",
   "settings-schema": "org.gnome.shell.extensions.copyveil",
   "gettext-domain": "copyveil-extension"
 }

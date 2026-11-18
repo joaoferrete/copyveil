@@ -287,7 +287,7 @@ checksum = "be95d4a884358a21a199689323c29e9256b4a1b315e22f183d155422041d3a9a"
 
 [[package]]
 name = "copyveil-app"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "async-channel",
  "copyveil-dbus",
@@ -303,11 +303,11 @@ dependencies = [
 
 [[package]]
 name = "copyveil-capture-datacontrol"
-version = "0.0.0"
+version = "0.1.0"
 
 [[package]]
 name = "copyveil-core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "chacha20poly1305",
  "copyveil-detect",
@@ -320,7 +320,7 @@ dependencies = [
 
 [[package]]
 name = "copyveil-daemon"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "copyveil-core",
  "copyveil-dbus",
@@ -339,7 +339,7 @@ dependencies = [
 
 [[package]]
 name = "copyveil-dbus"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "serde",
  "zbus",
@@ -347,14 +347,14 @@ dependencies = [
 
 [[package]]
 name = "copyveil-detect"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "copyveil-keyring"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "copyveil-core",
  "oo7",
