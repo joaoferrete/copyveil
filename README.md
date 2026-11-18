@@ -14,7 +14,7 @@
 
 Copyveil is a clipboard history manager for Linux, built for people who copy API keys, tokens and passwords all day. Press <kbd>Super</kbd>+<kbd>V</kbd>, find what you copied, paste it again. Secrets are masked, kept in memory only, and erased after a short time. Everything else is encrypted on disk.
 
-> **Status: pre-alpha.** The daemon works: it keeps the History, detects secrets, expires them and encrypts the rest on disk. The GNOME Shell extension and the app come next, so there's nothing to click yet. See the [roadmap](docs/roadmap.md).
+> **Status: pre-alpha.** The daemon and the GNOME Shell extension work: copies are captured, secrets are detected and expire, the clipboard is cleared after a Secret's Expiry, and the rest is encrypted on disk. The app (popup, settings, onboarding) comes next, so there's nothing to click yet. See the [roadmap](docs/roadmap.md).
 
 ## How it treats what you copy
 

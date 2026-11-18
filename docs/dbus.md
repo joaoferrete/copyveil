@@ -74,7 +74,7 @@ Each element of `List` is a struct with these fields, in order:
 - `text/html` for rich text, with its plain-text version in `plain_fallback`.
 - `image/*` for images.
 
-Set `password_manager_hint` when the clipboard offered `x-kde-passwordManagerHint` with the value `secret`. Other types, and empty content, are refused with `InvalidArgument`.
+Set `password_manager_hint` when the clipboard offered `x-kde-passwordManagerHint` with the value `secret`. Fail safe: when the hint is offered but its value can't be read or is empty, as Mutter sometimes hands it over, set it too. Only a readable value other than `secret` doesn't count. Other types, and empty content, are refused with `InvalidArgument`.
 
 ## Errors
 

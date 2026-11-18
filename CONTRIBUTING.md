@@ -12,7 +12,7 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Report se
 
 ## Setup
 
-You need the Rust toolchain pinned in `rust-toolchain.toml` (rustup picks it up automatically), Meson and Ninja, Node.js 22 for the GNOME extension, Python 3 for the design-token tool, and [`just`](https://github.com/casey/just).
+You need the Rust toolchain pinned in `rust-toolchain.toml` (rustup picks it up automatically), Meson and Ninja, Node.js 22 for the GNOME extension (and GNOME Shell for `just ext-smoke`), Python 3 for the design-token tool, and [`just`](https://github.com/casey/just).
 
 Optional tools that CI also runs: `cargo install cargo-llvm-cov cargo-mutants cargo-deny`.
 
