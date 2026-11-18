@@ -36,3 +36,4 @@ ADRs are not edited to reverse a decision. Write a new ADR that supersedes the o
 - [0002: Secrets never touch disk; at-rest key lives only in the system keyring](0002-secrets-never-touch-disk-and-keyring-only-at-rest-key.md)
 - [0003: Design tokens as single source; Sensitivity shown by shape](0003-design-tokens-as-single-source-and-sensitivity-by-shape.md)
 - [0004: Blind paste targets Pin slots, not History positions](0004-blind-paste-targets-pin-slots-not-history-positions.md)
+- [0005: The Plain store is SQLite with each Item sealed by XChaCha20-Poly1305](0005-plain-store-is-sqlite-with-per-item-xchacha20-poly1305.md)

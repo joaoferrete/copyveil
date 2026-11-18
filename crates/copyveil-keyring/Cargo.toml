@@ -1,0 +1,17 @@
+[package]
+name = "copyveil-keyring"
+description = "Copyveil's History key in the Secret Service keyring"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+copyveil-core.workspace = true
+oo7 = "0.7"
+zeroize = "1.8"
+
+[lints]
+workspace = true

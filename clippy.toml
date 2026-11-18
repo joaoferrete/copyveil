@@ -11,3 +11,6 @@ disallowed-macros = [
   { path = "std::print", reason = "use tracing with content-free fields" },
   { path = "std::println", reason = "use tracing with content-free fields" },
 ]
+
+# Proper nouns clippy would otherwise want in backticks.
+doc-valid-idents = ["SQLite", ".."]

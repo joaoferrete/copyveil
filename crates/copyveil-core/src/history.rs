@@ -1,7 +1,7 @@
 //! The History: every Item the user can browse and paste again.
 //!
-//! This is the in-memory model and its rules. Persistence of Plain Items lands
-//! separately; nothing here touches the disk.
+//! This is the in-memory model and its rules; nothing here touches the disk.
+//! [`crate::Store`] mirrors its Plain Items to disk.
 
 use crate::Sensitivity;
 use crate::classify::classify;
@@ -27,7 +27,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             secret_expiry: Duration::from_secs(30),
-            suspected_expiry: Duration::from_secs(15 * 60),
+            suspected_expiry: Duration::from_mins(15),
             max_plain_items: 500,
             detectors: DetectorSet::all(),
         }
@@ -78,6 +78,35 @@ impl History {
             settings,
             ..Self::default()
         }
+    }
+
+    /// A History rebuilt by the store: Items newest first, Pins in Pin slot
+    /// order. Expiry starts from `now` for any Item no longer Plain, which
+    /// also loses its Pin. New Items get ids after the largest restored one.
+    pub(crate) fn restore(
+        settings: Settings,
+        mut items: Vec<Item>,
+        mut pins: Vec<ItemId>,
+        now: Instant,
+    ) -> Self {
+        let next_id = items.iter().map(|item| item.id.0).max().unwrap_or(0);
+        let mut history = Self {
+            next_id,
+            settings,
+            ..Self::default()
+        };
+        for item in &mut items {
+            item.expires_at = history.expiry_for(item.sensitivity, now);
+        }
+        pins.retain(|id| {
+            items
+                .iter()
+                .any(|item| item.id == *id && item.sensitivity.may_pin())
+        });
+        history.items = items;
+        history.pins = pins;
+        history.evict();
+        history
     }
 
     /// The current settings.
