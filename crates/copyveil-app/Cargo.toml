@@ -13,6 +13,7 @@ name = "copyveil"
 path = "src/main.rs"
 
 [dependencies]
+copyveil-dbus.workspace = true
 
 [lints]
 workspace = true
