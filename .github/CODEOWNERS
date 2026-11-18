@@ -5,6 +5,8 @@
 # Keep in sync with .github/labeler.yml.
 /crates/copyveil-core/          @joaoferrete
 /crates/copyveil-detect/        @joaoferrete
+/crates/copyveil-daemon/        @joaoferrete
+/crates/copyveil-keyring/       @joaoferrete
 /crates/copyveil-capture-*/     @joaoferrete
 /gnome-extension/               @joaoferrete
 /deny.toml                      @joaoferrete

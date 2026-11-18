@@ -20,7 +20,7 @@ test:
 
 # Line coverage gate for the security crates (docs/testing.md).
 cov:
-    cargo llvm-cov --locked -p copyveil-core -p copyveil-detect --ignore-filename-regex 'src/bin/' --fail-under-lines 90
+    cargo llvm-cov --locked -p copyveil-core -p copyveil-detect --fail-under-lines 90
 
 # Mutation testing for the security crates. Every surviving mutant fails.
 mutants:

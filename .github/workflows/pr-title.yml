@@ -31,6 +31,8 @@ jobs:
           scopes: |
             core
             detect
+            daemon
+            keyring
             app
             capture
             gnome-ext

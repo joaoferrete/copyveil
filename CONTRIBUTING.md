@@ -33,7 +33,7 @@ PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). C
 ```
 
 - **Types**: `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `build`, `ci`, `chore`, `revert`.
-- **Scopes** (optional): `core`, `detect`, `app`, `capture`, `gnome-ext`, `design`, `packaging`, `deps`, `repo`.
+- **Scopes** (optional): `core`, `detect`, `daemon`, `keyring`, `app`, `capture`, `gnome-ext`, `design`, `packaging`, `deps`, `repo`.
 - **Subject**: imperative, lowercase, no final period. Example: `feat(detect): flag Slack bot tokens`.
 - **Breaking changes**: add `!` after the scope (`feat(core)!: …`) and explain the change in the PR body.
 
@@ -42,7 +42,7 @@ Commits inside your branch can be anything; only the PR title lands on `main`.
 ### Pull requests
 
 - Keep each PR to one concern. Smaller PRs get reviewed faster.
-- Fill in the template. The **Security impact** section is required when the PR gets the `security-sensitive` label, which is applied automatically to changes in `crates/copyveil-core`, `crates/copyveil-detect`, capture sources, the GNOME extension and the build and lint configuration.
+- Fill in the template. The **Security impact** section is required when the PR gets the `security-sensitive` label, which is applied automatically to changes in `crates/copyveil-core`, `crates/copyveil-detect`, `crates/copyveil-daemon`, `crates/copyveil-keyring`, capture sources, the GNOME extension and the build and lint configuration.
 - Changes to security-sensitive paths need a code owner's review (`.github/CODEOWNERS`).
 - For UI changes, include screenshots in light and dark theme.
 - All CI checks must pass. Nobody can merge with a red check, maintainers included.

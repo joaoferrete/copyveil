@@ -9,6 +9,20 @@ use std::time::Instant;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ItemId(pub(crate) u64);
 
+impl ItemId {
+    /// The id as a number, to send over D-Bus.
+    #[must_use]
+    pub const fn value(self) -> u64 {
+        self.0
+    }
+
+    /// An id received over D-Bus. History methods refuse ids they don't know.
+    #[must_use]
+    pub const fn from_value(value: u64) -> Self {
+        Self(value)
+    }
+}
+
 /// What kind of thing was copied.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Kind {
@@ -195,6 +209,12 @@ mod tests {
         );
         assert_eq!(Reason::Unflagged.description(), "");
         assert_eq!(Reason::Override.description(), "Changed by you");
+    }
+
+    #[test]
+    fn ids_round_trip_through_numbers() {
+        assert_eq!(ItemId(42).value(), 42);
+        assert_eq!(ItemId::from_value(42), ItemId(42));
     }
 
     #[test]
