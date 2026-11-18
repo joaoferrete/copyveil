@@ -12,7 +12,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-34465F" alt="License: GPL-3.0-or-later"></a>
 </p>
 
-Copyveil is a clipboard history manager for Linux, built for people who copy API keys, tokens and passwords all day. Press <kbd>Super</kbd>+<kbd>V</kbd>, find what you copied, paste it again. Secrets are masked, kept in memory only, and erased after a short time. Everything else is encrypted on disk.
+Copyveil is a clipboard history manager for Linux, built for people who copy API keys, tokens and passwords all day. Press a shortcut, find what you copied, paste it again. Secrets are masked, kept in memory only, and erased after a short time. Everything else is encrypted on disk.
 
 > **Status: pre-alpha.** The daemon and the GNOME Shell extension work: copies are captured, secrets are detected and expire, the clipboard is cleared after a Secret's Expiry, and the rest is encrypted on disk. The app (popup, settings, onboarding) comes next, so there's nothing to click yet. See the [roadmap](docs/roadmap.md).
 
@@ -39,7 +39,19 @@ GNOME doesn't let regular apps watch the clipboard, so a small Shell extension p
 
 ## Install from source
 
-Requirements: Rust (the version in `rust-toolchain.toml`), Meson ≥ 1.1, Ninja, a Secret Service keyring (GNOME Keyring or KWallet) to keep the History on disk, and GTK 4 / libadwaita development files once the app lands.
+### 1. Install the dependencies
+
+You need Rust through [rustup](https://rustup.rs) (it installs the version pinned in `rust-toolchain.toml` on its own), plus Meson, Ninja, `pkg-config` and the GTK 4 (≥ 4.14) and libadwaita (≥ 1.5) development files. SQLite is built in, so there's nothing to install for it.
+
+| Distribution | Command |
+|---|---|
+| Ubuntu 24.04+, Debian 13+ | `sudo apt install build-essential pkg-config meson ninja-build libgtk-4-dev libadwaita-1-dev` |
+| Fedora | `sudo dnf install gcc pkgconf-pkg-config meson ninja-build gtk4-devel libadwaita-devel` |
+| Arch Linux | `sudo pacman -S --needed base-devel meson ninja gtk4 libadwaita` |
+
+To keep the History across logins you also need a Secret Service keyring: GNOME Keyring (GNOME's default) or KWallet. Without one, Copyveil keeps the History in memory only and says so.
+
+### 2. Build and install
 
 ```sh
 git clone https://github.com/joaoferrete/copyveil.git
@@ -50,9 +62,18 @@ sudo meson install -C _build
 systemctl --user enable --now copyveil-daemon.service
 ```
 
-The daemon keeps the History. It starts with your session, and capture sources and the app can also start it through D-Bus.
+This installs `copyveil-daemon`, which keeps the History, and the `copyveil` app, which shows it. The daemon starts with your session, and both also start on demand through D-Bus.
 
-GNOME also needs the Shell extension. Until it's published on extensions.gnome.org, install it from the repository with `just ext-install`, then log out and back in.
+### 3. On GNOME, add the Shell extension
+
+GNOME doesn't let regular apps watch the clipboard, so Copyveil needs its Shell extension. Until it's on extensions.gnome.org, install it with [`just`](https://github.com/casey/just) (`gnome-extensions` comes with GNOME Shell):
+
+```sh
+just ext-install
+gnome-extensions enable copyveil@joaoferrete.github.io
+```
+
+Log out and back in, then press <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to open the History. Onboarding will offer to switch the shortcut to <kbd>Super</kbd>+<kbd>V</kbd>, which GNOME uses for notifications by default.
 
 Flatpak (Flathub) is planned for v0.2.
 

@@ -12,7 +12,13 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Report se
 
 ## Setup
 
-You need the Rust toolchain pinned in `rust-toolchain.toml` (rustup picks it up automatically), Meson and Ninja, Node.js 22 for the GNOME extension (and GNOME Shell for `just ext-smoke`), Python 3 for the design-token tool, and [`just`](https://github.com/casey/just).
+You need:
+
+- **The build dependencies** from the README's [Install from source](README.md#1-install-the-dependencies): rustup, Meson, Ninja, `pkg-config`, and the GTK 4 and libadwaita development files.
+- **[`just`](https://github.com/casey/just)** for the tasks below.
+- **Python 3** for the design-token and layer tools (standard library only).
+- **Node.js 22** for the GNOME extension's lint and tests.
+- **GNOME Shell** (with `gnome-extensions`) for `just ext-smoke`, `just ext-install` and `just app-screenshot`. Your session isn't touched: the smoke test and the screenshots run in an isolated, headless shell.
 
 Optional tools that CI also runs: `cargo install cargo-llvm-cov cargo-mutants cargo-deny`.
 
