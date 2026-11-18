@@ -56,6 +56,7 @@ Every crash becomes a regression test in the PR that fixes it.
 
 - `tests/bus.rs` runs the real `History1` and `Capture1` interfaces over a peer-to-peer D-Bus connection: no session bus, no keyring. Every method, signal and error in [`dbus.md`](dbus.md) has a test.
 - Masked Items must never appear with content in `List`, and a signal must never carry content. Those assertions stay in place.
+- `tests/settings.rs` covers `Settings1`: the limits, saving, and memory-only erasing the store and forgetting the key. The keyring is replaced by a `StorageOpener` with a fixed key in a temporary directory (`tests/common/mod.rs`).
 - Anything that changes the whole process, such as `harden`, is tested in a test file of its own, so it runs in its own process.
 - To try the real binary without touching your keyring, run it on an isolated session bus that has no activatable services, so it falls back to memory only.
 

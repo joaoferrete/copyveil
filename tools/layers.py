@@ -38,7 +38,7 @@ RULES = {
     "copyveil-dbus": {"workspace": set(), "external": {"serde", "zbus"}},
     # Glue: D-Bus, the async runtime, files, process setup.
     "copyveil-daemon": {
-        "workspace": {"copyveil-core", "copyveil-keyring", "copyveil-dbus"},
+        "workspace": {"copyveil-core", "copyveil-detect", "copyveil-keyring", "copyveil-dbus"},
         "external": None,
     },
     # The app and capture sources reach the History only over D-Bus.

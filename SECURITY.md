@@ -22,6 +22,7 @@ Before 1.0, only the latest release gets security fixes.
 - **Someone looking at the screen**: shoulder surfing, screen sharing, screenshots. Secret and Suspected Items are masked. A Reveal lasts only while held, for at most 5 seconds. Screen readers announce that an Item is hidden, never its value.
 - **Secrets that linger**: Secret and Suspected Items expire, and a Secret is also cleared from the system clipboard if it's still there. Expiry leaves no trace in the History.
 - **Recovering a secret through search**: search matches Secret and Suspected Items only by their description, never their content.
+- **Settings that weaken the defaults too far**: expiry times and the History size are configurable only within fixed limits (a Secret lives 10 s to 5 min), which the daemon enforces whatever client asks. Turning on memory-only erases the saved History and deletes its key from the keyring at once.
 
 ### What Copyveil does not protect against
 

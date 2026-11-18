@@ -127,6 +127,33 @@ impl State {
         self.notice
     }
 
+    /// Applies validated settings: a lower Plain limit removes Items now,
+    /// and new Expiry times apply to Items captured from now on.
+    pub fn set_settings(&mut self, settings: Settings, now: Instant) {
+        self.history.set_settings(settings);
+        self.persist(now);
+    }
+
+    /// Stops keeping the History on disk and erases the store's files. The
+    /// History in memory is untouched.
+    pub fn go_memory_only(&mut self) {
+        if let Storage::Disk(store) = std::mem::replace(&mut self.storage, Storage::Memory)
+            && let Err(err) = store.destroy()
+        {
+            tracing::error!(%err, "could not erase the History store");
+        }
+        self.notice = Notice::None;
+    }
+
+    /// Starts keeping Plain Items on disk again, writing the ones in memory
+    /// now. `storage` comes from [`crate::StorageOpener::open_fresh`], so it
+    /// starts empty and ends up mirroring this History.
+    pub fn attach(&mut self, storage: Storage, notice: Notice, now: Instant) {
+        self.storage = storage;
+        self.notice = notice;
+        self.persist(now);
+    }
+
     /// Adds a Capture. See [`History::capture`].
     pub fn capture(&mut self, capture: Capture, now: Instant) -> ItemId {
         let id = self.history.capture(capture, now);

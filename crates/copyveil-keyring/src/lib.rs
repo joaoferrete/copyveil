@@ -67,3 +67,17 @@ pub async fn history_key() -> Result<Key, KeyringError> {
         .await?;
     Ok(key)
 }
+
+/// Deletes the History key from the keyring, when the user switches to
+/// keeping the History in memory only. A later [`history_key`] creates a
+/// new one, so nothing encrypted with this key can be read again.
+///
+/// # Errors
+///
+/// [`KeyringError::Unavailable`] when the keyring can't be reached.
+pub async fn delete_history_key() -> Result<(), KeyringError> {
+    let keyring = oo7::Keyring::new().await?;
+    keyring.unlock().await?;
+    keyring.delete(&ATTRIBUTES).await?;
+    Ok(())
+}
