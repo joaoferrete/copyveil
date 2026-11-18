@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the copyveil-extension package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: copyveil-extension\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-18 13:51-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: indicator.js:18
+msgid "No keyring: History is kept in memory only"
+msgstr ""
+
+#: indicator.js:19
+msgid "History can’t be saved: kept in memory only"
+msgstr ""
+
+#: indicator.js:20
+msgid "The saved History couldn’t be opened and was erased"
+msgstr ""
+
+#: indicator.js:21
+msgid "Some saved Items couldn’t be read and were erased"
+msgstr ""
+
+#: indicator.js:22
+msgid "Saving the History failed; retrying on the next copy"
+msgstr ""
+
+#: indicator.js:45
+msgid "Open History"
+msgstr ""
+
+#: indicator.js:46
+msgid "Settings"
+msgstr ""
+
+#: indicator.js:47
+msgid "Pause Capture"
+msgstr ""
+
+#: indicator.js:73
+msgid "Copyveil, capture paused"
+msgstr ""
+
+#: indicator.js:74
+msgid "Copyveil, a Secret is in memory"
+msgstr ""
+
+#: indicator.js:86
+msgid "Copyveil isn’t running"
+msgstr ""
