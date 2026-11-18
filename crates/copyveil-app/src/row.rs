@@ -27,6 +27,8 @@ pub struct RowContext {
     pub suspected_expiry: Duration,
     /// The search, highlighted in Plain previews.
     pub query: String,
+    /// The ends of Suspected Items that show them, by id (`History1.SuspectedEnds`).
+    pub ends: std::collections::HashMap<u64, (String, String)>,
 }
 
 impl RowContext {
@@ -38,6 +40,7 @@ impl RowContext {
             secret_expiry: Duration::from_secs(30),
             suspected_expiry: Duration::from_mins(15),
             query: String::new(),
+            ends: std::collections::HashMap::new(),
         }
     }
 }
@@ -56,6 +59,8 @@ pub struct ItemRow {
     mask: Option<MaskedText>,
     /// Under the Mask: the value while it's revealed, empty otherwise.
     revealed: gtk::Label,
+    /// A Suspected Item's visible ends, hidden while it's revealed.
+    ends: Option<gtk::Box>,
     /// Collapses the row at Expiry.
     collapser: gtk::Revealer,
     meta: gtk::Label,
@@ -90,22 +95,7 @@ impl ItemRow {
 
         let revealed = content_label("");
         let mask = masked.then(|| MaskedText::new(shape_for(item)));
-        if let Some(mask) = &mask {
-            // The value sits under the Mask, so a Reveal peels the Mask off it.
-            let overlay = gtk::Overlay::new();
-            overlay.set_child(Some(&revealed));
-            overlay.add_overlay(&mask.area);
-            overlay.set_measure_overlay(&mask.area, true);
-            body.append(&overlay);
-        } else if item.kind == kind::IMAGE {
-            let label = content_label(&format!("Image · {}", item.mime));
-            label.add_css_class("dim-label");
-            body.append(&label);
-        } else {
-            let preview = content_label(&first_line(&item.preview));
-            highlight(&preview, &row.query);
-            body.append(&preview);
-        }
+        let ends = append_content(&body, item, row, &revealed, mask.as_ref());
 
         let meta = gtk::Label::new(None);
         meta.add_css_class("item-meta");
@@ -119,34 +109,7 @@ impl ItemRow {
         body.append(&meta_line);
         line.append(&body);
 
-        let ring = (item.expires_in_ms > 0).then(|| {
-            let total = if item.sensitivity == sensitivity::SECRET {
-                row.secret_expiry
-            } else {
-                row.suspected_expiry
-            };
-            let ring = ExpiryRing::new(1.0);
-            ring.area.set_tooltip_text(Some("Time until it’s erased"));
-            line.append(&ring.area);
-            (ring, total)
-        });
-
-        let unflag = (item.sensitivity == sensitivity::SUSPECTED).then(|| {
-            let button = gtk::Button::with_label("Not a secret");
-            button.add_css_class("flat");
-            button.add_css_class("item-unflag");
-            button.set_valign(gtk::Align::Center);
-            button.set_tooltip_text(Some("Show and keep it as Plain (Ctrl+N)"));
-            line.append(&button);
-            button
-        });
-
-        if item.pin_slot > 0 {
-            let pin = gtk::Image::from_icon_name("view-pin-symbolic");
-            pin.add_css_class("item-pin");
-            pin.set_tooltip_text(Some(&format!("Pin slot {}", item.pin_slot)));
-            line.append(&pin);
-        }
+        let (ring, unflag) = append_trailing(&line, item, row);
 
         let collapser = gtk::Revealer::builder()
             .transition_type(gtk::RevealerTransitionType::SlideUp)
@@ -166,6 +129,7 @@ impl ItemRow {
             unflag,
             mask,
             revealed,
+            ends,
             collapser,
             meta,
             age_ms: item.age_ms,
@@ -220,6 +184,7 @@ impl ItemRow {
     pub fn reveal(&self, value: &str) {
         if let Some(mask) = &self.mask {
             self.revealed.set_text(&first_line(value));
+            self.show_ends(false);
             mask.peel();
         }
     }
@@ -230,10 +195,19 @@ impl ItemRow {
             && !self.revealed.text().is_empty()
         {
             mask.drop_back();
-            let revealed = self.revealed.clone();
+            let (revealed, ends) = (self.revealed.clone(), self.ends.clone());
             glib::timeout_add_local_once(mask::motion(mask::REVEAL_PEEL_MS), move || {
                 revealed.set_text("");
+                if let Some(ends) = &ends {
+                    show_end_labels(ends, true);
+                }
             });
+        }
+    }
+
+    fn show_ends(&self, shown: bool) {
+        if let Some(ends) = &self.ends {
+            show_end_labels(ends, shown);
         }
     }
 
@@ -251,6 +225,85 @@ impl ItemRow {
         let total = mask::motion(mask::EXPIRY_DISSOLVE_MS + EXPIRY_COLLAPSE_MS);
         glib::timeout_add_local_once(total, done);
     }
+}
+
+/// The content line: the Mask over its (empty) revealed value, with a
+/// Suspected Item's ends beside it; an image's type; or a Plain preview
+/// with the search highlighted. Returns the line holding the ends, if any.
+fn append_content(
+    body: &gtk::Box,
+    item: &ItemSummary,
+    row: &RowContext,
+    revealed: &gtk::Label,
+    mask: Option<&MaskedText>,
+) -> Option<gtk::Box> {
+    let Some(mask) = mask else {
+        let label = if item.kind == kind::IMAGE {
+            let label = content_label(&format!("Image · {}", item.mime));
+            label.add_css_class("dim-label");
+            label
+        } else {
+            let preview = content_label(&first_line(&item.preview));
+            highlight(&preview, &row.query);
+            preview
+        };
+        body.append(&label);
+        return None;
+    };
+    // The value sits under the Mask, so a Reveal peels the Mask off it.
+    let overlay = gtk::Overlay::new();
+    overlay.set_child(Some(revealed));
+    overlay.add_overlay(&mask.area);
+    overlay.set_measure_overlay(&mask.area, true);
+    match row.ends.get(&item.id) {
+        Some((first, last)) if item.sensitivity == sensitivity::SUSPECTED => {
+            let line = gtk::Box::new(gtk::Orientation::Horizontal, 4);
+            line.append(&end_label(first));
+            line.append(&overlay);
+            line.append(&end_label(last));
+            body.append(&line);
+            Some(line)
+        }
+        _ => {
+            body.append(&overlay);
+            None
+        }
+    }
+}
+
+/// What sits at the row's right: the `ExpiryRing`, "Not a secret" and the pin.
+fn append_trailing(
+    line: &gtk::Box,
+    item: &ItemSummary,
+    row: &RowContext,
+) -> (Option<(ExpiryRing, Duration)>, Option<gtk::Button>) {
+    let ring = (item.expires_in_ms > 0).then(|| {
+        let total = if item.sensitivity == sensitivity::SECRET {
+            row.secret_expiry
+        } else {
+            row.suspected_expiry
+        };
+        let ring = ExpiryRing::new(1.0);
+        ring.area.set_tooltip_text(Some("Time until it’s erased"));
+        line.append(&ring.area);
+        (ring, total)
+    });
+    let unflag = (item.sensitivity == sensitivity::SUSPECTED).then(|| {
+        let button = gtk::Button::with_label("Not a secret");
+        button.add_css_class("flat");
+        button.add_css_class("item-unflag");
+        button.set_valign(gtk::Align::Center);
+        button.set_tooltip_text(Some("Show and keep it as Plain (Ctrl+N)"));
+        line.append(&button);
+        button
+    });
+    if item.pin_slot > 0 {
+        let pin = gtk::Image::from_icon_name("view-pin-symbolic");
+        pin.add_css_class("item-pin");
+        pin.set_tooltip_text(Some(&format!("Pin slot {}", item.pin_slot)));
+        line.append(&pin);
+    }
+    (ring, unflag)
 }
 
 fn shape_for(item: &ItemSummary) -> Shape {
@@ -305,6 +358,29 @@ fn highlight(label: &gtk::Label, query: &str) {
         attributes.insert(foreground);
     }
     label.set_attributes(Some(&attributes));
+}
+
+/// One end of a Suspected value, beside its Mask: presentation only, so a
+/// screen reader hears the row's label and never the characters.
+fn end_label(text: &str) -> gtk::Label {
+    let label = gtk::Label::builder()
+        .label(text)
+        .accessible_role(gtk::AccessibleRole::Presentation)
+        .build();
+    label.add_css_class("item-content");
+    label.add_css_class("mask-end");
+    label
+}
+
+/// Shows or hides the end labels in a Suspected Item's content line.
+fn show_end_labels(line: &gtk::Box, shown: bool) {
+    let mut child = line.first_child();
+    while let Some(widget) = child {
+        if widget.has_css_class("mask-end") {
+            widget.set_visible(shown);
+        }
+        child = widget.next_sibling();
+    }
 }
 
 fn content_label(text: &str) -> gtk::Label {

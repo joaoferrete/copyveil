@@ -96,6 +96,9 @@ pub struct ItemSummary {
 pub trait History {
     /// Every Item, newest first.
     fn list(&self) -> zbus::Result<Vec<ItemSummary>>;
+    /// The first and last four characters of each Suspected text Item of at
+    /// least 20 characters, by id. Never for Secret Items.
+    fn suspected_ends(&self) -> zbus::Result<std::collections::HashMap<u64, (String, String)>>;
     /// Ids of the Items matching `query`, newest first.
     fn search(&self, query: &str) -> zbus::Result<Vec<u64>>;
     /// One Item's content and plain-text fallback, for a Reveal or a paste.

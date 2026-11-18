@@ -233,6 +233,12 @@ impl Daemon {
             .await
     }
 
+    /// The ends of each Suspected Item that shows them, by id.
+    pub async fn suspected_ends(&self) -> Option<std::collections::HashMap<u64, (String, String)>> {
+        self.call(|history| async move { history.suspected_ends().await })
+            .await
+    }
+
     /// Ids matching `query`; masked Items match on their description only.
     pub async fn search(&self, query: String) -> Option<Vec<u64>> {
         self.call(|history| async move { history.search(&query).await })

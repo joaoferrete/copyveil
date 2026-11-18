@@ -48,7 +48,7 @@ An Item with no indication of being a secret.
 _Avoid_: Normal, common, safe
 
 **Mask**:
-The redaction bar that hides a Secret or Suspected Item's content in the UI: solid for Secret, hatched for Suspected.
+The redaction bar that hides a Secret or Suspected Item's content in the UI: solid for Secret, hatched for Suspected. A long Suspected value keeps its first and last few characters visible, so similar tokens can be told apart.
 _Avoid_: Blur, censor, veil
 
 **Reveal**:

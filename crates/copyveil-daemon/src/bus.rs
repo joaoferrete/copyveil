@@ -149,6 +149,19 @@ impl HistoryService {
         wire::summaries(state.history(), Instant::now())
     }
 
+    /// The first and last four characters of each Suspected text Item of at
+    /// least 20 characters, by id, so the popup can show which token it is.
+    /// Never for Secret Items. See `copyveil_core::Item::suspected_ends`.
+    async fn suspected_ends(&self) -> std::collections::HashMap<u64, (String, String)> {
+        let state = self.shared.state.lock().await;
+        state
+            .history()
+            .items()
+            .iter()
+            .filter_map(|item| Some((item.id().value(), item.suspected_ends()?)))
+            .collect()
+    }
+
     /// Ids of the Items matching `query`, newest first. Masked Items match
     /// only on their description.
     async fn search(&self, query: &str) -> Vec<u64> {
