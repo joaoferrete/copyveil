@@ -229,3 +229,26 @@ pub fn expired<T: PartialOrd + Copy>(expiring: &[(u64, T)], now_ids: &[u64], now
         .map(|(id, _)| *id)
         .collect()
 }
+
+/// How a paste goes out.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PasteRoute {
+    /// The app puts the Item on the clipboard itself, as HTML and plain text
+    /// together (a capture source can offer only one type), then asks the
+    /// capture source to press Ctrl+V (`History1.TypePaste`).
+    Rich,
+    /// The capture source puts the Item on the clipboard and pastes
+    /// (`History1.Paste`): rich text goes in as plain text.
+    Source,
+}
+
+/// Rich text pasted with Enter keeps its formatting; Shift+Enter, and every
+/// other kind, goes through the capture source.
+#[must_use]
+pub fn paste_route(item: &ItemSummary, plain: bool) -> PasteRoute {
+    if item.kind == copyveil_dbus::kind::RICH_TEXT && !plain {
+        PasteRoute::Rich
+    } else {
+        PasteRoute::Source
+    }
+}
