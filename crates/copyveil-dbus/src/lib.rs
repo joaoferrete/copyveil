@@ -107,6 +107,9 @@ pub trait History {
     fn pin_slot(&self, slot: u32) -> zbus::Result<u64>;
     /// Asks the capture source to paste the Item.
     fn paste(&self, id: u64) -> zbus::Result<()>;
+    /// Asks the capture source to press Ctrl+V, after the app put an Item
+    /// on the clipboard itself.
+    fn type_paste(&self) -> zbus::Result<()>;
     /// Removes the Item.
     fn remove(&self, id: u64) -> zbus::Result<()>;
     /// Pins a Plain Item.
@@ -149,6 +152,9 @@ pub trait Capture {
     /// The user asked to paste this Item.
     #[zbus(signal)]
     fn paste_requested(&self, id: u64) -> zbus::Result<()>;
+    /// The clipboard already holds what to paste: press Ctrl+V.
+    #[zbus(signal)]
+    fn type_requested(&self) -> zbus::Result<()>;
 }
 
 /// Client side of `io.github.joaoferrete.Copyveil.Settings1`. The daemon

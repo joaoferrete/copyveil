@@ -28,14 +28,17 @@ export class DaemonClient {
      *
      * @param {(ids: bigint[]) => void} onExpired
      * @param {(id: bigint) => void} onPaste
+     * @param {() => void} onType called on `TypeRequested`: the app already
+     *   put the Item on the clipboard, so only press Ctrl+V
      */
-    watch(onExpired, onPaste) {
+    watch(onExpired, onPaste, onType = () => {}) {
         const subscribe = (member, handler) => this.#bus.signal_subscribe(
             BUS_NAME, CAPTURE, member, OBJECT_PATH, null, Gio.DBusSignalFlags.NONE,
             (_conn, _sender, _path, _iface, _member, params) => handler(params));
         this.#subscriptions.push(
             subscribe('Expired', params => onExpired(params.get_child_value(0).deepUnpack().map(BigInt))),
-            subscribe('PasteRequested', params => onPaste(BigInt(params.get_child_value(0).deepUnpack()))));
+            subscribe('PasteRequested', params => onPaste(BigInt(params.get_child_value(0).deepUnpack()))),
+            subscribe('TypeRequested', () => onType()));
     }
 
     /**

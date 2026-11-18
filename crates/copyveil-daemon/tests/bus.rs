@@ -310,3 +310,11 @@ async fn suspected_items_show_their_ends_and_secrets_never_do() {
     assert_eq!(ends[&aws], ("AKIA".to_owned(), "CGWN".to_owned()));
     assert!(!ends.contains_key(&secret));
 }
+
+#[tokio::test]
+async fn type_paste_asks_only_for_ctrl_v() {
+    let d = memory_daemon(Settings::default()).await;
+    let mut typed = d.capture.receive_type_requested().await.unwrap();
+    d.history.type_paste().await.unwrap();
+    typed.next().await.unwrap();
+}

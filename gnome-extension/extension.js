@@ -41,7 +41,8 @@ export default class CopyveilExtension extends Extension {
         this._clipboard.watch(read => this._capture(read).catch(() => {}));
         this._daemon.watch(
             ids => this._expired(ids),
-            id => this._paste(id).catch(() => {}));
+            id => this._paste(id).catch(() => {}),
+            () => this._keyboard?.pasteSoon());
 
         this._indicator = new Indicator(this.dir.get_child('icons'), this._daemon, this._settings);
         this._daemon.watchHistory(() => this._refreshIcon().catch(() => {}));
