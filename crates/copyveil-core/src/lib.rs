@@ -20,6 +20,9 @@
 mod classify;
 mod content;
 mod crypto;
+#[cfg(feature = "fuzzing")]
+#[doc(hidden)]
+pub mod fuzzing;
 mod history;
 mod item;
 mod record;

@@ -1,0 +1,7 @@
+# cargo-mutants configuration. Every exclusion needs a reason a reviewer agreed to.
+
+exclude_globs = [
+  # Compiled only with the `fuzzing` feature, which the test suite doesn't
+  # enable; the fuzz targets exercise it instead.
+  "crates/copyveil-core/src/fuzzing.rs",
+]

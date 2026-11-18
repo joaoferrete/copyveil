@@ -1,0 +1,38 @@
+[package]
+name = "copyveil-fuzz"
+version = "0.0.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+copyveil-core = { path = "../crates/copyveil-core", features = ["fuzzing"] }
+copyveil-detect = { path = "../crates/copyveil-detect" }
+
+# Not part of the main workspace: fuzzing needs nightly.
+[workspace]
+
+[[bin]]
+name = "detect"
+path = "fuzz_targets/detect.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "records"
+path = "fuzz_targets/records.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sealed"
+path = "fuzz_targets/sealed.rs"
+test = false
+doc = false
+bench = false
