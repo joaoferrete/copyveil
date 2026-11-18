@@ -55,6 +55,7 @@ The app as of the latest UI change, generated with `just app-screenshot` from sy
 |---|---|---|
 | Popup | ![Popup, light](screenshots/popup-light.png) | ![Popup, dark](screenshots/popup-dark.png) |
 | Search | ![Search, light](screenshots/search-light.png) | ![Search, dark](screenshots/search-dark.png) |
+| Veil draw (mid-animation) | ![Veil draw, light](screenshots/veil-light.png) | ![Veil draw, dark](screenshots/veil-dark.png) |
 | Settings | ![Settings, light](screenshots/settings-light.png) | ![Settings, dark](screenshots/settings-dark.png) |
 | Onboarding | ![Onboarding, light](screenshots/onboarding-light.png) | ![Onboarding, dark](screenshots/onboarding-dark.png) |
 
@@ -69,7 +70,16 @@ Regenerate them in any PR that changes how the app looks.
 | Expiry | The Mask dissolves, then the row collapses. No tombstone. | 300 ms + 460 ms |
 | Carbon copy | On paste, a ghost copy lifts off the row and fades. | 360 ms ease-out |
 
-With reduced motion enabled, all four become instant state changes.
+With reduced motion enabled, all four become instant state changes: they are libadwaita animations, which skip themselves, and every wait that follows one is zero (`mask::motion`). The timings live in `design/tokens.json`, and a test checks the code against them.
+
+| Moment | Where |
+|---|---|
+| Veil draw | `MaskedText::draw_in`, for masked rows new since the last listing (opening the popup animates nothing) |
+| Hold to reveal | `MaskedText::peel` and `drop_back`: the value sits under the Mask, which peels off to the right |
+| Expiry | `ItemRow::expire`: the Mask dissolves, then a `GtkRevealer` collapses the row, then the list is rebuilt |
+| Carbon copy | `PopupWindow::paste`: a picture of the row lifts 18 px and fades in an overlay, then the popup closes and pastes |
+
+`just app-screenshot` includes `veil-*.png`, shot mid veil-draw.
 
 ## Accessibility
 

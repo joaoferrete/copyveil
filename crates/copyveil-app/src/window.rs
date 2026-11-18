@@ -16,10 +16,16 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
+/// `motion.carbon-copy`: the ghost of a pasted row lifting off.
+pub(crate) const CARBON_COPY_MS: u32 = 360;
+
 struct State {
     popup: Popup,
     /// Expiry times from the daemon's settings, for the rows' rings.
     expiry: (Duration, Duration),
+    /// Ids listed last time, to draw in only new rows; `None` right after
+    /// the popup opens, so opening it animates nothing.
+    listed: Option<Vec<u64>>,
     rows: Vec<ItemRow>,
     /// The row being revealed and the timer that ends the Reveal.
     revealed: Option<(u64, glib::SourceId)>,
@@ -31,6 +37,7 @@ struct State {
 pub struct PopupWindow {
     window: adw::ApplicationWindow,
     title: adw::WindowTitle,
+    layer: gtk::Overlay,
     banner: adw::Banner,
     search: gtk::SearchEntry,
     list: gtk::ListBox,
@@ -111,19 +118,23 @@ impl PopupWindow {
         toolbar.set_content(Some(&toasts));
         toolbar.add_bottom_bar(&hints());
 
+        // Carbon-copy ghosts float above everything else.
+        let layer = gtk::Overlay::new();
+        layer.set_child(Some(&toolbar));
         let window = adw::ApplicationWindow::builder()
             .application(app)
             .title("Copyveil")
             .default_width(520)
             .default_height(600)
             .hide_on_close(true)
-            .content(&toolbar)
+            .content(&layer)
             .build();
         window.add_css_class("copyveil-popup");
 
         let popup = Self {
             window,
             title,
+            layer,
             banner,
             search,
             list,
@@ -137,6 +148,7 @@ impl PopupWindow {
             state: Rc::new(RefCell::new(State {
                 popup: Popup::default(),
                 expiry: (Duration::from_secs(30), Duration::from_mins(15)),
+                listed: None,
                 rows: Vec::new(),
                 revealed: None,
                 ticker: None,
@@ -179,6 +191,7 @@ impl PopupWindow {
     }
 
     fn show(&self) {
+        self.state.borrow_mut().listed = None;
         self.search.set_text("");
         self.all.set_active(true);
         self.state.borrow_mut().popup.set_tab(Tab::All);
@@ -346,12 +359,44 @@ impl PopupWindow {
             } else {
                 this.daemon.search(query).await
             };
-            {
-                let mut state = this.state.borrow_mut();
-                state.popup.set_items(items.unwrap_or_default());
-                state.popup.set_matches_keeping_selection(matches);
+            let items = items.unwrap_or_default();
+            let now_ids: Vec<u64> = items.iter().map(|item| item.id).collect();
+            // A second of slack: the daemon's Expiry and this clock tick apart.
+            let due = Instant::now() + Duration::from_secs(1);
+            let expiring: Vec<(u64, Instant)> = this
+                .state
+                .borrow()
+                .rows
+                .iter()
+                .filter_map(|row| row.expiry_deadline().map(|at| (row.id, at)))
+                .collect();
+            let expired = crate::popup::expired(&expiring, &now_ids, due);
+            let apply = {
+                let this = this.clone();
+                move || {
+                    {
+                        let mut state = this.state.borrow_mut();
+                        state.popup.set_items(items.clone());
+                        state.popup.set_matches_keeping_selection(matches.clone());
+                    }
+                    this.render();
+                }
+            };
+            if expired.is_empty() {
+                apply();
+                return;
             }
-            this.render();
+            // The Expiry moment: dissolve and collapse, then list again.
+            let state = this.state.borrow();
+            let mut apply = Some(apply);
+            for row in state.rows.iter().filter(|row| expired.contains(&row.id)) {
+                let done = apply.take();
+                row.expire(move || {
+                    if let Some(apply) = &done {
+                        apply();
+                    }
+                });
+            }
         });
     }
 
@@ -380,6 +425,13 @@ impl PopupWindow {
                 button.connect_clicked(move |_| this.unflag(id));
             }
         }
+        let ids: Vec<u64> = rows.iter().map(|row| row.id).collect();
+        for id in crate::popup::appeared(state.listed.as_deref(), &ids) {
+            if let Some(row) = rows.iter().find(|row| row.id == id) {
+                row.draw_in();
+            }
+        }
+        state.listed = Some(ids);
         let selected = state.popup.selected_index();
         state.rows = rows;
         let searching = !self.search.text().is_empty();
@@ -441,12 +493,64 @@ impl PopupWindow {
         }
     }
 
+    /// The carbon copy: a ghost of the row lifts off and fades, then the
+    /// popup closes and the Item is pasted.
     fn paste(&self, id: u64) {
-        self.hide();
-        let daemon = self.daemon.clone();
-        glib::spawn_future_local(async move {
-            daemon.paste(id).await;
+        let row = self
+            .state
+            .borrow()
+            .rows
+            .iter()
+            .find(|row| row.id == id)
+            .map(|row| row.widget.clone());
+        let (this, daemon) = (self.clone(), self.daemon.clone());
+        let finish = move || {
+            this.hide();
+            let daemon = daemon.clone();
+            glib::spawn_future_local(async move {
+                daemon.paste(id).await;
+            });
+        };
+        match row.and_then(|row| self.lift_ghost(&row)) {
+            Some(ghost) => {
+                let layer = self.layer.clone();
+                glib::timeout_add_local_once(crate::mask::motion(CARBON_COPY_MS), move || {
+                    layer.remove_overlay(&ghost);
+                    finish();
+                });
+            }
+            None => finish(),
+        }
+    }
+
+    /// Places a picture of `row` over it and animates it up and out.
+    fn lift_ghost(&self, row: &gtk::ListBoxRow) -> Option<gtk::Picture> {
+        let bounds = row.compute_bounds(&self.layer)?;
+        let paintable = gtk::WidgetPaintable::new(Some(row)).current_image();
+        let ghost = gtk::Picture::for_paintable(&paintable);
+        ghost.add_css_class("carbon-copy");
+        ghost.set_can_target(false);
+        ghost.set_halign(gtk::Align::Start);
+        ghost.set_valign(gtk::Align::Start);
+        // Bounds are whole pixels in practice; round to place the ghost.
+        let to_px = |value: f32| format!("{:.0}", value.round()).parse::<i32>().unwrap_or(0);
+        let top = to_px(bounds.y());
+        ghost.set_margin_start(to_px(bounds.x()));
+        ghost.set_margin_top(top);
+        ghost.set_size_request(to_px(bounds.width()), to_px(bounds.height()));
+        self.layer.add_overlay(&ghost);
+        let target_ghost = ghost.clone();
+        let target = adw::CallbackAnimationTarget::new(move |progress| {
+            target_ghost.set_opacity(1.0 - progress);
+            let lift = format!("{:.0}", (progress * 18.0).round())
+                .parse::<i32>()
+                .unwrap_or(0);
+            target_ghost.set_margin_top(top - lift);
         });
+        let animation = adw::TimedAnimation::new(&ghost, 0.0, 1.0, CARBON_COPY_MS, target);
+        animation.set_easing(adw::Easing::EaseOutCubic);
+        animation.play();
+        Some(ghost)
     }
 
     fn toggle_pin(&self) {
