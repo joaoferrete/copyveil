@@ -68,3 +68,8 @@
 .item-unflag {
   font-size: smaller;
 }
+
+/* ExpiryRing: Slate, the brand colour of time running out. */
+.expiry-ring {
+  color: @cv_slate;
+}

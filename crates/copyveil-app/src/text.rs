@@ -77,6 +77,53 @@ pub fn storage_notice(storage_notice: &str) -> Option<&'static str> {
     }
 }
 
+/// Where `query` occurs in `text`, ignoring case, as byte ranges that don't
+/// overlap: what the search highlights in a Plain Item's preview.
+#[must_use]
+pub fn search_matches(text: &str, query: &str) -> Vec<std::ops::Range<usize>> {
+    let needle: Vec<char> = query.chars().flat_map(char::to_lowercase).collect();
+    if needle.is_empty() {
+        return Vec::new();
+    }
+    let chars: Vec<(usize, char)> = text.char_indices().collect();
+    let mut found = Vec::new();
+    let mut i = 0;
+    while i < chars.len() {
+        let mut matched = 0;
+        let mut j = i;
+        while j < chars.len() && matched < needle.len() {
+            let lower: Vec<char> = chars[j].1.to_lowercase().collect();
+            if needle[matched..].starts_with(&lower) {
+                matched += lower.len();
+                j += 1;
+            } else {
+                break;
+            }
+        }
+        if matched == needle.len() {
+            let end = chars.get(j).map_or(text.len(), |(at, _)| *at);
+            found.push(chars[i].0..end);
+            i = j;
+        } else {
+            i += 1;
+        }
+    }
+    found
+}
+
+/// How much of an Expiry is left, from 1 (just copied) to 0 (due), for the
+/// `ExpiryRing`.
+#[must_use]
+pub fn expiry_fraction(remaining_ms: u64, total_ms: u64) -> f64 {
+    if total_ms == 0 {
+        return 0.0;
+    }
+    // Expiry times are at most an hour, so milliseconds fit a u32 exactly.
+    let ms = |value: u64| f64::from(u32::try_from(value).unwrap_or(u32::MAX));
+    let fraction = ms(remaining_ms.min(total_ms)) / ms(total_ms);
+    fraction.clamp(0.0, 1.0)
+}
+
 /// What a screen reader hears for a row. Masked Items are announced by
 /// Sensitivity, description and time left; their content never is.
 #[must_use]
@@ -108,7 +155,8 @@ pub fn accessible_label(item: &ItemSummary) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        accessible_label, age, storage_notice, storage_title, time_left, time_left_spoken,
+        accessible_label, age, expiry_fraction, search_matches, storage_notice, storage_title,
+        time_left, time_left_spoken,
     };
     use copyveil_dbus::ItemSummary;
 
@@ -221,5 +269,28 @@ mod tests {
             ..summary("plain")
         };
         assert_eq!(accessible_label(&image), "Image, image/png.");
+    }
+
+    fn none() -> Vec<std::ops::Range<usize>> {
+        Vec::new()
+    }
+
+    #[test]
+    fn search_matches_ignore_case_and_never_overlap() {
+        assert_eq!(search_matches("git status", "STAT"), vec![(4..8)]);
+        assert_eq!(search_matches("aaa", "aa"), vec![(0..2)]);
+        assert_eq!(search_matches("Ação ação", "AÇÃO"), vec![0..6, 7..13]);
+        assert_eq!(search_matches("docker", ""), none());
+        assert_eq!(search_matches("docker", "x"), none());
+        assert_eq!(search_matches("ab", "abc"), none());
+    }
+
+    #[test]
+    fn the_expiry_ring_empties_as_time_passes() {
+        assert!((expiry_fraction(30_000, 30_000) - 1.0).abs() < f64::EPSILON);
+        assert!((expiry_fraction(15_000, 30_000) - 0.5).abs() < f64::EPSILON);
+        assert!(expiry_fraction(0, 30_000).abs() < f64::EPSILON);
+        assert!((expiry_fraction(40_000, 30_000) - 1.0).abs() < f64::EPSILON);
+        assert!(expiry_fraction(10, 0).abs() < f64::EPSILON);
     }
 }

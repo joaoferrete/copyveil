@@ -1,7 +1,7 @@
 //! Renders the popup to a PNG, for the light and dark screenshots UI PRs
 //! need (`docs/design/README.md`).
 //!
-//!     screenshot OUT.png [light|dark] [popup|settings|onboarding]
+//!     screenshot OUT.png [light|dark] [popup|search|settings|onboarding]
 //!
 //! It talks to whatever daemon is on the session bus, so run it inside
 //! `tools/app-screenshot/run.sh`, which starts an isolated one with
@@ -35,6 +35,10 @@ fn main() -> glib::ExitCode {
         let popup = PopupWindow::new(app, Daemon::connect());
         let shown: gtk::Widget = match view.as_str() {
             "settings" => popup.open_settings().upcast(),
+            "search" => {
+                popup.show_with_query("co");
+                popup.window().clone().upcast()
+            }
             "onboarding" => {
                 copyveil_app::onboarding_window::present(app, &Daemon::connect(), || {}).upcast()
             }

@@ -6,7 +6,7 @@
 
 use crate::daemon::Daemon;
 use crate::onboarding::{self, Extension, Step};
-use crate::row::ItemRow;
+use crate::row::{ItemRow, RowContext};
 use adw::prelude::*;
 use copyveil_dbus::ItemSummary;
 use gtk::{gdk, glib};
@@ -236,13 +236,13 @@ fn welcome_page() -> gtk::Box {
     list.add_css_class("onboarding-sample");
     list.set_selection_mode(gtk::SelectionMode::None);
     list.set_margin_top(12);
-    let now = Instant::now();
+    let context = RowContext::now();
     for item in [
         sample(1, "secret", "From password manager", 30_000, ""),
         sample(2, "suspected", "Looks like a GitHub token", 900_000, ""),
         sample(3, "plain", "", 0, "docker compose up -d"),
     ] {
-        let row = ItemRow::new(&item, None, now);
+        let row = ItemRow::new(&item, None, &context);
         row.widget.set_activatable(false);
         list.append(&row.widget);
     }
@@ -395,7 +395,7 @@ fn live_test_page(daemon: &Daemon, status: &gtk::Box, pages: Rc<Pages>) -> gtk::
                 let list = gtk::ListBox::new();
                 list.add_css_class("boxed-list");
                 list.set_selection_mode(gtk::SelectionMode::None);
-                list.append(&ItemRow::new(&item, None, Instant::now()).widget);
+                list.append(&ItemRow::new(&item, None, &RowContext::now()).widget);
                 status.append(&list);
                 status.append(&gtk::Label::new(Some(
                     "It works. The token is masked and in memory only. Copyveil removed the test Item and cleared the clipboard.",
