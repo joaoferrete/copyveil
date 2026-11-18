@@ -20,7 +20,7 @@
   </description>
   <launchable type="desktop-id">@APP_ID@.desktop</launchable>
   <developer id="io.github.joaoferrete">
-    <name>João Ferrete</name>
+    <name translate="no">João Ferrete</name>
   </developer>
   <url type="homepage">https://github.com/joaoferrete/copyveil</url>
   <url type="bugtracker">https://github.com/joaoferrete/copyveil/issues</url>

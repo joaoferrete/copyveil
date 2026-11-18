@@ -1,5 +1,6 @@
 # Files with translatable strings, for xgettext. Keep sorted.
 crates/copyveil-app/src/main.rs
+crates/copyveil-app/src/mask.rs
 crates/copyveil-app/src/onboarding.rs
 crates/copyveil-app/src/onboarding_window.rs
 crates/copyveil-app/src/popup.rs

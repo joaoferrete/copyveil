@@ -185,9 +185,9 @@ pub fn badge(shape: Shape) -> gtk::Box {
         paint(area, cr, width, height, shape, BADGE_RADIUS_PX);
     });
 
-    let label = gtk::Label::new(Some(match shape {
-        Shape::Solid => "Secret",
-        Shape::Hatch => "Suspected",
+    let label = gtk::Label::new(Some(&match shape {
+        Shape::Solid => gettextrs::gettext("Secret"),
+        Shape::Hatch => gettextrs::gettext("Suspected"),
     }));
     label.add_css_class("caption-heading");
     let badge = gtk::Box::new(gtk::Orientation::Horizontal, 4);

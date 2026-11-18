@@ -250,8 +250,8 @@ fn detection_page(
     let disabled = Rc::new(std::cell::RefCell::new(values.disabled_detectors.clone()));
     for (name, title, description) in detectors {
         let row = adw::SwitchRow::builder()
-            .title(title.as_str())
-            .subtitle(description.as_str())
+            .title(crate::text::detector_title(title))
+            .subtitle(crate::text::reason(description))
             .active(!values.disabled_detectors.contains(name))
             .build();
         let (dialog, daemon, disabled, name) = (

@@ -4,6 +4,7 @@
 //! A screen reader never hears a masked value: it hears the Sensitivity, the
 //! description and the time left (`docs/design/README.md`).
 
+use crate::N_;
 use copyveil_dbus::{ItemSummary, kind, notice, sensitivity};
 use gettextrs::{gettext, ngettext};
 
@@ -149,15 +150,32 @@ pub fn expiry_fraction(remaining_ms: u64, total_ms: u64) -> f64 {
 #[must_use]
 pub fn reason(english: &str) -> String {
     let marked = match english {
-        "From password manager" => crate::N_!("From password manager"),
-        "Changed by you" => crate::N_!("Changed by you"),
-        "Looks like a GitHub token" => crate::N_!("Looks like a GitHub token"),
-        "Looks like an AWS access key" => crate::N_!("Looks like an AWS access key"),
-        "Looks like an AI provider API key" => crate::N_!("Looks like an AI provider API key"),
-        "Looks like a JSON Web Token" => crate::N_!("Looks like a JSON Web Token"),
-        "Looks like a private key" => crate::N_!("Looks like a private key"),
-        "Looks like a payment card number" => crate::N_!("Looks like a payment card number"),
-        "Looks like a random secret" => crate::N_!("Looks like a random secret"),
+        "From password manager" => N_!("From password manager"),
+        "Changed by you" => N_!("Changed by you"),
+        "Looks like a GitHub token" => N_!("Looks like a GitHub token"),
+        "Looks like an AWS access key" => N_!("Looks like an AWS access key"),
+        "Looks like an AI provider API key" => N_!("Looks like an AI provider API key"),
+        "Looks like a JSON Web Token" => N_!("Looks like a JSON Web Token"),
+        "Looks like a private key" => N_!("Looks like a private key"),
+        "Looks like a payment card number" => N_!("Looks like a payment card number"),
+        "Looks like a random secret" => N_!("Looks like a random secret"),
+        other => return other.to_owned(),
+    };
+    gettext(marked)
+}
+
+/// A detector's title from `Settings1.Detectors` ("GitHub tokens"),
+/// translated. Unknown titles pass through as they are.
+#[must_use]
+pub fn detector_title(english: &str) -> String {
+    let marked = match english {
+        "GitHub tokens" => N_!("GitHub tokens"),
+        "AWS access keys" => N_!("AWS access keys"),
+        "AI provider API keys" => N_!("AI provider API keys"),
+        "JSON Web Tokens" => N_!("JSON Web Tokens"),
+        "Private keys" => N_!("Private keys"),
+        "Payment card numbers" => N_!("Payment card numbers"),
+        "Random-looking text" => N_!("Random-looking text"),
         other => return other.to_owned(),
     };
     gettext(marked)
@@ -359,5 +377,28 @@ mod tests {
         "Looks like a private key",
         "Looks like a payment card number",
         "Looks like a random secret",
+    ];
+
+    #[test]
+    fn every_detector_title_is_translatable() {
+        for detector in copyveil_detect::Detector::ALL {
+            let title = detector.title();
+            assert!(
+                TITLES.contains(&title),
+                "{title} is missing from text::detector_title"
+            );
+        }
+        assert_eq!(super::detector_title("New detector"), "New detector");
+    }
+
+    /// The titles `text::detector_title` knows, kept in sync with it.
+    const TITLES: [&str; 7] = [
+        "GitHub tokens",
+        "AWS access keys",
+        "AI provider API keys",
+        "JSON Web Tokens",
+        "Private keys",
+        "Payment card numbers",
+        "Random-looking text",
     ];
 }

@@ -107,7 +107,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends meson ninja-build desktop-file-utils appstream libgtk-4-dev libadwaita-1-dev
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends meson ninja-build desktop-file-utils appstream libgtk-4-dev libadwaita-1-dev gettext
       - run: meson setup _build -Dprofile=debug
       - run: meson compile -C _build
       - run: meson test -C _build --print-errorlogs
+      - name: Translations complete and valid
+        run: tools/check-translations.sh

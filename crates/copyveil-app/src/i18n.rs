@@ -47,6 +47,37 @@ macro_rules! N_ {
 mod tests {
     use super::tr;
 
+    /// Every source file with translatable strings is listed in
+    /// `po/POTFILES.in`, or `xgettext` never sees its strings.
+    #[test]
+    fn potfiles_list_every_translated_file() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+        let listed = std::fs::read_to_string(format!("{root}/po/POTFILES.in")).unwrap();
+        let src = concat!(env!("CARGO_MANIFEST_DIR"), "/src");
+        let mut stack = vec![std::path::PathBuf::from(src)];
+        while let Some(dir) = stack.pop() {
+            for entry in std::fs::read_dir(&dir).unwrap() {
+                let path = entry.unwrap().path();
+                if path.is_dir() {
+                    stack.push(path);
+                    continue;
+                }
+                let text = std::fs::read_to_string(&path).unwrap();
+                let translates = text.contains("gettext(\"") || text.contains("N_!(\"");
+                let name = format!(
+                    "crates/copyveil-app/src/{}",
+                    path.strip_prefix(src).unwrap().display()
+                );
+                if translates && !path.ends_with("i18n.rs") {
+                    assert!(
+                        listed.lines().any(|line| line == name),
+                        "{name} has translatable strings but isn't in po/POTFILES.in"
+                    );
+                }
+            }
+        }
+    }
+
     #[test]
     fn untranslated_strings_stay_in_english() {
         assert_eq!(tr("Settings"), "Settings");

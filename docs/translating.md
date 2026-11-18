@@ -22,7 +22,7 @@ There are two catalogs, because the app and the GNOME Shell extension are instal
    ```
 
 3. Translate every `msgstr`. Keep the glossary terms consistent (below), and keep each string about as long as the English, since rows and buttons have little room.
-4. Check them: `msgfmt --check -o /dev/null po/es.po` (and the same for the extension). CI runs this for every catalog.
+4. Check them with `just i18n-check`: it fails when any catalog is invalid, or has a string untranslated or fuzzy against the current English. CI runs it on every PR.
 
 ## Updating catalogs after the English changes
 
@@ -32,6 +32,17 @@ tools/extension-pot.sh --update
 ```
 
 Commit the updated `.pot` and `.po` files with the change that altered the strings.
+
+## Seeing a translation
+
+```sh
+meson setup _build && meson compile -C _build        # compiles po/*.po
+COPYVEIL_LOCALEDIR=$PWD/_build/po cargo build -p copyveil-app --example screenshot
+cargo build -p copyveil-daemon
+LANG=pt_BR.UTF-8 LANGUAGE=pt_BR tools/app-screenshot/run.sh /tmp/shots
+```
+
+This renders the popup, settings and onboarding in that language, from an isolated headless GNOME Shell. Strings too long for their row show up at once.
 
 ## Glossary terms
 
@@ -53,7 +64,7 @@ Glossary terms are product vocabulary: translate them once, then use the same wo
 
 ## For developers: marking strings
 
-- **App (Rust)**: wrap user-facing strings in `gettext("…")` where they're shown. For a string stored in a constant first, mark it with `N_!("…")` and translate it with `i18n::tr` when it's shown. Reasons from the daemon ("Looks like a GitHub token") are English on the bus and translated by the app through `text::reason`, whose table a test keeps in sync with the detectors.
+- **App (Rust)**: wrap user-facing strings in `gettext("…")` where they're shown. For a string stored in a constant first, mark it with `N_!("…")` (imported with `use crate::N_;`, since `xgettext` doesn't match `crate::N_!`) and translate it with `i18n::tr` when it's shown. Reasons from the daemon ("Looks like a GitHub token") are English on the bus and translated by the app through `text::reason`, whose table a test keeps in sync with the detectors.
 - **Extension (GJS)**: use `_()` from `extension.js`; the extension's `gettext-domain` is set in `metadata.json`.
 - Tests compare against the English strings: without a loaded catalog, gettext returns the original.
 - Never put Item content in a translatable string or its arguments.

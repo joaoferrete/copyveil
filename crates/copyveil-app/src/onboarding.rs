@@ -4,6 +4,7 @@
 //! is kept, and a live test. The live test can't be skipped the first
 //! time: it proves capture, detection and masking work on this desktop.
 
+use crate::N_;
 use copyveil_dbus::{ItemSummary, kind, notice, sensitivity};
 use std::path::PathBuf;
 
@@ -75,26 +76,24 @@ impl Extension {
     pub const fn describe(self) -> (&'static str, &'static str) {
         match self {
             Self::NoGnomeShell => (
-                crate::N_!("Copyveil captures on GNOME for now"),
-                crate::N_!(
-                    "Support for KDE Plasma, COSMIC and wlroots desktops arrives in version 0.2."
-                ),
+                N_!("Copyveil captures on GNOME for now"),
+                N_!("Support for KDE Plasma, COSMIC and wlroots desktops arrives in version 0.2."),
             ),
             Self::NotInstalled => (
-                crate::N_!("Install the GNOME Shell extension"),
-                crate::N_!(
+                N_!("Install the GNOME Shell extension"),
+                N_!(
                     "GNOME only lets its own extensions watch the clipboard. Run “./install.sh” in the Copyveil source folder, then log out and back in."
                 ),
             ),
             Self::Off => (
-                crate::N_!("Turn on the GNOME Shell extension"),
-                crate::N_!(
+                N_!("Turn on the GNOME Shell extension"),
+                N_!(
                     "It’s installed but not running. It passes each copy to Copyveil and stores nothing itself."
                 ),
             ),
             Self::On => (
-                crate::N_!("Copies reach Copyveil"),
-                crate::N_!(
+                N_!("Copies reach Copyveil"),
+                N_!(
                     "The GNOME Shell extension is running. It passes each copy to Copyveil and stores nothing itself."
                 ),
             ),
@@ -111,24 +110,24 @@ pub fn describe_storage(
 ) -> (&'static str, &'static str) {
     match (on_disk, storage_notice) {
         (None, _) => (
-            crate::N_!("Copyveil isn’t running"),
-            crate::N_!("Start it with “systemctl --user enable --now copyveil-daemon”."),
+            N_!("Copyveil isn’t running"),
+            N_!("Start it with “systemctl --user enable --now copyveil-daemon”."),
         ),
         (Some(true), _) => (
-            crate::N_!("Your History is encrypted"),
-            crate::N_!(
+            N_!("Your History is encrypted"),
+            N_!(
                 "Plain Items are saved encrypted with a key that lives only in your keyring. Secrets never touch the disk."
             ),
         ),
         (Some(false), notice::KEYRING_UNAVAILABLE) => (
-            crate::N_!("No keyring found"),
-            crate::N_!(
+            N_!("No keyring found"),
+            N_!(
                 "Copyveil keeps the History in memory only, so it clears when you log out. Install GNOME Keyring or KWallet to keep it."
             ),
         ),
         (Some(false), _) => (
-            crate::N_!("Your History stays in memory"),
-            crate::N_!(
+            N_!("Your History stays in memory"),
+            N_!(
                 "Nothing is saved to disk, so the History clears when you log out. You can change this in Settings."
             ),
         ),

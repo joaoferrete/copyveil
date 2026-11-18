@@ -4,12 +4,14 @@
 //! daemon. Typing always goes to the search; arrows, Enter, Ctrl+number,
 //! Ctrl+P, Delete, Alt and Escape are handled before the search sees them.
 
+use crate::N_;
 use crate::daemon::Daemon;
 use crate::mask::REVEAL_MAX_MS;
 use crate::popup::{Popup, Tab, row_number};
 use crate::row::{ItemRow, RowContext};
 use crate::text;
 use adw::prelude::*;
+use gettextrs::gettext;
 use gtk::gdk;
 use gtk::glib::{self, Propagation};
 use std::cell::RefCell;
@@ -58,8 +60,8 @@ impl PopupWindow {
     #[must_use]
     pub fn new(app: &adw::Application, daemon: Daemon) -> Self {
         let title = adw::WindowTitle::new("Copyveil", "");
-        let all = gtk::ToggleButton::with_label("All");
-        let pinned = gtk::ToggleButton::with_label("Pinned");
+        let all = gtk::ToggleButton::with_label(&gettext("All"));
+        let pinned = gtk::ToggleButton::with_label(&gettext("Pinned"));
         pinned.set_group(Some(&all));
         all.set_active(true);
         let tabs = gtk::Box::new(gtk::Orientation::Horizontal, 0);
@@ -74,12 +76,12 @@ impl PopupWindow {
         let banner = adw::Banner::new("");
         header.pack_start(&tabs);
         let settings = gtk::Button::from_icon_name("emblem-system-symbolic");
-        settings.set_tooltip_text(Some("Settings (Ctrl+,)"));
+        settings.set_tooltip_text(Some(&gettext("Settings (Ctrl+,)")));
         settings.set_action_name(Some("app.preferences"));
         header.pack_end(&settings);
 
         let search = gtk::SearchEntry::new();
-        search.set_placeholder_text(Some("Search the History"));
+        search.set_placeholder_text(Some(&gettext("Search the History")));
         search.set_hexpand(true);
         search.add_css_class("popup-search");
 
@@ -95,10 +97,10 @@ impl PopupWindow {
 
         let empty = adw::StatusPage::builder()
             .icon_name("edit-paste-symbolic")
-            .title("Nothing copied yet")
-            .description(
+            .title(gettext("Nothing copied yet"))
+            .description(gettext(
                 "Copy something and it appears here. Secrets are hidden and erased on their own.",
-            )
+            ))
             .build();
         let stack = gtk::Stack::new();
         stack.add_named(&scroller, Some("list"));
@@ -125,7 +127,7 @@ impl PopupWindow {
         layer.set_child(Some(&toolbar));
         let window = adw::ApplicationWindow::builder()
             .application(app)
-            .title("Copyveil")
+            .title(gettext("Copyveil"))
             .default_width(520)
             .default_height(600)
             .hide_on_close(true)
@@ -450,20 +452,24 @@ impl PopupWindow {
         if is_empty {
             let (title, description) = match (searching, self.pinned.is_active()) {
                 (true, _) => (
-                    "No matches",
-                    "Secret and Suspected Items match only on their description.",
+                    gettext("No matches"),
+                    gettext("Secret and Suspected Items match only on their description."),
                 ),
                 (false, true) => (
-                    "No Pins yet",
-                    "Pin a Plain Item with Ctrl+P to keep it here and paste it with Super+Alt+number.",
+                    gettext("No Pins yet"),
+                    gettext(
+                        "Pin a Plain Item with Ctrl+P to keep it here and paste it with Super+Alt+number.",
+                    ),
                 ),
                 (false, false) => (
-                    "Nothing copied yet",
-                    "Copy something and it appears here. Secrets are hidden and erased on their own.",
+                    gettext("Nothing copied yet"),
+                    gettext(
+                        "Copy something and it appears here. Secrets are hidden and erased on their own.",
+                    ),
                 ),
             };
-            self.empty.set_title(title);
-            self.empty.set_description(Some(description));
+            self.empty.set_title(&title);
+            self.empty.set_description(Some(&description));
         }
         self.stack
             .set_visible_child_name(if is_empty { "empty" } else { "list" });
@@ -616,16 +622,17 @@ impl PopupWindow {
             return;
         };
         if let Err(refusal) = Popup::may_pin(&item) {
-            self.toasts.add_toast(adw::Toast::new(refusal.message()));
+            self.toasts
+                .add_toast(adw::Toast::new(&crate::i18n::tr(refusal.message())));
             return;
         }
         let this = self.clone();
         glib::spawn_future_local(async move {
             let pinned = item.pin_slot == 0;
             if this.daemon.set_pinned(item.id, pinned).await.is_none() {
-                this.toasts.add_toast(adw::Toast::new(
+                this.toasts.add_toast(adw::Toast::new(&gettext(
                     "Couldn’t change the Pin. Is Copyveil running?",
-                ));
+                )));
             }
         });
     }
@@ -659,14 +666,18 @@ impl PopupWindow {
                 .await
                 .is_none()
             {
-                this.toasts
-                    .add_toast(adw::Toast::new("Couldn’t change it. Is Copyveil running?"));
+                this.toasts.add_toast(adw::Toast::new(&gettext(
+                    "Couldn’t change it. Is Copyveil running?",
+                )));
                 return;
             }
-            let toast = adw::Toast::new("Marked as not a secret");
+            let toast = adw::Toast::new(&gettext("Marked as not a secret"));
             let detectors = this.daemon.detectors().await.unwrap_or_default();
             if let Some((name, title)) = crate::popup::detector_for(&item.reason, &detectors) {
-                toast.set_button_label(Some(&format!("Stop flagging {}", title.to_lowercase())));
+                toast.set_button_label(Some(&gettext("Stop flagging {kind}").replace(
+                    "{kind}",
+                    &lowercase_first(&crate::text::detector_title(title)),
+                )));
                 let (daemon, toasts, name) =
                     (this.daemon.clone(), this.toasts.clone(), name.to_owned());
                 toast.connect_button_clicked(move |_| {
@@ -760,16 +771,16 @@ fn hints() -> gtk::Box {
     bar.set_margin_top(6);
     bar.set_margin_bottom(6);
     for (keys, action) in [
-        ("↵", "Paste"),
-        ("⇧↵", "Plain text"),
-        ("Alt", "Hold to reveal"),
-        ("Ctrl P", "Pin"),
-        ("Del", "Remove"),
+        ("↵", N_!("Paste")),
+        ("⇧↵", N_!("Plain text")),
+        ("Alt", N_!("Hold to reveal")),
+        ("Ctrl P", N_!("Pin")),
+        ("Del", N_!("Remove")),
     ] {
         let hint = gtk::Box::new(gtk::Orientation::Horizontal, 6);
         let key = gtk::Label::new(Some(keys));
         key.add_css_class("keycap");
-        let label = gtk::Label::new(Some(action));
+        let label = gtk::Label::new(Some(&crate::i18n::tr(action)));
         label.add_css_class("dim-label");
         label.add_css_class("caption");
         hint.append(&key);
@@ -777,6 +788,19 @@ fn hints() -> gtk::Box {
         bar.append(&hint);
     }
     bar
+}
+
+/// "GitHub tokens" → "gitHub tokens" would be wrong; this lowers only the
+/// first letter, so a title reads inside a sentence: "GitHub tokens" stays,
+/// "Tokens do GitHub" becomes "tokens do GitHub".
+fn lowercase_first(title: &str) -> String {
+    let mut chars = title.chars();
+    match chars.next() {
+        Some(first) if !title.chars().nth(1).is_some_and(char::is_uppercase) => {
+            first.to_lowercase().chain(chars).collect()
+        }
+        _ => title.to_owned(),
+    }
 }
 
 fn number_key(key: gdk::Key) -> Option<usize> {

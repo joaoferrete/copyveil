@@ -83,7 +83,7 @@ pub fn present(
     let dots: Vec<gtk::Label> = Step::ALL
         .iter()
         .map(|_| {
-            let dot = gtk::Label::new(Some(&gettext("●")));
+            let dot = gtk::Label::new(Some("●"));
             dot.add_css_class("onboarding-dot");
             dots_box.append(&dot);
             dot

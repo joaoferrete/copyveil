@@ -34,6 +34,7 @@ The gates are the project's promise, so an agent strengthens them freely and ask
 
 - Changing `copyveil-core` or `copyveil-detect`: read `docs/testing.md` first. Every detector change adds corpus cases.
 - Changing the D-Bus API (`crates/copyveil-daemon/src/bus.rs`): update `docs/dbus.md` in the same change. A breaking change adds a new interface version (`History2`), never edits `History1`.
+- Adding or changing user-facing text: mark it for translation and update every catalog in the same change (`docs/translating.md`); `just i18n-check` fails otherwise.
 - Adding or changing a UI component, colour or animation: follow `docs/design/README.md`, and change colours only in `design/tokens.json`, then run `just tokens-gen`.
 - Making a decision that is hard to reverse, surprising, and a real trade-off: propose an ADR using `docs/adr/README.md`.
 - Writing a commit message or PR title: Conventional Commits with the types and scopes in `CONTRIBUTING.md`.

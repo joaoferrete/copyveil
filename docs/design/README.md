@@ -59,6 +59,12 @@ The app as of the latest UI change, generated with `just app-screenshot` from sy
 | Settings | ![Settings, light](screenshots/settings-light.png) | ![Settings, dark](screenshots/settings-dark.png) |
 | Onboarding | ![Onboarding, light](screenshots/onboarding-light.png) | ![Onboarding, dark](screenshots/onboarding-dark.png) |
 
+In Brazilian Portuguese:
+
+| Popup (dark) | Settings (light) |
+|---|---|
+| ![Popup in pt-BR](screenshots/popup-pt_BR-dark.png) | ![Settings in pt-BR](screenshots/settings-pt_BR-light.png) |
+
 Regenerate them in any PR that changes how the app looks.
 
 ## Popup keyboard

@@ -3,6 +3,7 @@
 //! The daemon owns the settings and their limits (`Settings1`); this module
 //! turns them into what the window shows and back.
 
+use crate::N_;
 use std::ops::RangeInclusive;
 
 /// The limits from `Settings1.Limits`, as the window's spin rows use them.
@@ -45,31 +46,31 @@ pub fn seconds_from_minutes(minutes: u32) -> u32 {
 /// Copyveil guarantees whatever they set (ADR 0002).
 pub const FIXED: [(&str, &str); 5] = [
     (
-        crate::N_!("Secrets never touch the disk"),
-        crate::N_!("Items from a password manager live in memory only"),
+        N_!("Secrets never touch the disk"),
+        N_!("Items from a password manager live in memory only"),
     ),
     (
-        crate::N_!("Suspected Items never touch the disk"),
-        crate::N_!("Anything that looks like a key or token lives in memory only"),
+        N_!("Suspected Items never touch the disk"),
+        N_!("Anything that looks like a key or token lives in memory only"),
     ),
     (
-        crate::N_!("Saved History is encrypted"),
-        crate::N_!("With a key that lives only in your keyring"),
+        N_!("Saved History is encrypted"),
+        N_!("With a key that lives only in your keyring"),
     ),
     (
-        crate::N_!("Search never looks inside secrets"),
-        crate::N_!("Secret and Suspected Items match only on their description"),
+        N_!("Search never looks inside secrets"),
+        N_!("Secret and Suspected Items match only on their description"),
     ),
     (
-        crate::N_!("Pins are kept until you unpin them"),
-        crate::N_!("They don't count toward the History limit and never expire"),
+        N_!("Pins are kept until you unpin them"),
+        N_!("They don't count toward the History limit and never expire"),
     ),
 ];
 
 /// What the confirmation says before memory-only erases the saved History.
 pub const MEMORY_ONLY_CONFIRM: (&str, &str) = (
-    crate::N_!("Erase the saved History?"),
-    crate::N_!(
+    N_!("Erase the saved History?"),
+    N_!(
         "Copyveil will keep the History in memory only. The History saved on disk and its key in your keyring are erased now; what's in memory stays until you log out."
     ),
 );

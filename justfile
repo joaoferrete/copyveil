@@ -8,7 +8,7 @@ fmt:
     cargo fmt --all
 
 # Everything CI checks, in the same order.
-ci: lint test cov mutants deny tokens ext-lint data-check
+ci: lint test cov mutants deny tokens ext-lint data-check i18n-check
 
 # Format check, clippy with warnings as errors, and the architecture layers.
 lint:
@@ -78,3 +78,11 @@ ext-install: ext-pack
 # Fuzz one target (detect, records or sealed). Needs nightly and cargo-fuzz.
 fuzz target="records" seconds="60":
     cd fuzz && cargo +nightly fuzz run {{target}} -- -max_total_time={{seconds}}
+
+# Every catalog complete and valid against the current English strings.
+i18n-check:
+    tools/check-translations.sh
+
+# Refresh the extension's template and catalogs after its strings change.
+i18n-update-extension:
+    tools/extension-pot.sh --update
