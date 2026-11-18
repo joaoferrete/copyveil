@@ -60,6 +60,7 @@ sleep 1
 check "Paste puts the Item back on the clipboard" "\$(clip read)" 'CLIP:\[COPYVEIL-MARKER-plain\]'
 check "pasting doesn't capture the Item again" "\$(list)" '^a(tssssuttts) 1 '
 
+
 \$S set org.gnome.shell.extensions.copyveil capture-paused true; sleep 1
 before=\$(list)
 clip copy COPYVEIL-MARKER-paused
@@ -88,6 +89,19 @@ fi
 check "the live test leaves no test Item behind" "\$(list)" '^a(tssssuttts) 1 '
 check "the live test leaves the clipboard empty" "\$(clip read)" 'CLIP:\[\]'
 kill \$live 2>/dev/null
+
+# Last, since a re-offered rich copy can come back after it's removed.
+clip rich COPYVEIL-MARKER-rich
+rich=\$(list | awk '{print \$3}')
+check "a rich copy is listed as rich text" "\$(list)" '"rich-text" "" "plain"'
+# The app puts rich text on the clipboard itself (here, clip.py stands in),
+# then asks for TypePaste: the extension must only type, not replace it.
+WAYLAND_DISPLAY=copyveil-smoke python3 "$root/tools/ext-smoke/clip.py" rich-hold COPYVEIL-MARKER-rich > /dev/null 2>&1 &
+holder=\$!
+sleep 2
+busctl --user call \$O \$P \$H TypePaste; sleep 1
+check "TypePaste leaves the app's HTML and plain text in place" "\$(clip formats)" 'text/html.*text/plain'
+kill \$holder 2>/dev/null
 
 if grep -q "JS ERROR\|Extension $uuid:" "$work/shell.log"; then
     echo "FAIL the shell logged errors from the extension:"; grep -A3 "JS ERROR\|Extension $uuid:" "$work/shell.log"; failed=1

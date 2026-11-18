@@ -25,7 +25,8 @@ Any process running as the user can call these methods. This is inside the threa
 | `Search(query)` | `s → at` | Ids of matching Items, newest first. Masked Items match only on their description. |
 | `Content(id)` | `t → (ayay)` | The Item's content and its plain-text fallback (empty when there is none). |
 | `PinSlot(slot)` | `u → t` | The id of the Item in Pin slot `slot`, counting from 1. |
-| `Paste(id)` | `t → ()` | Asks the capture source to paste the Item: emits `Capture1.PasteRequested`. |
+| `Paste(id)` | `t → ()` | Asks the capture source to paste the Item: emits `Capture1.PasteRequested`. The capture source puts a single type on the clipboard, so rich text goes in as its plain text. |
+| `TypePaste()` | `→ ()` | Asks the capture source to press Ctrl+V without touching the clipboard: emits `Capture1.TypeRequested`. The app uses it after putting rich text on the clipboard itself, as HTML and plain text together. |
 | `Remove(id)` | `t → ()` | Removes the Item. |
 | `Pin(id)` | `t → ()` | Pins a Plain Item into the next free Pin slot. |
 | `Unpin(id)` | `t → ()` | Unpins the Item. Later Pins move up a slot. |
@@ -69,6 +70,7 @@ Each element of `List` is a struct with these fields, in order:
 | `Capture(mime, content, plain_fallback, password_manager_hint)` | `sayayb → t` | Reports a clipboard change and returns the Item's id. Keep the id: it is how `Expired` tells you to clear the clipboard. |
 | `Expired(ids)` | signal `at` | These Items reached their Expiry and are gone. If the clipboard still holds one of them, clear it. |
 | `PasteRequested(id)` | signal `t` | The user asked to paste this Item. Fetch it with `History1.Content`, put it on the clipboard and paste. |
+| `TypeRequested()` | signal | The clipboard already holds what to paste: press Ctrl+V. |
 
 `mime` is the type the source chose from what the clipboard offered:
 

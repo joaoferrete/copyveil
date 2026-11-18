@@ -260,7 +260,7 @@ impl PopupWindow {
         self.list.connect_row_activated(move |_, row| {
             let id = this.state.borrow().rows.get(row_index(row)).map(|r| r.id);
             if let Some(id) = id {
-                this.paste(id);
+                this.paste(id, false);
             }
         });
 
@@ -305,7 +305,8 @@ impl PopupWindow {
             gdk::Key::Return | gdk::Key::KP_Enter => {
                 let id = self.state.borrow().popup.selected().map(|item| item.id);
                 if let Some(id) = id {
-                    self.paste(id);
+                    let plain = modifiers.contains(gdk::ModifierType::SHIFT_MASK);
+                    self.paste(id, plain);
                 }
             }
             gdk::Key::Alt_L | gdk::Key::Alt_R => self.reveal_selected(),
@@ -324,7 +325,7 @@ impl PopupWindow {
                 let id = number_key(key)
                     .and_then(|n| self.state.borrow().popup.numbered(n).map(|item| item.id));
                 if let Some(id) = id {
-                    self.paste(id);
+                    self.paste(id, false);
                 }
             }
             _ => return Propagation::Proceed,
@@ -500,7 +501,55 @@ impl PopupWindow {
 
     /// The carbon copy: a ghost of the row lifts off and fades, then the
     /// popup closes and the Item is pasted.
-    fn paste(&self, id: u64) {
+    /// Pastes an Item: rich text with Enter goes on the clipboard from here,
+    /// as HTML and plain text, while the popup still has focus (Wayland lets
+    /// only the focused app set the clipboard); everything else is pasted by
+    /// the capture source. See [`crate::popup::paste_route`].
+    fn paste(&self, id: u64, plain: bool) {
+        let item = self
+            .state
+            .borrow()
+            .popup
+            .visible()
+            .into_iter()
+            .find(|item| item.id == id)
+            .cloned();
+        let Some(item) = item else {
+            return;
+        };
+        match crate::popup::paste_route(&item, plain) {
+            crate::popup::PasteRoute::Source => self.lift_and_finish(id, false),
+            crate::popup::PasteRoute::Rich => {
+                let this = self.clone();
+                glib::spawn_future_local(async move {
+                    let Some((html, text)) = this.daemon.content(id).await else {
+                        return;
+                    };
+                    let text = if text.is_empty() { html.clone() } else { text };
+                    let providers = [
+                        gdk::ContentProvider::for_bytes(
+                            "text/html",
+                            &glib::Bytes::from_owned(html),
+                        ),
+                        gdk::ContentProvider::for_bytes(
+                            "text/plain;charset=utf-8",
+                            &glib::Bytes::from_owned(text),
+                        ),
+                    ];
+                    let _ = this
+                        .window
+                        .clipboard()
+                        .set_content(Some(&gdk::ContentProvider::new_union(&providers)));
+                    this.lift_and_finish(id, true);
+                });
+            }
+        }
+    }
+
+    /// The carbon copy, then the popup closes and the paste goes out: only
+    /// Ctrl+V when the app already filled the clipboard (`typed`), or a full
+    /// paste through the capture source.
+    fn lift_and_finish(&self, id: u64, typed: bool) {
         let row = self
             .state
             .borrow()
@@ -513,7 +562,11 @@ impl PopupWindow {
             this.hide();
             let daemon = daemon.clone();
             glib::spawn_future_local(async move {
-                daemon.paste(id).await;
+                if typed {
+                    daemon.type_paste().await;
+                } else {
+                    daemon.paste(id).await;
+                }
             });
         };
         match row.and_then(|row| self.lift_ghost(&row)) {
@@ -708,6 +761,7 @@ fn hints() -> gtk::Box {
     bar.set_margin_bottom(6);
     for (keys, action) in [
         ("↵", "Paste"),
+        ("⇧↵", "Plain text"),
         ("Alt", "Hold to reveal"),
         ("Ctrl P", "Pin"),
         ("Del", "Remove"),

@@ -258,6 +258,20 @@ impl Daemon {
         Some(String::from_utf8_lossy(&text).into_owned())
     }
 
+    /// One Item's content and plain-text fallback, as bytes: for pasting rich
+    /// text from the app.
+    pub async fn content(&self, id: u64) -> Option<(Vec<u8>, Vec<u8>)> {
+        self.call(move |history| async move { history.content(id).await })
+            .await
+    }
+
+    /// Asks the capture source to press Ctrl+V, after the app put an Item on
+    /// the clipboard itself.
+    pub async fn type_paste(&self) -> Option<()> {
+        self.call(|history| async move { history.type_paste().await })
+            .await
+    }
+
     /// Asks the capture source to paste the Item.
     pub async fn paste(&self, id: u64) -> Option<()> {
         self.call(move |history| async move { history.paste(id).await })

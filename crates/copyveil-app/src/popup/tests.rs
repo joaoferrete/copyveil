@@ -1,4 +1,7 @@
-use super::{NUMBERED_ROWS, PinRefusal, Popup, Tab, appeared, detector_for, expired, row_number};
+use super::{
+    NUMBERED_ROWS, PasteRoute, PinRefusal, Popup, Tab, appeared, detector_for, expired,
+    paste_route, row_number,
+};
 use copyveil_dbus::ItemSummary;
 
 fn item(id: u64, sensitivity: &str, pin_slot: u32) -> ItemSummary {
@@ -214,4 +217,17 @@ fn only_rows_whose_expiry_came_dissolve() {
     // Removed by hand before its Expiry: it just goes.
     assert!(expired(&shown, &[1, 3], 5).is_empty());
     assert_eq!(expired(&shown, &[], 9), [1, 2, 3]);
+}
+
+#[test]
+fn rich_text_keeps_its_formatting_unless_pasted_as_plain_text() {
+    let mut rich = item(1, "plain", 0);
+    rich.kind = "rich-text".into();
+    assert_eq!(paste_route(&rich, false), PasteRoute::Rich);
+    assert_eq!(paste_route(&rich, true), PasteRoute::Source);
+    assert_eq!(paste_route(&item(2, "plain", 0), false), PasteRoute::Source);
+    assert_eq!(
+        paste_route(&item(3, "secret", 0), false),
+        PasteRoute::Source
+    );
 }

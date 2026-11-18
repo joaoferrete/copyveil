@@ -61,6 +61,24 @@ The app as of the latest UI change, generated with `just app-screenshot` from sy
 
 Regenerate them in any PR that changes how the app looks.
 
+## Popup keyboard
+
+Typing always goes to the search. Everything else:
+
+| Keys | What it does |
+|---|---|
+| <kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Page Up</kbd> <kbd>Page Down</kbd> | Move the selection |
+| <kbd>↵</kbd> | Paste the selected Item. Rich text keeps its formatting: the app offers HTML and plain text together, and the target app takes what it understands |
+| <kbd>⇧</kbd>+<kbd>↵</kbd> | Paste as plain text |
+| <kbd>Ctrl</kbd>+<kbd>1…9</kbd> | Paste the row with that number |
+| hold <kbd>Alt</kbd> | Reveal the selected masked Item, for at most 5 s |
+| <kbd>Ctrl</kbd>+<kbd>P</kbd> | Pin or unpin (Plain Items only) |
+| <kbd>Ctrl</kbd>+<kbd>N</kbd> | "Not a secret" on a Suspected Item |
+| <kbd>Del</kbd> | Remove (when the search is empty) |
+| <kbd>Ctrl</kbd>+<kbd>Tab</kbd> | Switch between All and Pinned |
+| <kbd>Ctrl</kbd>+<kbd>,</kbd> | Settings |
+| <kbd>Esc</kbd> | Close |
+
 ## Motion
 
 | Moment | What happens | Timing |

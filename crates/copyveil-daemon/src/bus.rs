@@ -220,6 +220,15 @@ impl HistoryService {
         Ok(())
     }
 
+    /// Asks the capture source to press Ctrl+V without touching the
+    /// clipboard: the app already put an Item there itself, in several types
+    /// (rich text as HTML and plain text), which a capture source can't.
+    async fn type_paste(&self, #[zbus(connection)] connection: &Connection) -> Result<(), Error> {
+        let emitter = SignalEmitter::new(connection, OBJECT_PATH)?;
+        CaptureService::type_requested(&emitter).await?;
+        Ok(())
+    }
+
     /// Removes an Item.
     async fn remove(
         &self,
@@ -352,6 +361,10 @@ impl CaptureService {
     /// put it on the clipboard and paste it.
     #[zbus(signal)]
     async fn paste_requested(emitter: &SignalEmitter<'_>, id: u64) -> zbus::Result<()>;
+
+    /// The clipboard already holds what to paste: just press Ctrl+V.
+    #[zbus(signal)]
+    async fn type_requested(emitter: &SignalEmitter<'_>) -> zbus::Result<()>;
 }
 
 /// Builds both interfaces over `shared`.
