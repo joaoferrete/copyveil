@@ -13,13 +13,14 @@ Code is layered. Each crate depends only on the layers below it, and `tools/laye
 | Detection | `copyveil-detect` | Deciding whether text looks like a secret | I/O, clocks, state |
 | Domain | `copyveil-core` | History, Sensitivity rules, Expiry, encryption, the store | D-Bus, async, desktop APIs, global state |
 | Keyring | `copyveil-keyring` | Reading and creating the History key | Anything else |
+| Contract | `copyveil-dbus` | Bus names, the Item summary, client proxies | Logic, Item content |
 | Service | `copyveil-daemon` | D-Bus, the async runtime, process setup, file paths | Domain rules |
-| Clients | `copyveil-app`, capture sources, `gnome-extension/` | Showing and capturing | Holding History; they reach it over D-Bus only |
+| Clients | `copyveil-app`, capture sources, `gnome-extension/` | Showing and capturing | Holding History; they reach it over D-Bus only, through `copyveil-dbus` |
 
 - **Rules live in the domain.** A rule about Items (what may persist, what expires, what search may read) goes in `copyveil-core` with its tests, even when only the daemon calls it. The daemon translates and wires; if a daemon function needs a comment explaining a rule, the rule is in the wrong crate.
 - **The security crates have an allowlist of dependencies** in `tools/layers.py`. A new dependency there is a new line in that file and a justification in the PR.
 - **Desktop-specific code is a capture source.** The core never learns which desktop it runs on ([ADR 0001](adr/0001-desktop-agnostic-core-with-pluggable-capture-sources.md)).
-- **The D-Bus API is a contract.** [`dbus.md`](dbus.md) documents it. A breaking change adds a new interface version and leaves the old one alone.
+- **The D-Bus API is a contract.** [`dbus.md`](dbus.md) documents it, and `copyveil-dbus` encodes it: the daemon's tests talk to it through the same proxies the app uses, so the two can't drift. A breaking change adds a new interface version and leaves the old one alone.
 
 ## Modules and types
 

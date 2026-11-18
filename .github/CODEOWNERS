@@ -6,6 +6,7 @@
 /crates/copyveil-core/          @joaoferrete
 /crates/copyveil-detect/        @joaoferrete
 /crates/copyveil-daemon/        @joaoferrete
+/crates/copyveil-dbus/          @joaoferrete
 /crates/copyveil-keyring/       @joaoferrete
 /crates/copyveil-capture-*/     @joaoferrete
 /gnome-extension/               @joaoferrete

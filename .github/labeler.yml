@@ -5,6 +5,7 @@ security-sensitive:
           - crates/copyveil-core/**
           - crates/copyveil-detect/**
           - crates/copyveil-daemon/**
+          - crates/copyveil-dbus/**
           - crates/copyveil-keyring/**
           - crates/copyveil-capture-*/**
           - gnome-extension/**

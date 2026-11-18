@@ -3,8 +3,9 @@
 #![expect(clippy::unwrap_used, reason = "a failing test should panic")]
 
 use copyveil_core::{Key, Settings, Store};
-use copyveil_daemon::bus::{self, CaptureServiceProxy, HistoryServiceProxy, OBJECT_PATH, Shared};
+use copyveil_daemon::bus::{self, OBJECT_PATH, Shared};
 use copyveil_daemon::state::{Notice, State, Storage};
+use copyveil_dbus::{CaptureProxy, ERROR_PREFIX, HistoryProxy};
 use futures_util::StreamExt;
 use std::os::unix::net::UnixStream;
 use std::sync::Arc;
@@ -17,8 +18,8 @@ const AWS: &str = "AKIAWBHK8C2D086BCGWN";
 struct Daemon {
     shared: Arc<Shared>,
     server: Connection,
-    history: HistoryServiceProxy<'static>,
-    capture: CaptureServiceProxy<'static>,
+    history: HistoryProxy<'static>,
+    capture: CaptureProxy<'static>,
 }
 
 async fn daemon(state: State) -> Daemon {
@@ -36,8 +37,8 @@ async fn daemon(state: State) -> Daemon {
     Daemon {
         shared,
         server,
-        history: HistoryServiceProxy::new(&client).await.unwrap(),
-        capture: CaptureServiceProxy::new(&client).await.unwrap(),
+        history: HistoryProxy::new(&client).await.unwrap(),
+        capture: CaptureProxy::new(&client).await.unwrap(),
     }
 }
 
@@ -51,8 +52,16 @@ async fn memory_daemon(settings: Settings) -> Daemon {
     .await
 }
 
-fn error_name(err: &bus::Error) -> String {
-    zbus::DBusError::name(err).to_string()
+/// The D-Bus error name, without the shared prefix.
+fn error_name(err: &zbus::Error) -> String {
+    match err {
+        zbus::Error::MethodError(name, _, _) => name
+            .strip_prefix(ERROR_PREFIX)
+            .and_then(|rest| rest.strip_prefix('.'))
+            .unwrap_or(name)
+            .to_owned(),
+        other => format!("not a method error: {other}"),
+    }
 }
 
 #[tokio::test]
@@ -141,26 +150,24 @@ async fn rich_text_keeps_its_fallback() {
 #[tokio::test]
 async fn malformed_captures_are_refused() {
     let d = memory_daemon(Settings::default()).await;
-    let prefix = "io.github.joaoferrete.Copyveil.Error.";
     let err = d
         .capture
         .capture("text/uri-list", b"file:///x".to_vec(), Vec::new(), false)
         .await
         .unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}InvalidArgument"));
+    assert_eq!(error_name(&err), "InvalidArgument");
     let err = d
         .capture
         .capture("text/plain", Vec::new(), Vec::new(), false)
         .await
         .unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}InvalidArgument"));
+    assert_eq!(error_name(&err), "InvalidArgument");
     assert!(d.history.list().await.unwrap().is_empty());
 }
 
 #[tokio::test]
 async fn pins_and_overrides() {
     let d = memory_daemon(Settings::default()).await;
-    let prefix = "io.github.joaoferrete.Copyveil.Error.";
     let a = d
         .capture
         .capture("text/plain", b"a".to_vec(), Vec::new(), false)
@@ -184,9 +191,9 @@ async fn pins_and_overrides() {
     d.history.unpin(b).await.unwrap();
     assert_eq!(d.history.pin_slot(1).await.unwrap(), a);
     let err = d.history.pin_slot(2).await.unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}NoSuchPinSlot"));
+    assert_eq!(error_name(&err), "NoSuchPinSlot");
     let err = d.history.move_pin(b, 1).await.unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}NotPinned"));
+    assert_eq!(error_name(&err), "NotPinned");
 
     d.history.r#override(a, "secret").await.unwrap();
     let list = d.history.list().await.unwrap();
@@ -194,15 +201,15 @@ async fn pins_and_overrides() {
     assert_eq!(list[1].reason, "Changed by you");
     assert_eq!(list[1].pin_slot, 0);
     let err = d.history.pin(a).await.unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}NotPlain"));
+    assert_eq!(error_name(&err), "NotPlain");
     let err = d.history.r#override(a, "Secret").await.unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}InvalidArgument"));
+    assert_eq!(error_name(&err), "InvalidArgument");
 
     d.history.remove(a).await.unwrap();
     let err = d.history.remove(a).await.unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}UnknownItem"));
+    assert_eq!(error_name(&err), "UnknownItem");
     let err = d.history.content(a).await.unwrap_err();
-    assert_eq!(error_name(&err), format!("{prefix}UnknownItem"));
+    assert_eq!(error_name(&err), "UnknownItem");
     assert_eq!(d.history.list().await.unwrap().len(), 1);
 }
 
@@ -220,10 +227,7 @@ async fn paste_asks_the_capture_source() {
     assert_eq!(request.args().unwrap().id, id);
 
     let err = d.history.paste(id + 1).await.unwrap_err();
-    assert_eq!(
-        error_name(&err),
-        "io.github.joaoferrete.Copyveil.Error.UnknownItem"
-    );
+    assert_eq!(error_name(&err), "UnknownItem");
 }
 
 #[tokio::test]

@@ -7,7 +7,7 @@
 
 Item ids are `t` (unsigned 64-bit) and last as long as the daemon runs; Plain Items keep theirs across restarts. The `1` in each interface name is its version. A breaking change adds a new interface instead of changing an existing one.
 
-The daemon is D-Bus activatable, so calling it starts it.
+The daemon is D-Bus activatable, so calling it starts it. Rust clients use the proxies, names and `ItemSummary` from the `copyveil-dbus` crate.
 
 ## Content stays put
 
