@@ -1,7 +1,10 @@
 //! Renders the popup to a PNG, for the light and dark screenshots UI PRs
 //! need (`docs/design/README.md`).
 //!
-//!     screenshot OUT.png [light|dark] [popup|search|settings|onboarding]
+//!     screenshot OUT.png [light|dark] [popup|search|settings|onboarding|veil]
+//!
+//! `veil` captures a new Secret while the popup is open and shoots mid
+//! veil-draw, to show the animation is there.
 //!
 //! It talks to whatever daemon is on the session bus, so run it inside
 //! `tools/app-screenshot/run.sh`, which starts an isolated one with
@@ -48,7 +51,34 @@ fn main() -> glib::ExitCode {
             }
         };
         let (app, out) = (app.clone(), out.clone());
-        glib::timeout_add_local_once(Duration::from_millis(2500), move || {
+        let delay = if view == "veil" {
+            // Capture a Secret once the popup has listed, then shoot mid-draw.
+            glib::timeout_add_local_once(Duration::from_secs(2), || {
+                let _ = std::process::Command::new("busctl")
+                    .args([
+                        "--user",
+                        "call",
+                        "io.github.joaoferrete.Copyveil.Daemon",
+                        "/io/github/joaoferrete/Copyveil/Daemon",
+                        "io.github.joaoferrete.Copyveil.Capture1",
+                        "Capture",
+                        "sayayb",
+                        "text/plain",
+                        "4",
+                        "120",
+                        "121",
+                        "122",
+                        "119",
+                        "0",
+                        "true",
+                    ])
+                    .status();
+            });
+            Duration::from_millis(2120)
+        } else {
+            Duration::from_millis(2500)
+        };
+        glib::timeout_add_local_once(delay, move || {
             let Some(window) = shown.root().and_downcast::<gtk::Window>() else {
                 std::process::exit(1);
             };

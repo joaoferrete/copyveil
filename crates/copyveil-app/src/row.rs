@@ -5,12 +5,16 @@
 //! doesn't make the list jump. What a screen reader hears comes from
 //! [`crate::text::accessible_label`], never from the content.
 
-use crate::mask::{self, Shape};
+use crate::mask::{self, MaskedText, Shape};
 use crate::ring::ExpiryRing;
 use crate::text;
 use copyveil_dbus::{ItemSummary, kind, sensitivity};
+use gtk::glib;
 use gtk::prelude::*;
 use std::time::{Duration, Instant};
+
+/// `motion.expiry-collapse`: the row closing after the Mask dissolves.
+pub const EXPIRY_COLLAPSE_MS: u32 = 460;
 
 /// What every row is built with, beyond its Item.
 #[derive(Debug, Clone)]
@@ -48,9 +52,12 @@ pub struct ItemRow {
     pub masked: bool,
     /// "Not a secret", on Suspected Items only. The popup connects it.
     pub unflag: Option<gtk::Button>,
-    /// Shows `mask` or `revealed`, for a Reveal.
-    content: gtk::Stack,
+    /// The Mask, for masked Items.
+    mask: Option<MaskedText>,
+    /// Under the Mask: the value while it's revealed, empty otherwise.
     revealed: gtk::Label,
+    /// Collapses the row at Expiry.
+    collapser: gtk::Revealer,
     meta: gtk::Label,
     age_ms: u64,
     expires_at: Option<Instant>,
@@ -81,25 +88,24 @@ impl ItemRow {
         let body = gtk::Box::new(gtk::Orientation::Vertical, 2);
         body.set_hexpand(true);
 
-        let content = gtk::Stack::new();
-        content.set_transition_type(gtk::StackTransitionType::Crossfade);
-        content.set_transition_duration(170);
-        content.set_hhomogeneous(false);
         let revealed = content_label("");
-        if masked {
-            content.add_named(&mask::masked_text(shape_for(item)), Some("mask"));
+        let mask = masked.then(|| MaskedText::new(shape_for(item)));
+        if let Some(mask) = &mask {
+            // The value sits under the Mask, so a Reveal peels the Mask off it.
+            let overlay = gtk::Overlay::new();
+            overlay.set_child(Some(&revealed));
+            overlay.add_overlay(&mask.area);
+            overlay.set_measure_overlay(&mask.area, true);
+            body.append(&overlay);
         } else if item.kind == kind::IMAGE {
             let label = content_label(&format!("Image · {}", item.mime));
             label.add_css_class("dim-label");
-            content.add_named(&label, Some("mask"));
+            body.append(&label);
         } else {
             let preview = content_label(&first_line(&item.preview));
             highlight(&preview, &row.query);
-            content.add_named(&preview, Some("mask"));
+            body.append(&preview);
         }
-        content.add_named(&revealed, Some("revealed"));
-        content.set_visible_child_name("mask");
-        body.append(&content);
 
         let meta = gtk::Label::new(None);
         meta.add_css_class("item-meta");
@@ -142,7 +148,13 @@ impl ItemRow {
             line.append(&pin);
         }
 
-        let widget = gtk::ListBoxRow::builder().child(&line).build();
+        let collapser = gtk::Revealer::builder()
+            .transition_type(gtk::RevealerTransitionType::SlideUp)
+            .transition_duration(EXPIRY_COLLAPSE_MS)
+            .reveal_child(true)
+            .child(&line)
+            .build();
+        let widget = gtk::ListBoxRow::builder().child(&collapser).build();
         widget.update_property(&[gtk::accessible::Property::Label(&text::accessible_label(
             item,
         ))]);
@@ -152,8 +164,9 @@ impl ItemRow {
             widget,
             masked,
             unflag,
-            content,
+            mask,
             revealed,
+            collapser,
             meta,
             age_ms: item.age_ms,
             expires_at: (item.expires_in_ms > 0)
@@ -190,16 +203,53 @@ impl ItemRow {
         self.meta.set_text(&parts.join(" · "));
     }
 
-    /// Shows `value` in place of the Mask until [`ItemRow::conceal`].
-    pub fn reveal(&self, value: &str) {
-        self.revealed.set_text(&first_line(value));
-        self.content.set_visible_child_name("revealed");
+    /// When the Item's Expiry comes, for masked Items.
+    #[must_use]
+    pub fn expiry_deadline(&self) -> Option<Instant> {
+        self.expires_at
     }
 
-    /// Puts the Mask back and forgets the revealed value.
+    /// Draws the Mask in: for a sensitive Item that just arrived.
+    pub fn draw_in(&self) {
+        if let Some(mask) = &self.mask {
+            mask.draw_in();
+        }
+    }
+
+    /// Peels the Mask off `value` until [`ItemRow::conceal`].
+    pub fn reveal(&self, value: &str) {
+        if let Some(mask) = &self.mask {
+            self.revealed.set_text(&first_line(value));
+            mask.peel();
+        }
+    }
+
+    /// Drops the Mask back, then forgets the revealed value.
     pub fn conceal(&self) {
-        self.content.set_visible_child_name("mask");
-        self.revealed.set_text("");
+        if let Some(mask) = &self.mask
+            && !self.revealed.text().is_empty()
+        {
+            mask.drop_back();
+            let revealed = self.revealed.clone();
+            glib::timeout_add_local_once(mask::motion(mask::REVEAL_PEEL_MS), move || {
+                revealed.set_text("");
+            });
+        }
+    }
+
+    /// The Expiry: the Mask dissolves, then the row collapses, then `done`
+    /// runs. No tombstone is left.
+    pub fn expire(&self, done: impl Fn() + 'static) {
+        let collapser = self.collapser.clone();
+        let collapse = move || {
+            collapser.set_reveal_child(false);
+        };
+        match &self.mask {
+            Some(mask) => mask.dissolve(collapse),
+            None => collapse(),
+        }
+        let total = mask::motion(mask::EXPIRY_DISSOLVE_MS + EXPIRY_COLLAPSE_MS);
+        glib::timeout_add_local_once(total, done);
     }
 }
 

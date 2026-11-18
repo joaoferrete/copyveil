@@ -204,3 +204,28 @@ pub fn detector_for<'a>(
         .find(|(_, _, description)| description == reason)
         .map(|(name, title, _)| (name.as_str(), title.as_str()))
 }
+
+/// Ids in `now` that weren't in `before`: rows that get the veil-draw
+/// animation when they're masked. The first listing animates nothing.
+#[must_use]
+pub fn appeared(before: Option<&[u64]>, now: &[u64]) -> Vec<u64> {
+    let Some(before) = before else {
+        return Vec::new();
+    };
+    now.iter()
+        .filter(|id| !before.contains(id))
+        .copied()
+        .collect()
+}
+
+/// Ids of rows that are gone from `now` because their Expiry came: the
+/// ones that dissolve and collapse instead of just vanishing. `expiring`
+/// lists the masked rows shown, with their Expiry deadline.
+#[must_use]
+pub fn expired<T: PartialOrd + Copy>(expiring: &[(u64, T)], now_ids: &[u64], now: T) -> Vec<u64> {
+    expiring
+        .iter()
+        .filter(|(id, deadline)| !now_ids.contains(id) && *deadline <= now)
+        .map(|(id, _)| *id)
+        .collect()
+}

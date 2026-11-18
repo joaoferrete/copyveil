@@ -1,4 +1,4 @@
-use super::{NUMBERED_ROWS, PinRefusal, Popup, Tab, detector_for, row_number};
+use super::{NUMBERED_ROWS, PinRefusal, Popup, Tab, appeared, detector_for, expired, row_number};
 use copyveil_dbus::ItemSummary;
 
 fn item(id: u64, sensitivity: &str, pin_slot: u32) -> ItemSummary {
@@ -197,4 +197,21 @@ fn the_flagging_detector_is_found_by_its_description() {
         Some(("jwt", "JSON Web Tokens"))
     );
     assert_eq!(detector_for("From password manager", &detectors), None);
+}
+
+#[test]
+fn only_rows_new_since_the_last_listing_draw_their_veil() {
+    assert!(appeared(None, &[1, 2]).is_empty());
+    assert_eq!(appeared(Some(&[1, 2]), &[3, 1, 2]), [3]);
+    assert!(appeared(Some(&[1, 2]), &[2]).is_empty());
+}
+
+#[test]
+fn only_rows_whose_expiry_came_dissolve() {
+    // Deadlines in seconds: 2 is due at 5, 9 isn't.
+    let shown = [(1, 2), (2, 9), (3, 1)];
+    assert_eq!(expired(&shown, &[3], 5), [1]);
+    // Removed by hand before its Expiry: it just goes.
+    assert!(expired(&shown, &[1, 3], 5).is_empty());
+    assert_eq!(expired(&shown, &[], 9), [1, 2, 3]);
 }
