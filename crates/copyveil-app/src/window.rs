@@ -7,7 +7,7 @@
 use crate::daemon::Daemon;
 use crate::mask::REVEAL_MAX_MS;
 use crate::popup::{Popup, Tab, row_number};
-use crate::row::ItemRow;
+use crate::row::{ItemRow, RowContext};
 use crate::text;
 use adw::prelude::*;
 use gtk::gdk;
@@ -18,6 +18,8 @@ use std::time::{Duration, Instant};
 
 struct State {
     popup: Popup,
+    /// Expiry times from the daemon's settings, for the rows' rings.
+    expiry: (Duration, Duration),
     rows: Vec<ItemRow>,
     /// The row being revealed and the timer that ends the Reveal.
     revealed: Option<(u64, glib::SourceId)>,
@@ -134,6 +136,7 @@ impl PopupWindow {
             daemon,
             state: Rc::new(RefCell::new(State {
                 popup: Popup::default(),
+                expiry: (Duration::from_secs(30), Duration::from_mins(15)),
                 rows: Vec::new(),
                 revealed: None,
                 ticker: None,
@@ -156,6 +159,14 @@ impl PopupWindow {
             self.hide();
         }
         crate::prefs_window::present(self.daemon.clone())
+    }
+
+    /// Shows the popup with `query` already searched (for tools and tests).
+    pub fn show_with_query(&self, query: &str) {
+        if !self.window.is_visible() {
+            self.show();
+        }
+        self.search.set_text(query);
     }
 
     /// Shows the popup, or hides it if it's showing (the shortcut toggles).
@@ -310,6 +321,12 @@ impl PopupWindow {
         let this = self.clone();
         glib::spawn_future_local(async move {
             let items = this.daemon.list().await;
+            if let Some(values) = this.daemon.settings().await {
+                this.state.borrow_mut().expiry = (
+                    Duration::from_secs(values.secret_expiry.into()),
+                    Duration::from_secs(values.suspected_expiry.into()),
+                );
+            }
             let storage = this.daemon.storage().await;
             let (on_disk, notice) = match storage {
                 Some((on_disk, notice)) => (Some(on_disk), notice),
@@ -342,14 +359,19 @@ impl PopupWindow {
     fn render(&self) {
         self.conceal();
         self.list.remove_all();
-        let now = Instant::now();
         let mut state = self.state.borrow_mut();
+        let context = RowContext {
+            listed_at: Instant::now(),
+            secret_expiry: state.expiry.0,
+            suspected_expiry: state.expiry.1,
+            query: self.search.text().to_string(),
+        };
         let rows: Vec<ItemRow> = state
             .popup
             .visible()
             .iter()
             .enumerate()
-            .map(|(index, item)| ItemRow::new(item, row_number(index), now))
+            .map(|(index, item)| ItemRow::new(item, row_number(index), &context))
             .collect();
         for row in &rows {
             self.list.append(&row.widget);
