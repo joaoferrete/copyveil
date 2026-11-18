@@ -21,6 +21,7 @@ import {DaemonClient} from './daemon.js';
 import {Indicator} from './indicator.js';
 import {Keyboard} from './keyboard.js';
 import {ClipboardItem} from './lib/clipboard-item.js';
+import {iconState} from './lib/icon-state.js';
 import {pasteType} from './lib/mime.js';
 import {withSuperV, withoutSuperV} from './lib/shortcuts.js';
 
@@ -42,8 +43,10 @@ export default class CopyveilExtension extends Extension {
             ids => this._expired(ids),
             id => this._paste(id).catch(() => {}));
 
-        this._indicator = new Indicator(
-            this.dir.get_child('icons').get_child('copyveil-symbolic.svg'), this._daemon);
+        this._indicator = new Indicator(this.dir.get_child('icons'), this._daemon, this._settings);
+        this._daemon.watchHistory(() => this._refreshIcon().catch(() => {}));
+        this._pausedChanged = this._settings.connect('changed::capture-paused', () => this._refreshIcon().catch(() => {}));
+        this._refreshIcon().catch(() => {});
         Main.panel.addToStatusArea(this.uuid, this._indicator);
 
         this._applySuperV();
@@ -52,6 +55,7 @@ export default class CopyveilExtension extends Extension {
     }
 
     disable() {
+        this._settings.disconnect(this._pausedChanged);
         this._unbindShortcuts();
         this._settings.disconnect(this._superVChanged);
         this._giveSuperVBack();
@@ -70,9 +74,23 @@ export default class CopyveilExtension extends Extension {
         this._settings = null;
     }
 
+    async _refreshIcon() {
+        const sensitivities = await this._daemon?.sensitivities() ?? [];
+        this._indicator?.setState(iconState({
+            paused: this._settings?.get_boolean('capture-paused') ?? false,
+            sensitivities,
+        }));
+    }
+
     async _capture(read) {
         if (!this._onClipboard.shouldCapture())
             return;
+        // Paused: copies aren't read or sent. The id on the clipboard is no
+        // longer known, so an Expiry won't clear what was copied meanwhile.
+        if (this._settings.get_boolean('capture-paused')) {
+            this._onClipboard.captured(null);
+            return;
+        }
         const offer = await read();
         if (offer === null) {
             this._onClipboard.captured(null);
