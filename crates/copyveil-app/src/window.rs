@@ -350,10 +350,10 @@ impl PopupWindow {
                 Some((on_disk, notice)) => (Some(on_disk), notice),
                 None => (None, String::new()),
             };
-            this.title.set_subtitle(text::storage_title(on_disk));
+            this.title.set_subtitle(&text::storage_title(on_disk));
             match text::storage_notice(&notice) {
                 Some(message) => {
-                    this.banner.set_title(message);
+                    this.banner.set_title(&message);
                     this.banner.set_revealed(true);
                 }
                 None => this.banner.set_revealed(false),
