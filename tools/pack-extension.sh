@@ -15,8 +15,11 @@ rm -rf "$stage"
 mkdir -p "$stage/icons"
 (cd "$root/gnome-extension" && cp -r metadata.json extension.js clipboard.js daemon.js \
     indicator.js keyboard.js lib schemas "$stage/")
-cp "$root/data/icons/hicolor/symbolic/apps/io.github.joaoferrete.Copyveil-symbolic.svg" \
-    "$stage/icons/copyveil-symbolic.svg"
+# The panel icon in its three states (normal, capture paused, Secret in memory).
+for state in "" -paused -secret; do
+    cp "$root/data/icons/hicolor/symbolic/apps/io.github.joaoferrete.Copyveil$state-symbolic.svg" \
+        "$stage/icons/copyveil$state-symbolic.svg"
+done
 glib-compile-schemas --strict "$stage/schemas"
 (cd "$stage" && gnome-extensions pack --force --out-dir="$root/_build" \
     --extra-source=clipboard.js --extra-source=daemon.js \

@@ -7,6 +7,11 @@
       <summary>Open the History</summary>
       <description>Opens the Copyveil popup. Onboarding offers to switch it to Super+V.</description>
     </key>
+    <key name="capture-paused" type="b">
+      <default>false</default>
+      <summary>Pause capture</summary>
+      <description>While on, copies aren't sent to Copyveil. Pasting and clearing the clipboard after a Secret's Expiry keep working.</description>
+    </key>
     <key name="take-super-v" type="b">
       <default>false</default>
       <summary>Take Super+V from the notification list</summary>

@@ -38,6 +38,28 @@ export class DaemonClient {
             subscribe('PasteRequested', params => onPaste(BigInt(params.get_child_value(0).deepUnpack()))));
     }
 
+    /**
+     * Calls `onChange()` whenever the History changes.
+     *
+     * @param {() => void} onChange
+     */
+    watchHistory(onChange) {
+        this.#subscriptions.push(this.#bus.signal_subscribe(
+            BUS_NAME, HISTORY, 'Changed', OBJECT_PATH, null, Gio.DBusSignalFlags.NONE,
+            () => onChange()));
+    }
+
+    /**
+     * The Sensitivity of every Item, for the panel icon. Empty when the
+     * daemon is unreachable. Summaries only: no content.
+     *
+     * @returns {Promise<string[]>}
+     */
+    async sensitivities() {
+        const list = await this.#call(HISTORY, 'List', null, '(a(tssssuttts))');
+        return list === null ? [] : list.get_child_value(0).deepUnpack().map(item => item[3]);
+    }
+
     /** Stops delivering signals. */
     unwatch() {
         for (const id of this.#subscriptions)

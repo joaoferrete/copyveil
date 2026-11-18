@@ -60,6 +60,15 @@ sleep 1
 check "Paste puts the Item back on the clipboard" "\$(clip read)" 'CLIP:\[COPYVEIL-MARKER-plain\]'
 check "pasting doesn't capture the Item again" "\$(list)" '^a(tssssuttts) 1 '
 
+\$S set org.gnome.shell.extensions.copyveil capture-paused true; sleep 1
+before=\$(list)
+clip copy COPYVEIL-MARKER-paused
+check "a paused capture sends nothing" "\$(list)" "^\$(echo "\$before" | awk '{print \$1" "\$2}') "
+\$S set org.gnome.shell.extensions.copyveil capture-paused false; sleep 1
+clip copy COPYVEIL-MARKER-resumed
+check "capture resumes when unpaused" "\$(list)" '"COPYVEIL-MARKER-resumed"'
+busctl --user call \$O \$P \$H Remove t "\$(list | awk '{print \$3}')" > /dev/null
+
 \$S set org.gnome.shell.extensions.copyveil take-super-v true; sleep 1
 check "agreeing takes only Super+V from notifications" "\$(gsettings get org.gnome.shell.keybindings toggle-message-tray)" "\['<Super>m'\]"
 gnome-extensions disable $uuid; sleep 1
