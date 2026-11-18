@@ -24,7 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install GTK 4 and libadwaita
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+        uses: ./.github/actions/apt-install
+        with:
+          packages: libgtk-4-dev libadwaita-1-dev
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -37,7 +39,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install GTK 4 and libadwaita
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+        uses: ./.github/actions/apt-install
+        with:
+          packages: libgtk-4-dev libadwaita-1-dev
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace --locked
 
@@ -54,21 +58,38 @@ jobs:
           cargo llvm-cov --locked -p copyveil-core -p copyveil-detect
           --fail-under-lines 90
 
-  mutants:
-    name: Mutation testing (core, detect)
+  # Every mutant is tested, split across four machines. The job named
+  # "Mutation testing (core, detect)" is the one the branch rules require.
+  mutants-shard:
+    name: Mutants shard ${{ matrix.shard }}/4
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-mutants
-      - run: cargo mutants --package copyveil-core --package copyveil-detect --no-shuffle
+      - run: >
+          cargo mutants --package copyveil-core --package copyveil-detect
+          --no-shuffle --shard ${{ matrix.shard }}/4
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: mutants-out
+          name: mutants-out-${{ matrix.shard }}
           path: mutants.out
+
+  mutants:
+    name: Mutation testing (core, detect)
+    runs-on: ubuntu-24.04
+    needs: mutants-shard
+    if: always()
+    steps:
+      - name: Every shard passed
+        run: test "${{ needs.mutants-shard.result }}" = success
 
   deny:
     name: Licences, advisories, sources
@@ -107,7 +128,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends meson ninja-build desktop-file-utils appstream libgtk-4-dev libadwaita-1-dev gettext
+      - name: Install Meson, validators, GTK 4 and libadwaita
+        uses: ./.github/actions/apt-install
+        with:
+          packages: meson ninja-build desktop-file-utils appstream libgtk-4-dev libadwaita-1-dev gettext
       - run: meson setup _build -Dprofile=debug
       - run: meson compile -C _build
       - run: meson test -C _build --print-errorlogs

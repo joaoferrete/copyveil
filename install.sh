@@ -94,6 +94,7 @@ package_for() {
         debian:adw) echo libadwaita-1-dev ;;
         debian:python) echo python3 ;;
         debian:glib) echo libglib2.0-bin ;;
+        debian:gettext) echo gettext ;;
         fedora:meson) echo meson ;;
         fedora:ninja) echo ninja-build ;;
         fedora:pkg-config) echo pkgconf-pkg-config ;;
@@ -102,6 +103,7 @@ package_for() {
         fedora:adw) echo libadwaita-devel ;;
         fedora:python) echo python3 ;;
         fedora:glib) echo glib2 ;;
+        fedora:gettext) echo gettext ;;
         arch:meson) echo meson ;;
         arch:ninja) echo ninja ;;
         arch:pkg-config) echo pkgconf ;;
@@ -110,6 +112,7 @@ package_for() {
         arch:adw) echo libadwaita ;;
         arch:python) echo python ;;
         arch:glib) echo glib2 ;;
+        arch:gettext) echo gettext ;;
     esac
 }
 
@@ -144,6 +147,8 @@ check_dependencies() {
         bad "Meson ≥ $MESON_MIN"; missing+=(meson)
     fi
     if command -v ninja > /dev/null; then ok "Ninja $(ninja --version)"; else bad "Ninja"; missing+=(ninja); fi
+    # msgfmt compiles the translations and the translated desktop file and metainfo.
+    if command -v msgfmt > /dev/null; then ok "gettext"; else bad "gettext (msgfmt)"; missing+=(gettext); fi
     if command -v pkg-config > /dev/null; then
         ok "pkg-config"
         if pkg-config --atleast-version="$GTK_MIN" gtk4 2> /dev/null; then
