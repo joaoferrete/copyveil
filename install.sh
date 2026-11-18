@@ -240,7 +240,9 @@ start_session() {
     $session || return 0
     step "Starting the daemon"
     systemctl --user daemon-reload
-    systemctl --user enable --now copyveil-daemon.service
+    systemctl --user enable copyveil-daemon.service
+    # restart, not start: after an update, the old daemon would keep running.
+    systemctl --user restart copyveil-daemon.service
     ok "copyveil-daemon runs now and starts with your session"
 
     if ! $gnome; then

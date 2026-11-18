@@ -14,7 +14,7 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Report se
 
 You need:
 
-- **The build dependencies**: `./install.sh --check` lists what's missing and the command to install it (`--install-deps` runs it). By hand: see [Install from source](README.md#install-from-source).
+- **The build dependencies**: `./install.sh --check` lists what's missing and the command to install it (`--install-deps` runs it). By hand: see "Installing by hand" under [Install](README.md#install).
 - **[`just`](https://github.com/casey/just)** for the tasks below.
 - **Python 3** for the design-token and layer tools (standard library only).
 - **Node.js 22** for the GNOME extension's lint and tests.
@@ -57,7 +57,7 @@ Commits inside your branch can be anything; only the PR title lands on `main`.
 
 ### Releases
 
-[release-please](https://github.com/googleapis/release-please) opens a release PR from the commits on `main`, with the version bump and CHANGELOG. Merging it tags the release and publishes binaries, SBOMs and provenance attestations. Versioning follows [SemVer](https://semver.org/); before 1.0, `feat` bumps the minor version.
+[release-please](https://github.com/googleapis/release-please) opens a release PR from the commits on `main`, titled `chore: release X.Y.Z` (set in `release-please-config.json`, since it rewrites the title on every push), with the version bump and CHANGELOG. Merging it tags the release and publishes binaries, SBOMs and provenance attestations. Versioning follows [SemVer](https://semver.org/); before 1.0, `feat` bumps the minor version.
 
 ## Writing code
 
