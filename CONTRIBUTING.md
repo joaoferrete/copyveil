@@ -57,7 +57,7 @@ Commits inside your branch can be anything; only the PR title lands on `main`.
 
 ### Releases
 
-[release-please](https://github.com/googleapis/release-please) opens a release PR from the commits on `main`, with the version bump and CHANGELOG. Merging it tags the release and publishes binaries, SBOMs and provenance attestations. Versioning follows [SemVer](https://semver.org/); before 1.0, `feat` bumps the minor version.
+[release-please](https://github.com/googleapis/release-please) opens a release PR from the commits on `main`, titled `chore: release X.Y.Z` (set in `release-please-config.json`, since it rewrites the title on every push), with the version bump and CHANGELOG. Merging it tags the release and publishes binaries, SBOMs and provenance attestations. Versioning follows [SemVer](https://semver.org/); before 1.0, `feat` bumps the minor version.
 
 ## Writing code
 
