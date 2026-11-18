@@ -33,7 +33,7 @@ flowchart LR
 |---|---|
 | `crates/copyveil-core` | Library. History, Sensitivity rules, Expiry, the encrypted store. Desktop-agnostic and free of D-Bus. |
 | `crates/copyveil-dbus` | The D-Bus contract: bus names, the Item summary and client proxies. Shared by the daemon and the app, with no logic and no Item content. |
-| `crates/copyveil-daemon` | `copyveil-daemon` binary. Holds the History and serves it over D-Bus ([API](dbus.md)), runs Expiry, and opens the store with the key from `copyveil-keyring`. |
+| `crates/copyveil-daemon` | `copyveil-daemon` binary. Holds the History and serves it over D-Bus ([API](dbus.md)), runs Expiry, opens the store with the key from `copyveil-keyring`, and owns the settings (`$XDG_CONFIG_HOME/copyveil/settings.toml`), which it validates against the limits in `copyveil-core`. |
 | `crates/copyveil-keyring` | Reads and creates the History key in the Secret Service keyring with `oo7`. Thin on purpose: it can only be tested against a running keyring. |
 | `crates/copyveil-detect` | Pure library. Detectors that flag content as Suspected. No I/O, so it's easy to test, fuzz and reuse. |
 | `crates/copyveil-app` | `copyveil` binary. GTK4/libadwaita UI (gtk-rs): popup, settings, onboarding. Talks to the daemon over D-Bus only, through `copyveil-dbus`, and is D-Bus activatable so the extension can open the popup. |

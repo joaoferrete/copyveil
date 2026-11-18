@@ -317,6 +317,18 @@ impl Store {
         Ok(())
     }
 
+    /// Deletes the store at `path` and its SQLite journals without opening
+    /// it, for when the History must be in memory only and a store is left
+    /// on disk. A missing file is fine.
+    ///
+    /// # Errors
+    ///
+    /// [`StoreError::Io`] if a file exists but can't be removed.
+    pub fn erase(path: &Path) -> Result<(), StoreError> {
+        erase_files(path)?;
+        Ok(())
+    }
+
     /// Closes the store and deletes its files, for when the user switches to
     /// keeping the History in memory only.
     ///

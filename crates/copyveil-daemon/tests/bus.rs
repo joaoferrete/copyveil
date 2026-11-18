@@ -2,67 +2,18 @@
 
 #![expect(clippy::unwrap_used, reason = "a failing test should panic")]
 
+mod common;
+
+use common::{daemon, error_name, memory_daemon};
+
 use copyveil_core::{Key, Settings, Store};
-use copyveil_daemon::bus::{self, OBJECT_PATH, Shared};
+use copyveil_daemon::bus;
 use copyveil_daemon::state::{Notice, State, Storage};
-use copyveil_dbus::{CaptureProxy, ERROR_PREFIX, HistoryProxy};
 use futures_util::StreamExt;
-use std::os::unix::net::UnixStream;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use zbus::Connection;
-use zbus::connection::Builder;
 
 const AWS: &str = "AKIAWBHK8C2D086BCGWN";
-
-struct Daemon {
-    shared: Arc<Shared>,
-    server: Connection,
-    history: HistoryProxy<'static>,
-    capture: CaptureProxy<'static>,
-}
-
-async fn daemon(state: State) -> Daemon {
-    let shared = Shared::new(state);
-    let (history, capture) = bus::services(&shared);
-    let (p0, p1) = UnixStream::pair().unwrap();
-    let server = Builder::unix_stream(p0)
-        .server(zbus::Guid::generate())
-        .p2p()
-        .serve_at(OBJECT_PATH, history)
-        .serve_at(OBJECT_PATH, capture)
-        .build();
-    let client = Builder::unix_stream(p1).p2p().build();
-    let (server, client) = tokio::try_join!(server, client).unwrap();
-    Daemon {
-        shared,
-        server,
-        history: HistoryProxy::new(&client).await.unwrap(),
-        capture: CaptureProxy::new(&client).await.unwrap(),
-    }
-}
-
-async fn memory_daemon(settings: Settings) -> Daemon {
-    daemon(State::load(
-        settings,
-        Storage::Memory,
-        Notice::None,
-        Instant::now(),
-    ))
-    .await
-}
-
-/// The D-Bus error name, without the shared prefix.
-fn error_name(err: &zbus::Error) -> String {
-    match err {
-        zbus::Error::MethodError(name, _, _) => name
-            .strip_prefix(ERROR_PREFIX)
-            .and_then(|rest| rest.strip_prefix('.'))
-            .unwrap_or(name)
-            .to_owned(),
-        other => format!("not a method error: {other}"),
-    }
-}
 
 #[tokio::test]
 async fn a_capture_is_listed_and_its_content_returned() {

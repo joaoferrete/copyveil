@@ -4,6 +4,7 @@
 
 - **`History1`**, for the app.
 - **`Capture1`**, for capture sources (the GNOME Shell extension, `ext-data-control` later).
+- **`Settings1`**, for the settings window.
 
 Item ids are `t` (unsigned 64-bit) and last as long as the daemon runs; Plain Items keep theirs across restarts. The `1` in each interface name is its version. A breaking change adds a new interface instead of changing an existing one.
 
@@ -75,6 +76,22 @@ Each element of `List` is a struct with these fields, in order:
 - `image/*` for images.
 
 Set `password_manager_hint` when the clipboard offered `x-kde-passwordManagerHint` with the value `secret`. Fail safe: when the hint is offered but its value can't be read or is empty, as Mutter sometimes hands it over, set it too. Only a readable value other than `secret` doesn't count. Other types, and empty content, are refused with `InvalidArgument`.
+
+## `io.github.joaoferrete.Copyveil.Settings1`
+
+The daemon owns the settings: it checks every value against its limits, applies it at once and saves it to `$XDG_CONFIG_HOME/copyveil/settings.toml`. A value outside the limits is refused with `org.freedesktop.DBus.Error.InvalidArgs` and changes nothing. Every change also emits `History1.Changed`, since a lower limit can remove Items.
+
+| Member | Signature | What it does |
+|---|---|---|
+| `Limits()` | `→ (uuuuuu)` | The limits: Secret expiry min and max (s), Suspected expiry min and max (s), Plain Items min and max. Today 10–300, 60–3600, 50–5000. |
+| `Detectors()` | `→ a(sss)` | Every detector as `(name, title, description)`, for example `("github-token", "GitHub tokens", "Looks like a GitHub token")`. |
+| `SecretExpiry` | property `u`, read-write | Seconds a Secret lives before its Expiry. Applies to Items captured from then on. |
+| `SuspectedExpiry` | property `u`, read-write | Seconds a Suspected Item lives before its Expiry. |
+| `MaxPlainItems` | property `u`, read-write | How many unpinned Plain Items the History keeps. Pins don't count; they stay until unpinned. |
+| `DisabledDetectors` | property `as`, read-write | Names of the detectors turned off. Unknown names are refused. |
+| `MemoryOnly` | property `b`, read-write | Keep the History in memory only. Turning it on erases the saved History and deletes its key from the keyring. Turning it off starts a new, empty store and writes the Plain Items in memory to it. |
+
+Clients should read `History1`'s `OnDisk` and `StorageNotice` without caching them, or listen for their `PropertiesChanged`: they change when `MemoryOnly` does.
 
 ## Errors
 

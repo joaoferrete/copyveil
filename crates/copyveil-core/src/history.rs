@@ -6,33 +6,9 @@
 use crate::Sensitivity;
 use crate::classify::classify;
 use crate::item::{Capture, Item, ItemId, Kind, Reason};
-use copyveil_detect::DetectorSet;
+use crate::settings::Settings;
 use std::fmt;
-use std::time::{Duration, Instant};
-
-/// User settings that shape the History.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Settings {
-    /// How long a Secret lives before its Expiry.
-    pub secret_expiry: Duration,
-    /// How long a Suspected Item lives before its Expiry.
-    pub suspected_expiry: Duration,
-    /// How many unpinned Plain Items to keep. Older ones are removed first.
-    pub max_plain_items: usize,
-    /// Which detectors may flag an Item as Suspected.
-    pub detectors: DetectorSet,
-}
-
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            secret_expiry: Duration::from_secs(30),
-            suspected_expiry: Duration::from_mins(15),
-            max_plain_items: 500,
-            detectors: DetectorSet::all(),
-        }
-    }
-}
+use std::time::Instant;
 
 /// Why a History operation was refused.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -68,6 +68,42 @@ impl Detector {
         }
     }
 
+    /// A stable identifier, used in the settings file and on D-Bus.
+    #[must_use]
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::GitHubToken => "github-token",
+            Self::AwsAccessKey => "aws-access-key",
+            Self::AiProviderKey => "ai-provider-key",
+            Self::Jwt => "jwt",
+            Self::PrivateKey => "private-key",
+            Self::PaymentCard => "payment-card",
+            Self::HighEntropy => "high-entropy",
+        }
+    }
+
+    /// The detector with this [`Detector::name`].
+    #[must_use]
+    pub fn from_name(name: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|detector| detector.name() == name)
+    }
+
+    /// What it finds, for a settings toggle ("GitHub tokens").
+    #[must_use]
+    pub const fn title(self) -> &'static str {
+        match self {
+            Self::GitHubToken => "GitHub tokens",
+            Self::AwsAccessKey => "AWS access keys",
+            Self::AiProviderKey => "AI provider API keys",
+            Self::Jwt => "JSON Web Tokens",
+            Self::PrivateKey => "Private keys",
+            Self::PaymentCard => "Payment card numbers",
+            Self::HighEntropy => "Random-looking text",
+        }
+    }
+
     /// Whether this detector finds a secret anywhere in `text`.
     #[must_use]
     pub fn matches(self, text: &str) -> bool {
@@ -151,6 +187,45 @@ mod tests {
     fn every_detector_has_a_distinct_description() {
         let descriptions: HashSet<_> = Detector::ALL.iter().map(|d| d.description()).collect();
         assert_eq!(descriptions.len(), Detector::ALL.len());
+    }
+
+    #[test]
+    fn names_are_stable_and_round_trip() {
+        let names: Vec<_> = Detector::ALL.iter().map(|d| d.name()).collect();
+        assert_eq!(
+            names,
+            [
+                "github-token",
+                "aws-access-key",
+                "ai-provider-key",
+                "jwt",
+                "private-key",
+                "payment-card",
+                "high-entropy"
+            ]
+        );
+        for detector in Detector::ALL {
+            assert_eq!(Detector::from_name(detector.name()), Some(detector));
+        }
+        assert_eq!(Detector::from_name("GitHub-Token"), None);
+        assert_eq!(Detector::from_name(""), None);
+    }
+
+    #[test]
+    fn titles_name_what_each_detector_finds() {
+        let titles: Vec<_> = Detector::ALL.iter().map(|d| d.title()).collect();
+        assert_eq!(
+            titles,
+            [
+                "GitHub tokens",
+                "AWS access keys",
+                "AI provider API keys",
+                "JSON Web Tokens",
+                "Private keys",
+                "Payment card numbers",
+                "Random-looking text"
+            ]
+        );
     }
 
     #[test]

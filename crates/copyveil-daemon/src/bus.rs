@@ -1,16 +1,23 @@
-//! The D-Bus service: `History1` for the app, `Capture1` for capture sources.
+//! The D-Bus service: `History1` for the app, `Capture1` for capture
+//! sources, `Settings1` for the settings window.
 //!
-//! Both interfaces live at [`OBJECT_PATH`] on the session bus under
-//! [`BUS_NAME`]. Clients use the proxies in `copyveil-dbus`, which also
-//! holds the names and the Item summary, so both sides share one contract. Signals carry Item ids only. Content leaves the daemon only
-//! as the reply to `Content`, for one Item the caller names.
+//! All three live at [`OBJECT_PATH`] on the session bus under [`BUS_NAME`].
+//! Clients use the proxies in `copyveil-dbus`, which also holds the names
+//! and the Item summary, so both sides share one contract. Signals carry
+//! Item ids only. Content leaves the daemon only as the reply to `Content`,
+//! for one Item the caller names.
 
+use crate::StorageOpener;
+use crate::config::Config;
 use crate::state::State;
 use crate::wire;
-use copyveil_core::{Capture, Content, HistoryError, ItemId};
+use copyveil_core::settings::{MAX_PLAIN_ITEMS, SECRET_EXPIRY, SUSPECTED_EXPIRY};
+use copyveil_core::{Capture, Content, HistoryError, ItemId, Settings};
 use copyveil_dbus::ItemSummary;
+use copyveil_detect::Detector;
+use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tokio::sync::{Mutex, Notify};
 use zbus::object_server::SignalEmitter;
 use zbus::{Connection, interface};
@@ -53,16 +60,58 @@ pub struct Shared {
     state: Mutex<State>,
     /// Woken after every change, so the Expiry task can recompute its timer.
     changed: Notify,
+    /// The settings as last saved. Lock before `state` when holding both.
+    config: Mutex<Config>,
+    config_path: Option<PathBuf>,
+    storage: Box<dyn StorageOpener>,
 }
 
 impl Shared {
-    /// Wraps the daemon state.
+    /// Wraps the daemon state, its settings and where its storage comes from.
     #[must_use]
-    pub fn new(state: State) -> Arc<Self> {
+    pub fn new(
+        state: State,
+        config: Config,
+        config_path: Option<PathBuf>,
+        storage: Box<dyn StorageOpener>,
+    ) -> Arc<Self> {
         Arc::new(Self {
             state: Mutex::new(state),
             changed: Notify::new(),
+            config: Mutex::new(config),
+            config_path,
+            storage,
         })
+    }
+
+    /// Validates `change` applied to the current settings, then applies and
+    /// saves them. Returns the error message for D-Bus on refusal.
+    async fn change_settings(
+        &self,
+        change: impl FnOnce(&mut Settings),
+    ) -> Result<(), zbus::fdo::Error> {
+        let mut config = self.config.lock().await;
+        let mut settings = config.settings.clone();
+        change(&mut settings);
+        settings
+            .validate()
+            .map_err(|err| zbus::fdo::Error::InvalidArgs(err.to_string()))?;
+        self.state
+            .lock()
+            .await
+            .set_settings(settings.clone(), Instant::now());
+        config.settings = settings;
+        self.save(&config);
+        self.changed.notify_one();
+        Ok(())
+    }
+
+    fn save(&self, config: &Config) {
+        if let Some(path) = &self.config_path
+            && let Err(err) = config.save(path)
+        {
+            tracing::error!(%err, "could not save the settings");
+        }
     }
 }
 
@@ -294,7 +343,7 @@ impl CaptureService {
 
 /// Builds both interfaces over `shared`.
 #[must_use]
-pub fn services(shared: &Arc<Shared>) -> (HistoryService, CaptureService) {
+pub fn services(shared: &Arc<Shared>) -> (HistoryService, CaptureService, SettingsService) {
     (
         HistoryService {
             shared: Arc::clone(shared),
@@ -302,7 +351,217 @@ pub fn services(shared: &Arc<Shared>) -> (HistoryService, CaptureService) {
         CaptureService {
             shared: Arc::clone(shared),
         },
+        SettingsService {
+            shared: Arc::clone(shared),
+        },
     )
+}
+
+/// `io.github.joaoferrete.Copyveil.Settings1`: what the settings window changes.
+pub struct SettingsService {
+    shared: Arc<Shared>,
+}
+
+/// Emits `PropertiesChanged` for History1's `OnDisk` and `StorageNotice`.
+async fn storage_changed(server: &zbus::ObjectServer) -> Result<(), zbus::fdo::Error> {
+    let failed = |err: zbus::Error| zbus::fdo::Error::Failed(err.to_string());
+    let history = server
+        .interface::<_, HistoryService>(OBJECT_PATH)
+        .await
+        .map_err(failed)?;
+    let emitter = history.signal_emitter();
+    history
+        .get()
+        .await
+        .on_disk_changed(emitter)
+        .await
+        .map_err(failed)?;
+    history
+        .get()
+        .await
+        .storage_notice_changed(emitter)
+        .await
+        .map_err(failed)
+}
+
+/// Tells History1 clients to list again: settings can remove Items (a lower
+/// limit) or change where they're kept (`OnDisk`, `StorageNotice`).
+async fn announce(emitter: &SignalEmitter<'_>) -> Result<(), zbus::fdo::Error> {
+    HistoryService::changed(emitter)
+        .await
+        .map_err(|err| zbus::fdo::Error::Failed(err.to_string()))
+}
+
+fn seconds(duration: Duration) -> u32 {
+    u32::try_from(duration.as_secs()).unwrap_or(u32::MAX)
+}
+
+#[interface(name = "io.github.joaoferrete.Copyveil.Settings1")]
+impl SettingsService {
+    /// The limits every setting must stay within:
+    /// `(secret_min_s, secret_max_s, suspected_min_s, suspected_max_s, items_min, items_max)`.
+    #[expect(
+        clippy::unused_self,
+        reason = "D-Bus methods are called on the interface object"
+    )]
+    fn limits(&self) -> (u32, u32, u32, u32, u32, u32) {
+        let items = |n: usize| u32::try_from(n).unwrap_or(u32::MAX);
+        (
+            seconds(*SECRET_EXPIRY.start()),
+            seconds(*SECRET_EXPIRY.end()),
+            seconds(*SUSPECTED_EXPIRY.start()),
+            seconds(*SUSPECTED_EXPIRY.end()),
+            items(*MAX_PLAIN_ITEMS.start()),
+            items(*MAX_PLAIN_ITEMS.end()),
+        )
+    }
+
+    /// Every detector: `(name, title, description)`, in a stable order.
+    #[expect(
+        clippy::unused_self,
+        reason = "D-Bus methods are called on the interface object"
+    )]
+    fn detectors(&self) -> Vec<(String, String, String)> {
+        Detector::ALL
+            .iter()
+            .map(|detector| {
+                (
+                    detector.name().to_owned(),
+                    detector.title().to_owned(),
+                    detector.description().to_owned(),
+                )
+            })
+            .collect()
+    }
+
+    /// Seconds a Secret lives before its Expiry.
+    #[zbus(property)]
+    async fn secret_expiry(&self) -> u32 {
+        seconds(self.shared.config.lock().await.settings.secret_expiry)
+    }
+
+    #[zbus(property)]
+    async fn set_secret_expiry(
+        &self,
+        value: u32,
+        #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
+    ) -> Result<(), zbus::fdo::Error> {
+        self.shared
+            .change_settings(|s| s.secret_expiry = Duration::from_secs(value.into()))
+            .await?;
+        announce(&emitter).await
+    }
+
+    /// Seconds a Suspected Item lives before its Expiry.
+    #[zbus(property)]
+    async fn suspected_expiry(&self) -> u32 {
+        seconds(self.shared.config.lock().await.settings.suspected_expiry)
+    }
+
+    #[zbus(property)]
+    async fn set_suspected_expiry(
+        &self,
+        value: u32,
+        #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
+    ) -> Result<(), zbus::fdo::Error> {
+        self.shared
+            .change_settings(|s| s.suspected_expiry = Duration::from_secs(value.into()))
+            .await?;
+        announce(&emitter).await
+    }
+
+    /// How many unpinned Plain Items the History keeps. Pins don't count.
+    #[zbus(property)]
+    async fn max_plain_items(&self) -> u32 {
+        let max = self.shared.config.lock().await.settings.max_plain_items;
+        u32::try_from(max).unwrap_or(u32::MAX)
+    }
+
+    #[zbus(property)]
+    async fn set_max_plain_items(
+        &self,
+        value: u32,
+        #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
+    ) -> Result<(), zbus::fdo::Error> {
+        let value = usize::try_from(value).unwrap_or(usize::MAX);
+        self.shared
+            .change_settings(|s| s.max_plain_items = value)
+            .await?;
+        announce(&emitter).await
+    }
+
+    /// Names of the detectors turned off (see `Detectors`).
+    #[zbus(property)]
+    async fn disabled_detectors(&self) -> Vec<String> {
+        let detectors = self.shared.config.lock().await.settings.detectors;
+        Detector::ALL
+            .iter()
+            .filter(|detector| !detectors.contains(**detector))
+            .map(|detector| detector.name().to_owned())
+            .collect()
+    }
+
+    #[zbus(property)]
+    async fn set_disabled_detectors(
+        &self,
+        value: Vec<String>,
+        #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
+    ) -> Result<(), zbus::fdo::Error> {
+        let mut disabled = Vec::new();
+        for name in &value {
+            let detector = Detector::from_name(name)
+                .ok_or_else(|| zbus::fdo::Error::InvalidArgs("unknown detector name".to_owned()))?;
+            disabled.push(detector);
+        }
+        self.shared
+            .change_settings(|s| {
+                s.detectors = disabled
+                    .iter()
+                    .fold(copyveil_detect::DetectorSet::all(), |set, d| {
+                        set.without(*d)
+                    });
+            })
+            .await?;
+        announce(&emitter).await
+    }
+
+    /// Whether the History is kept in memory only. Turning it on erases the
+    /// saved History and forgets its key; turning it off starts a new,
+    /// empty store and writes the Plain Items in memory to it.
+    #[zbus(property)]
+    async fn memory_only(&self) -> bool {
+        self.shared.config.lock().await.memory_only
+    }
+
+    #[zbus(property)]
+    async fn set_memory_only(
+        &self,
+        value: bool,
+        #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
+        #[zbus(object_server)] server: &zbus::ObjectServer,
+    ) -> Result<(), zbus::fdo::Error> {
+        let mut config = self.shared.config.lock().await;
+        if config.memory_only == value {
+            return Ok(());
+        }
+        if value {
+            self.shared.state.lock().await.go_memory_only();
+            self.shared.storage.forget_key().await;
+        } else {
+            let (storage, notice) = self.shared.storage.open_fresh().await;
+            self.shared
+                .state
+                .lock()
+                .await
+                .attach(storage, notice, Instant::now());
+        }
+        config.memory_only = value;
+        self.shared.save(&config);
+        self.shared.changed.notify_one();
+        drop(config);
+        storage_changed(server).await?;
+        announce(&emitter).await
+    }
 }
 
 /// Runs Expiry forever: sleeps until the next Expiry or the next change,
