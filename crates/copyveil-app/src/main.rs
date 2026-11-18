@@ -26,6 +26,16 @@ fn main() -> glib::ExitCode {
     }
     app.add_action(&action);
 
+    let preferences = gio::SimpleAction::new("preferences", None);
+    {
+        let (app, popup) = (app.clone(), Rc::clone(&popup));
+        preferences.connect_activate(move |_, _| {
+            let _settings = popup_for(&app, &popup).open_settings();
+        });
+    }
+    app.add_action(&preferences);
+    app.set_accels_for_action("app.preferences", &["<Control>comma"]);
+
     let quit = gio::SimpleAction::new("quit", None);
     {
         let app = app.clone();

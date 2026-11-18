@@ -62,6 +62,10 @@ impl PopupWindow {
         header.set_decoration_layout(Some(":close"));
         let banner = adw::Banner::new("");
         header.pack_start(&tabs);
+        let settings = gtk::Button::from_icon_name("emblem-system-symbolic");
+        settings.set_tooltip_text(Some("Settings (Ctrl+,)"));
+        settings.set_action_name(Some("app.preferences"));
+        header.pack_end(&settings);
 
         let search = gtk::SearchEntry::new();
         search.set_placeholder_text(Some("Search the History"));
@@ -143,6 +147,15 @@ impl PopupWindow {
     #[must_use]
     pub fn window(&self) -> &adw::ApplicationWindow {
         &self.window
+    }
+
+    /// Closes the popup and opens the settings in their own window.
+    #[must_use]
+    pub fn open_settings(&self) -> adw::PreferencesDialog {
+        if self.window.is_visible() {
+            self.hide();
+        }
+        crate::prefs_window::present(self.daemon.clone())
     }
 
     /// Shows the popup, or hides it if it's showing (the shortcut toggles).
