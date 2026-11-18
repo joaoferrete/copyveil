@@ -95,6 +95,6 @@ With reduced motion enabled, all four become instant state changes: they are lib
 
 ## Icon
 
-The app icon is a kraft clipboard holding a sheet whose lower half is covered by the security tint, with the three Mask dots. The symbolic panel icon keeps only the silhouette and the dots, and has three states: normal, capture paused (slashed), and Secret in memory (dot). Sources live in `data/icons/`. They are drafts until redrawn on the GNOME app-icon grid and checked with Icon Preview.
+The app icon is a kraft clipboard holding a sheet whose lower half is covered by the security tint, with the three Mask dots. The symbolic panel icon keeps only the silhouette and the dots, and has three states: normal, capture paused (struck through, from **Pause Capture** in its menu), and Secret in memory (a dot that goes at the Secret's Expiry). A Secret in memory wins over a pause, since it means the clipboard hasn't been cleared yet (`gnome-extension/lib/icon-state.js`). The state files are `io.github.joaoferrete.Copyveil{,-paused,-secret}-symbolic.svg`. Sources live in `data/icons/`. They are drafts until redrawn on the GNOME app-icon grid and checked with Icon Preview.
 
 Design exploration files (mockups) live in Penpot; icons are SVGs in the repository.
