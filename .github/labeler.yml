@@ -4,6 +4,8 @@ security-sensitive:
       - any-glob-to-any-file:
           - crates/copyveil-core/**
           - crates/copyveil-detect/**
+          - crates/copyveil-daemon/**
+          - crates/copyveil-keyring/**
           - crates/copyveil-capture-*/**
           - gnome-extension/**
           - deny.toml

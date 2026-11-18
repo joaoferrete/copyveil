@@ -36,6 +36,15 @@ Every "Detector got it wrong" issue becomes a corpus line in the PR that fixes i
 
 Nightly fuzzing with `cargo fuzz` covers the detectors and the store's decoding paths once they exist. Every crash becomes a regression test.
 
+## Daemon
+
+`copyveil-daemon` is glue between the core and D-Bus, so it has no coverage gate. Its behaviour is tested end to end instead:
+
+- `tests/bus.rs` runs the real `History1` and `Capture1` interfaces over a peer-to-peer D-Bus connection: no session bus, no keyring. Every method, signal and error in [`dbus.md`](dbus.md) has a test.
+- Masked Items must never appear with content in `List`, and a signal must never carry content. Those assertions stay in place.
+- Anything that changes the whole process, such as `harden`, is tested in a test file of its own, so it runs in its own process.
+- To try the real binary without touching your keyring, run it on an isolated session bus that has no activatable services, so it falls back to memory only.
+
 ## App and capture sources
 
 There's no coverage target here; coverage of GTK glue code says little. Instead:

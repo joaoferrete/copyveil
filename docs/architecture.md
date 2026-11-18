@@ -8,7 +8,7 @@ flowchart LR
     GS[GNOME Shell<br/>+ Copyveil extension]
     DC[ext-data-control<br/>capture source]
   end
-  subgraph Core["copyveil-daemon (copyveil-core)"]
+  subgraph Core["copyveil-daemon (+ copyveil-core)"]
     CL[Classifier<br/>hint + copyveil-detect]
     MEM[(Memory store<br/>Secret, Suspected)]
     DB[(Encrypted store<br/>Plain)]
@@ -17,21 +17,22 @@ flowchart LR
   KR[[Secret Service keyring]]
   APP[copyveil app<br/>popup, settings, onboarding]
 
-  GS -- "D-Bus: clipboard changed" --> CL
+  GS -- "Capture1.Capture" --> CL
   DC -- "clipboard changed" --> CL
   CL --> MEM
   CL --> DB
   EXP --> MEM
-  KR -- "master key" --> DB
-  APP <-- "D-Bus: History, paste, Override" --> Core
-  Core -- "D-Bus: paste / clear clipboard" --> GS
+  KR -- "History key (copyveil-keyring)" --> DB
+  APP <-- "History1: List, Content, Paste, Override…" --> Core
+  Core -- "Capture1: PasteRequested, Expired (ids only)" --> GS
 ```
 
 ## Crates and directories
 
 | Path | What it is |
 |---|---|
-| `crates/copyveil-core` | Library + `copyveil-daemon` binary. History, Sensitivity rules, Expiry, encryption at rest, D-Bus service. |
+| `crates/copyveil-core` | Library. History, Sensitivity rules, Expiry, the encrypted store. Desktop-agnostic and free of D-Bus. |
+| `crates/copyveil-daemon` | `copyveil-daemon` binary. Holds the History and serves it over D-Bus ([API](dbus.md)), runs Expiry, and opens the store with the key from `copyveil-keyring`. |
 | `crates/copyveil-keyring` | Reads and creates the History key in the Secret Service keyring with `oo7`. Thin on purpose: it can only be tested against a running keyring. |
 | `crates/copyveil-detect` | Pure library. Detectors that flag content as Suspected. No I/O, so it's easy to test, fuzz and reuse. |
 | `crates/copyveil-app` | `copyveil` binary. GTK4/libadwaita UI: popup, settings, onboarding. Talks to the core over D-Bus only. |
@@ -46,8 +47,9 @@ flowchart LR
 1. The user copies something. The capture source reads the content and the MIME types on offer, and sends both to the core.
 2. The core classifies the Item. If the source flagged it with `x-kde-passwordManagerHint: secret`, it's a Secret. Otherwise `copyveil-detect` decides between Suspected and Plain. The user can change this later with an Override.
 3. Secret and Suspected Items go to the memory store with an Expiry timer. Plain Items are sealed one by one and written to the store on disk ([ADR 0005](adr/0005-plain-store-is-sqlite-with-per-item-xchacha20-poly1305.md)).
-4. The app asks the core for the History over D-Bus. Masked Items arrive without their content; content reaches the app only for a Reveal or a paste, and only for that one Item.
-5. On paste, the core puts the content on the clipboard and asks the capture source to paste. On GNOME, the extension injects <kbd>Ctrl</kbd>+<kbd>V</kbd>. After a Secret is pasted, the core clears it from the clipboard when its timer runs out.
+4. The app asks the daemon for the History with `History1.List`. Masked Items arrive without their content. Content reaches the app only through `History1.Content`, for a Reveal, and only for that one Item.
+5. On paste, the app calls `History1.Paste` and the daemon emits `Capture1.PasteRequested` with the Item's id. The capture source fetches the content, puts it on the clipboard and pastes. On GNOME, the extension injects <kbd>Ctrl</kbd>+<kbd>V</kbd>.
+6. When a Secret or Suspected Item reaches its Expiry, the daemon erases it and emits `Capture1.Expired` with its id. A capture source that last put that Item on the clipboard clears the clipboard. Signals carry ids only ([D-Bus API](dbus.md)).
 
 ## Lifecycle
 

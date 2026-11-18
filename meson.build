@@ -6,6 +6,7 @@ project(
 )
 
 app_id = 'io.github.joaoferrete.Copyveil'
+daemon_bus_name = app_id + '.Daemon'
 
 prefix = get_option('prefix')
 bindir = prefix / get_option('bindir')

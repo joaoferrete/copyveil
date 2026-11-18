@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=@DAEMON_BUS_NAME@
+Exec=@BINDIR@/copyveil-daemon
+SystemdService=copyveil-daemon.service

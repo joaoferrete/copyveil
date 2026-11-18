@@ -46,7 +46,6 @@ jobs:
           tool: cargo-llvm-cov
       - run: >
           cargo llvm-cov --locked -p copyveil-core -p copyveil-detect
-          --ignore-filename-regex 'src/bin/'
           --fail-under-lines 90
 
   mutants:
