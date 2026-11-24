@@ -19,7 +19,7 @@ jobs:
       matrix:
         target: [detect, records, sealed]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install nightly --profile minimal
       - uses: taiki-e/install-action@v2
         with:
